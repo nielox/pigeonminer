@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pigeon Miner 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #facc15; /* Bread color */
+            --secondary: #38bdf8; /* Diamond color */
+            --dark: #1e293b;
+            --panel: rgba(30, 41, 59, 0.85);
+            --text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Sky blue fallback */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none; /* Prevent default scroll/zoom on mobile */
+        }
+
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass through to canvas when not on UI */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Top Stats Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            pointer-events: auto;
+        }
+
+        .stat-box {
+            background: var(--panel);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: var(--text);
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .icon-bread { color: var(--primary); }
+        .icon-diamond { color: var(--secondary); }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            pointer-events: auto;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        button {
+            background: linear-gradient(145deg, #334155, #1e293b);
+            border: 2px solid #475569;
+            color: white;
+            padding: 12px 10px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s, filter 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            filter: brightness(0.8);
+        }
+
+        button span.sub {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .btn-sell { border-color: var(--primary); }
+        .btn-upgrade { border-color: #4ade80; }
+        .btn-box { border-color: #c084fc; background: linear-gradient(145deg, #6b21a8, #4c1d95); }
+        .btn-auto { border-color: #f59e0b; }
+        .btn-mine { border-color: #ec4899; }
+
+        /* Modals & Notifications */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--dark);
+            border: 2px solid #475569;
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 { margin-top: 0; color: var(--primary); }
+        .modal p { color: #cbd5e1; line-height: 1.5; }
+        .modal-close { margin-top: 15px; width: 100%; background: #ef4444; border-color: #dc2626; }
+
+        /* Notification Toast */
+        #toast {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* Floating Text for mining */
+        .floating-text {
+            position: absolute;
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: floatUp 1s ease-out forwards;
+            z-index: 5;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+
+        /* Inventory Grid */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .inv-item {
+            background: #334155;
+            border: 2px solid #475569;
+            border-radius: 10px;
+            padding: 10px 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .inv-item.active { border-color: #4ade80; background: #166534; }
+        .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+        .rarity-common { color: #cbd5e1; }
+        .rarity-rare { color: #38bdf8; }
+        .rarity-epic { color: #c084fc; }
+        .rarity-legendary { color: #facc15; text-shadow: 0 0 5px rgba(250, 204, 21, 0.5); }
+        .rarity-mythic { color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.8); }
+        
+        #mine-hint {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+            text-align: center;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-canvas"></div>
+
+    <div id="ui-layer">
+        <div class="top-bar">
+            <div class="stat-box">
+                <span class="icon-bread">🍞</span>
+                <span id="bread-display">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="icon-diamond">💎</span>
+                <span id="diamond-display">0</span>
+            </div>
+        </div>
+
+        <div id="mine-hint">TAP ROCK TO MINE</div>
+
+        <div class="bottom-controls">
+            <button class="btn-sell full-width" onclick="game.sellDiamonds()">
+                Sell Stones
+                <span class="sub" id="sell-rate-display">1 💎 = 2 🍞</span>
+            </button>
+            <button class="btn-upgrade" onclick="game.upgradeSpeed()">
+                Upgrade Dig Speed
+                <span class="sub" id="upgrade-cost-display">Cost: 10 🍞 (Lvl 1)</span>
+            </button>
+            <button class="btn-auto" onclick="game.upgradeAuto()">
+                Buy Auto-Miner
+                <span class="sub" id="auto-cost-display">Cost: 50 🍞 (0/sec)</span>
+            </button>
+            <button class="btn-box" onclick="game.buyBox()">
+                🎁 Buy Mystery Box
+                <span class="sub" id="box-cost-display">Cost: 50 🍞</span>
+            </button>
+            <button class="btn-mine" onclick="game.upgradeMine()">
+                Next Mine Area
+                <span class="sub" id="mine-cost-display">Cost: 500 🍞</span>
+            </button>
+            <button class="full-width" onclick="ui.openInventory()">
+                🐦 Pigeon Collection
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="toast">Message</div>
+
+    <div id="modal-inventory" class="modal-overlay">
+        <div class="modal">
+            <h2>Pigeon Collection</h2>
+            <div class="inventory-grid" id="inventory-grid">
+                <!-- Populated by JS -->
+            </div>
+            <button class="modal-close" onclick="ui.closeModal('modal-inventory')">Close</button>
+        </div>
+    </div>
+
+    <div id="modal-unlocked" class="modal-overlay">
+        <div class="modal">
+            <h2 style="color: var(--secondary)">New Pigeon Unlocked!</h2>
+            <h3 id="unlocked-name" style="margin: 10px 0; font-size: 1.5rem;">???</h3>
+            <p id="unlocked-desc">You got a new miner.</p>
+            <button class="btn-upgrade" style="width:100%; margin-top:15px;" onclick="ui.closeModal('modal-unlocked'); ui.openInventory();">View Collection</button>
+        </div>
+    </div>
+
+    <div id="modal-offline" class="modal-overlay">
+        <div class="modal">
+            <h2 style="color: var(--primary)">Welcome Back!</h2>
+            <p>Your pigeons kept mining while you were away!</p>
+            <p id="offline-stats" style="font-weight:bold; font-size:1.2rem; color:var(--secondary);"></p>
+            <button class="btn-upgrade" style="width:100%; margin-top:15px;" onclick="ui.closeModal('modal-offline')">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME CONFIG & DATA ---
+        const PIGEON_TYPES = {
+            base: { id: 'base', name: 'Basic Pigeon', rarity: 'common', color: 'rarity-common' },
+            hat: { id: 'hat', name: 'Hat Pigeon', rarity: 'common', chance: 20, color: 'rarity-common' },
+            cool: { id: 'cool', name: 'Cool Pigeon', rarity: 'common', chance: 20, color: 'rarity-common' },
+            car: { id: 'car', name: 'Car Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare' },
+            cat: { id: 'cat', name: 'Cat Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare' },
+            pirate: { id: 'pirate', name: 'Pirate Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare' },
+            wolf: { id: 'wolf', name: 'Wolf Pigeon', rarity: 'epic', chance: 5, color: 'rarity-epic' },
+            super: { id: 'super', name: 'Super Pigeon', rarity: 'epic', chance: 5, color: 'rarity-epic' },
+            robot: { id: 'robot', name: 'Robot Pigeon', rarity: 'epic', chance: 5, color: 'rarity-epic' },
+            ninja: { id: 'ninja', name: 'Ninja Pigeon', rarity: 'epic', chance: 5, color: 'rarity-epic' },
+            worm: { id: 'worm', name: 'Realistic Worm Pigeon', rarity: 'legendary', chance: 4.5, color: 'rarity-legendary' },
+            ghost: { id: 'ghost', name: 'Ghost Pigeon', rarity: 'legendary', chance: 4.5, color: 'rarity-legendary' },
+            golden: { id: 'golden', name: 'Golden Pigeon', rarity: 'mythic', chance: 1, color: 'rarity-mythic' }
+        };
+
+        const MINES = [
+            { name: "Diamond Mine", rockColor: 0x475569, crystalColor: 0x38bdf8, multiplier: 1, unlockCost: 0 },
+            { name: "Ruby Mine", rockColor: 0x2d3748, crystalColor: 0xf43f5e, multiplier: 5, unlockCost: 500 },
+            { name: "Emerald Mine", rockColor: 0x1a202c, crystalColor: 0x10b981, multiplier: 25, unlockCost: 2500 },
+            { name: "Amethyst Mine", rockColor: 0x1e1b4b, crystalColor: 0xa855f7, multiplier: 100, unlockCost: 10000 },
+        ];
+
+        const GAME_STATE = {
+            bread: 0,
+            diamonds: 0,
+            digSpeed: 1, // How many diamonds per tap
+            autoSpeed: 0, // Auto-mines per second
+            upgradeCost: 10,
+            autoCost: 50,
+            boxCost: 50,
+            currentMine: 0,
+            unlockedPigeons: ['base'],
+            equippedPigeon: 'base',
+            sellRate: 2, // 1 Diamond = 2 Bread initially
+            lastSaveTime: null
+        };
+
+        // --- THREE.JS ENGINE ---
+        const engine = {
+            scene: null,
+            camera: null,
+            renderer: null,
+            pigeonGroup: null, // Container for the current pigeon model
+            mineBlock: null,
+            particles: [],
+            isAnimatingMine: false,
+            mineAnimationProgress: 0,
+            clock: new THREE.Clock(),
+
+            init: function() {
+                const container = document.getElementById('game-canvas');
+                
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
+                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.02);
+
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+                this.camera.position.set(0, 4, 8);
+                this.camera.lookAt(0, 1, 0);
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for mobile
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                container.appendChild(this.renderer.domElement);
+
+                this.setupLighting();
+                this.setupEnvironment();
+                this.buildMine(GAME_STATE.currentMine);
+                this.loadPigeonModel(GAME_STATE.equippedPigeon);
+
+                // Events
+                window.addEventListener('resize', this.onWindowResize.bind(this));
+                
+                // Interaction
+                const raycaster = new THREE.Raycaster();
+                const mouse = new THREE.Vector2();
+
+                const handleTap = (event) => {
+                    // Ignore UI clicks
+                    if(event.target.tagName === 'BUTTON' || event.target.closest('#ui-layer > div')) return;
+
+                    let clientX, clientY;
+                    if (event.changedTouches) {
+                        clientX = event.changedTouches[0].clientX;
+                        clientY = event.changedTouches[0].clientY;
+                    } else {
+                        clientX = event.clientX;
+                        clientY = event.clientY;
+                    }
+
+                    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, this.camera);
+                    
+                    // Check intersection with mine block or its children
+                    const intersects = raycaster.intersectObject(this.mineBlock, true);
+                    
+                    if (intersects.length > 0) {
+                        game.mine(clientX, clientY);
+                    } else {
+                        // Fallback: tap anywhere roughly in the center also mines for easier mobile play
+                        if (mouse.y > -0.5 && mouse.y < 0.5) {
+                            game.mine(clientX, clientY);
+                        }
+                    }
+                };
+
+                window.addEventListener('mousedown', handleTap);
+                window.addEventListener('touchstart', handleTap, {passive: false});
+
+                document.getElementById('mine-hint').style.display = 'block';
+            },
+
+            setupLighting: function() {
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+
+                const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                dirLight.position.set(5, 10, 5);
+                dirLight.castShadow = true;
+                dirLight.shadow.camera.top = 10;
+                dirLight.shadow.camera.bottom = -10;
+                dirLight.shadow.camera.left = -10;
+                dirLight.shadow.camera.right = 10;
+                dirLight.shadow.bias = -0.001;
+                this.scene.add(dirLight);
+            },
+
+            setupEnvironment: function() {
+                // Ground
+                const groundGeo = new THREE.PlaneGeometry(50, 50);
+                const groundMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x3d2817, // Dirt brown
+                    roughness: 1,
+                    metalness: 0
+                });
+                const ground = new THREE.Mesh(groundGeo, groundMat);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+
+                // Add some small decorative rocks
+                const rockGeo = new THREE.DodecahedronGeometry(0.5);
+                const rockMat = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.8 });
+                for(let i=0; i<10; i++) {
+                    const rock = new THREE.Mesh(rockGeo, rockMat);
+                    rock.position.set((Math.random() - 0.5) * 20, 0, (Math.random() - 0.5) * 20);
+                    rock.rotation.set(Math.random(), Math.random(), Math.random());
+                    rock.scale.setScalar(Math.random() * 0.5 + 0.2);
+                    rock.castShadow = true;
+                    this.scene.add(rock);
+                }
+            },
+
+            buildMine: function(mineIndex = 0) {
+                if (this.mineBlock) {
+                    this.scene.remove(this.mineBlock);
+                }
+
+                const mineData = MINES[mineIndex];
+                this.mineBlock = new THREE.Group();
+                
+                // Base Rock
+                const geo = new THREE.DodecahedronGeometry(1.5, 1);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: mineData.rockColor,
+                    roughness: 0.7,
+                    metalness: 0.2,
+                    flatShading: true
+                });
+                const baseRock = new THREE.Mesh(geo, mat);
+                baseRock.castShadow = true;
+                baseRock.receiveShadow = true;
+                baseRock.position.y = 1;
+                this.mineBlock.add(baseRock);
+
+                // Diamond Crystals sticking out
+                const crystalGeo = new THREE.ConeGeometry(0.4, 1.5, 4);
+                const crystalMat = new THREE.MeshStandardMaterial({
+                    color: mineData.crystalColor,
+                    roughness: 0.1,
+                    metalness: 0.8,
+                    transparent: true,
+                    opacity: 0.9,
+                    flatShading: true
+                });
+
+                for(let i=0; i<5; i++) {
+                    const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+                    crystal.position.set(
+                        (Math.random() - 0.5) * 1.5,
+                        1 + Math.random(),
+                        (Math.random() - 0.5) * 1.5
+                    );
+                    crystal.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+                    this.mineBlock.add(crystal);
+                }
+
+                this.mineBlock.position.set(0, 0, -2);
+                this.scene.add(this.mineBlock);
+            },
+
+            // Generate procedural canvas textures for feathers/skin
+            generateTexture: function(baseColor, accentColor, isWorm = false) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                
+                // Base background
+                ctx.fillStyle = baseColor;
+                ctx.fillRect(0, 0, 256, 256);
+                
+                // Draw noise/pattern
+                for(let i = 0; i < 800; i++) {
+                    ctx.fillStyle = accentColor;
+                    ctx.globalAlpha = Math.random() * 0.4;
+                    const x = Math.random() * 256;
+                    const y = Math.random() * 256;
+                    
+                    ctx.beginPath();
+                    if (isWorm) {
+                        // Wrinkles for the worm
+                        ctx.ellipse(x, y, Math.random() * 20 + 10, Math.random() * 2 + 1, 0, 0, Math.PI * 2);
+                    } else {
+                        // Feathers for the pigeon
+                        ctx.ellipse(x, y, Math.random() * 8 + 4, Math.random() * 3 + 1, Math.random() * Math.PI, 0, Math.PI * 2);
+                    }
+                    ctx.fill();
+                }
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(isWorm ? 1 : 2, isWorm ? 1 : 2);
+                return texture;
+            },
+
+            // PROCEDURAL 3D MODELS
+            loadPigeonModel: function(type) {
+                if (this.pigeonGroup) {
+                    this.scene.remove(this.pigeonGroup);
+                }
+
+                this.pigeonGroup = new THREE.Group();
+                this.pigeonGroup.position.set(0, 0, 1.5);
+                
+                // Procedural Textures
+                const texGrey = this.generateTexture('#9ca3af', '#4b5563');
+                const texDarkGrey = this.generateTexture('#4b5563', '#1f2937');
+                const texPink = this.generateTexture('#f472b6', '#be185d', true);
+
+                // Materials
+                const matGrey = new THREE.MeshStandardMaterial({ map: texGrey, roughness: 0.9, metalness: 0.1 });
+                const matDarkGrey = new THREE.MeshStandardMaterial({ map: texDarkGrey, roughness: 0.9, metalness: 0.1 });
+                const matBeak = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+                const matEye = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.1, metalness: 0.8 });
+                const matPink = new THREE.MeshStandardMaterial({ map: texPink, roughness: 0.6, metalness: 0.1 });
+                const matGold = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.2, metalness: 1.0 });
+
+                // Construct based on type
+                if (type === 'worm') {
+                    // Legendary: Realistic Worm Pigeon
+                    // Long segmented body
+                    const segments = 8;
+                    for (let i = 0; i < segments; i++) {
+                        const segGeo = new THREE.SphereGeometry(0.3 - (i*0.02), 16, 16);
+                        const seg = new THREE.Mesh(segGeo, matPink);
+                        seg.position.z = -i * 0.4 + 1.5;
+                        seg.position.y = 0.3 + Math.sin(i * 0.5) * 0.1;
+                        seg.castShadow = true;
+                        this.pigeonGroup.add(seg);
+                        
+                        // Add face to first segment
+                        if (i === 0) {
+                            const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                            eye1.position.set(0.1, 0.1, 0.25);
+                            const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                            eye2.position.set(-0.1, 0.1, 0.25);
+                            const beak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 4), matBeak);
+                            beak.rotation.x = Math.PI / 2;
+                            beak.position.set(0, 0, 0.3);
+                            seg.add(eye1, eye2, beak);
+                        }
+                    }
+                    this.pigeonGroup.rotation.y = Math.PI; // Face mine
+                } else if (type === 'car') {
+                    // Rare: Car Pigeon - Boxy body, wheels
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.5), matGrey);
+                    body.position.y = 0.6;
+                    body.castShadow = true;
+                    this.pigeonGroup.add(body);
+
+                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), matGrey);
+                    head.position.set(0, 1.1, 0.7);
+                    this.pigeonGroup.add(head);
+
+                    // Wheels
+                    const wheelGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16);
+                    const matWheel = new THREE.MeshStandardMaterial({color: 0x111111});
+                    const positions = [
+                        [0.6, 0.25, 0.5], [-0.6, 0.25, 0.5],
+                        [0.6, 0.25, -0.5], [-0.6, 0.25, -0.5]
+                    ];
+                    positions.forEach(pos => {
+                        const wheel = new THREE.Mesh(wheelGeo, matWheel);
+                        wheel.rotation.z = Math.PI / 2;
+                        wheel.position.set(...pos);
+                        wheel.castShadow = true;
+                        this.pigeonGroup.add(wheel);
+                    });
+                    
+                    this.addFace(head, matEye, matBeak);
+                    this.pigeonGroup.rotation.y = Math.PI;
+                } else {
+                    // Base Bird structure for all others
+                    let customMat = type === 'wolf' ? matDarkGrey : matGrey;
+                    if (type === 'robot') customMat = new THREE.MeshStandardMaterial({ color: 0xa3a3a3, metalness: 0.8, roughness: 0.2 });
+                    if (type === 'ninja') customMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+                    if (type === 'golden') customMat = matGold;
+                    if (type === 'ghost') customMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+                    
+                    // Body (Replaced CapsuleGeometry with scaled SphereGeometry for r128 compatibility)
+                    const bodyGeo = new THREE.SphereGeometry(0.45, 16, 16);
+                    const body = new THREE.Mesh(bodyGeo, customMat);
+                    body.scale.set(0.9, 1.4, 0.9);
+                    body.rotation.x = Math.PI / 2;
+                    body.position.y = 0.6;
+                    body.castShadow = true;
+                    this.pigeonGroup.add(body);
+
+                    // Head
+                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3), customMat);
+                    head.position.set(0, 1.0, 0.4);
+                    head.castShadow = true;
+                    this.pigeonGroup.add(head);
+
+                    // Face
+                    if (type === 'wolf') {
+                        // Snout
+                        const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.3), matDarkGrey);
+                        snout.rotation.x = Math.PI / 2;
+                        snout.position.set(0, 0, 0.3);
+                        head.add(snout);
+                        
+                        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                        nose.position.set(0, 0, 0.15);
+                        snout.add(nose);
+
+                        // Pointy ears
+                        const earGeo = new THREE.ConeGeometry(0.1, 0.3, 4);
+                        const ear1 = new THREE.Mesh(earGeo, matDarkGrey);
+                        ear1.position.set(0.2, 0.3, -0.1);
+                        const ear2 = new THREE.Mesh(earGeo, matDarkGrey);
+                        ear2.position.set(-0.2, 0.3, -0.1);
+                        head.add(ear1, ear2);
+                        
+                        this.addEyesOnly(head, matEye);
+                    } else if (type === 'robot') {
+                        // Cyclops red eye
+                        const roboEye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000}));
+                        roboEye.position.set(0, 0.1, 0.26);
+                        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({color: 0x666666, metalness:0.8}));
+                        beak.rotation.x = Math.PI / 2;
+                        beak.position.set(0, 0, 0.3);
+                        head.add(roboEye, beak);
+                    } else {
+                        this.addFace(head, matEye, matBeak);
+                    }
+
+                    // Decorations
+                    if (type === 'pirate') {
+                        const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1), new THREE.MeshBasicMaterial({color: 0x000000}));
+                        patch.rotation.x = Math.PI/2;
+                        patch.position.set(0.15, 0.05, 0.26); // Cover right eye
+                        const strap = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.4), new THREE.MeshBasicMaterial({color: 0x000000}));
+                        strap.position.set(0, 0.05, 0);
+                        head.add(patch, strap);
+                    }
+
+                    if (type === 'ninja') {
+                        const headband = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000}));
+                        headband.position.y = 0.1;
+                        head.add(headband);
+                    }
+
+                    if (type === 'hat') {
+                        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05), new THREE.MeshStandardMaterial({color: 0x111111}));
+                        brim.position.y = 0.25;
+                        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.4), new THREE.MeshStandardMaterial({color: 0x111111}));
+                        top.position.y = 0.45;
+                        head.add(brim, top);
+                    }
+
+                    if (type === 'cool') {
+                        const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), new THREE.MeshStandardMaterial({color: 0x111111}));
+                        glasses.position.set(0, 0.05, 0.26);
+                        head.add(glasses);
+                    }
+
+                    if (type === 'cat') {
+                        const earGeo = new THREE.ConeGeometry(0.1, 0.2, 4);
+                        const ear1 = new THREE.Mesh(earGeo, matGrey);
+                        ear1.position.set(0.2, 0.25, 0);
+                        const ear2 = new THREE.Mesh(earGeo, matGrey);
+                        ear2.position.set(-0.2, 0.25, 0);
+                        head.add(ear1, ear2);
+                        
+                        const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), matGrey);
+                        tail.position.set(0, 0.5, -0.7);
+                        tail.rotation.x = Math.PI / 4;
+                        this.pigeonGroup.add(tail);
+                    }
+
+                    if (type === 'super') {
+                        const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide}));
+                        cape.position.set(0, 0.5, -0.5);
+                        cape.rotation.x = -Math.PI / 6;
+                        this.pigeonGroup.add(cape);
+                    }
+
+                    this.pigeonGroup.rotation.y = Math.PI; // Face mine
+                }
+
+                this.scene.add(this.pigeonGroup);
+            },
+
+            addFace: function(headObject, matEye, matBeak) {
+                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                eye1.position.set(0.15, 0.05, 0.25);
+                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                eye2.position.set(-0.15, 0.05, 0.25);
+                const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matBeak);
+                beak.rotation.x = Math.PI / 2;
+                beak.position.set(0, 0, 0.3);
+                headObject.add(eye1, eye2, beak);
+            },
+
+            addEyesOnly: function(headObject, matEye) {
+                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                eye1.position.set(0.15, 0.1, 0.2);
+                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
+                eye2.position.set(-0.15, 0.1, 0.2);
+                headObject.add(eye1, eye2);
+            },
+
+            triggerMineAnimation: function() {
+                this.isAnimatingMine = true;
+                this.mineAnimationProgress = 0;
+
+                // Create particles matching current mine
+                const particleColor = MINES[GAME_STATE.currentMine].crystalColor;
+                const mat = new THREE.MeshBasicMaterial({color: particleColor});
+                for(let i=0; i<5; i++) {
+                    const size = Math.random() * 0.1 + 0.05;
+                    const p = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
+                    p.position.copy(this.mineBlock.position);
+                    p.position.y += 1;
+                    
+                    // Random velocity
+                    p.userData.velocity = new THREE.Vector3(
+                        (Math.random() - 0.5) * 5,
+                        Math.random() * 5 + 2,
+                        Math.random() * 5
+                    );
+                    p.userData.life = 1.0;
+                    this.scene.add(p);
+                    this.particles.push(p);
+                }
+
+                // Shake mine slightly
+                this.mineBlock.scale.set(0.9, 0.9, 0.9);
+                setTimeout(() => this.mineBlock.scale.set(1,1,1), 50);
+            },
+
+            update: function() {
+                const delta = this.clock.getDelta();
+                const time = this.clock.getElapsedTime();
+
+                // Auto-Miner logic
+                if(GAME_STATE.autoSpeed > 0) {
+                    this.autoTimer = (this.autoTimer || 0) + delta;
+                    if (this.autoTimer >= 1.0) {
+                        this.autoTimer = 0;
+                        GAME_STATE.diamonds += GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier;
+                        ui.updateStats();
+                        this.triggerMineAnimation();
+                        // Display visual feedback if UI is active
+                        if(document.getElementById('mine-hint').style.display === 'none') {
+                           ui.showFloatingText(window.innerWidth/2, window.innerHeight/2 + 50, `+${GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier} 💎 (Auto)`);
+                        }
+                    }
+                }
+
+                // 360 Orbit Camera
+                const orbitRadius = 8;
+                const orbitSpeed = 0.5; // Adjust for faster/slower rotation
+                this.camera.position.x = Math.sin(time * orbitSpeed) * orbitRadius;
+                this.camera.position.z = Math.cos(time * orbitSpeed) * orbitRadius;
+                this.camera.lookAt(0, 1, 0); // Always look at the center of the scene
+
+                // Day/Night Cycle Transition
+                const cycle = (Math.sin(time * 0.05) + 1) / 2; // oscillates between 0 and 1
+                const dayColor = new THREE.Color(0x87CEEB);
+                const nightColor = new THREE.Color(0x0f172a);
+                this.scene.background.lerpColors(nightColor, dayColor, cycle);
+                this.scene.fog.color.copy(this.scene.background);
+
+                // Idle animation
+                if (this.pigeonGroup && !this.isAnimatingMine) {
+                    this.pigeonGroup.position.y = Math.sin(time * 2) * 0.05;
+                    if(GAME_STATE.equippedPigeon !== 'worm' && GAME_STATE.equippedPigeon !== 'car') {
+                         this.pigeonGroup.children[1].rotation.z = Math.sin(time * 1) * 0.1; // head bob
+                    }
+                }
+
+                // Mining animation (Pecking forward)
+                if (this.isAnimatingMine && this.pigeonGroup) {
+                    this.mineAnimationProgress += delta * 10;
+                    
+                    if (this.mineAnimationProgress < Math.PI) {
+                        // Rotation around X axis to simulate pecking
+                        const angle = Math.sin(this.mineAnimationProgress) * (Math.PI / 4);
+                        if(GAME_STATE.equippedPigeon !== 'worm') {
+                            this.pigeonGroup.rotation.x = angle;
+                        } else {
+                            // Worm stretches
+                            this.pigeonGroup.position.z = 1.5 - Math.sin(this.mineAnimationProgress) * 0.5;
+                        }
+                    } else {
+                        this.isAnimatingMine = false;
+                        this.pigeonGroup.rotation.x = 0;
+                        this.pigeonGroup.position.z = 1.5;
+                    }
+                }
+
+                // Update particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.position.addScaledVector(p.userData.velocity, delta);
+                    p.userData.velocity.y -= 9.8 * delta; // Gravity
+                    p.userData.life -= delta;
+                    
+                    p.rotation.x += delta * 10;
+                    p.rotation.y += delta * 10;
+
+                    if (p.userData.life <= 0 || p.position.y < -1) {
+                        this.scene.remove(p);
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                // Animate Mine block floating slowly
+                if (this.mineBlock) {
+                    this.mineBlock.position.y = Math.sin(time) * 0.1;
+                }
+
+                this.renderer.render(this.scene, this.camera);
+            },
+
+            onWindowResize: function() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        };
+
+        // --- GAME LOGIC ---
+        const game = {
+            saveGame: function() {
+                GAME_STATE.lastSaveTime = Date.now();
+                localStorage.setItem('pigeonMinerSave', JSON.stringify(GAME_STATE));
+            },
+
+            loadGame: function() {
+                const saved = localStorage.getItem('pigeonMinerSave');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        // Merge saved data into GAME_STATE so new updates don't break
+                        Object.assign(GAME_STATE, parsed);
+                        
+                        // Calculate offline progress
+                        if (GAME_STATE.lastSaveTime && GAME_STATE.autoSpeed > 0) {
+                            const secondsOffline = Math.floor((Date.now() - GAME_STATE.lastSaveTime) / 1000);
+                            if (secondsOffline > 60) { // Minimum 1 minute offline to trigger
+                                const gained = secondsOffline * GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier;
+                                GAME_STATE.diamonds += gained;
+                                setTimeout(() => ui.showOfflineModal(secondsOffline, gained), 1000);
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Save file corrupted, starting fresh.");
+                    }
+                }
+            },
+
+            mine: function(x, y) {
+                document.getElementById('mine-hint').style.display = 'none';
+
+                const isCrit = Math.random() < 0.1; // 10% chance for Critical Hit
+                const critMult = isCrit ? 3 : 1;
+                const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * critMult;
+                
+                GAME_STATE.diamonds += gained;
+                ui.updateStats();
+                engine.triggerMineAnimation();
+                
+                if (isCrit) {
+                    ui.showFloatingText(x, y, `CRIT! +${gained} 💎`, true);
+                } else {
+                    ui.showFloatingText(x, y, `+${gained} 💎`);
+                }
+            },
+
+            sellDiamonds: function() {
+                if (GAME_STATE.diamonds > 0) {
+                    const breadGained = GAME_STATE.diamonds * GAME_STATE.sellRate;
+                    GAME_STATE.bread += breadGained;
+                    GAME_STATE.diamonds = 0;
+                    ui.updateStats();
+                    ui.showToast(`Sold diamonds for ${breadGained} 🍞`);
+                } else {
+                    ui.showToast("No diamonds to sell!");
+                }
+            },
+
+            upgradeSpeed: function() {
+                if (GAME_STATE.bread >= GAME_STATE.upgradeCost) {
+                    GAME_STATE.bread -= GAME_STATE.upgradeCost;
+                    GAME_STATE.digSpeed += 1;
+                    
+                    // Increase cost exponentially
+                    GAME_STATE.upgradeCost = Math.floor(GAME_STATE.upgradeCost * 1.5);
+                    
+                    ui.updateStats();
+                    ui.showToast("Dig Speed Upgraded!");
+                } else {
+                    ui.showToast("Not enough Bread!");
+                }
+            },
+
+            upgradeAuto: function() {
+                if (GAME_STATE.bread >= GAME_STATE.autoCost) {
+                    GAME_STATE.bread -= GAME_STATE.autoCost;
+                    GAME_STATE.autoSpeed += 1;
+                    GAME_STATE.autoCost = Math.floor(GAME_STATE.autoCost * 1.6);
+                    
+                    // Hide hint text since it mines automatically now
+                    document.getElementById('mine-hint').style.display = 'none';
+
+                    ui.updateStats();
+                    ui.showToast("Auto-Miner Upgraded!");
+                } else {
+                    ui.showToast("Not enough Bread!");
+                }
+            },
+
+            upgradeMine: function() {
+                const nextMineIdx = GAME_STATE.currentMine + 1;
+                if (nextMineIdx < MINES.length) {
+                    const nextMine = MINES[nextMineIdx];
+                    if (GAME_STATE.bread >= nextMine.unlockCost) {
+                        GAME_STATE.bread -= nextMine.unlockCost;
+                        GAME_STATE.currentMine = nextMineIdx;
+                        engine.buildMine(GAME_STATE.currentMine);
+                        ui.updateStats();
+                        ui.showToast(`Unlocked ${nextMine.name}!`);
+                    } else {
+                        ui.showToast(`Need ${nextMine.unlockCost} Bread to unlock next mine!`);
+                    }
+                } else {
+                    ui.showToast("Max mine area reached!");
+                }
+            },
+
+            buyBox: function() {
+                if (GAME_STATE.bread >= GAME_STATE.boxCost) {
+                    GAME_STATE.bread -= GAME_STATE.boxCost;
+                    ui.updateStats();
+                    this.openMysteryBox();
+                } else {
+                    ui.showToast("Not enough Bread!");
+                }
+            },
+
+            openMysteryBox: function() {
+                const roll = Math.random() * 100;
+                let wonType = 'base';
+                
+                let cumulative = 0;
+                for (const key in PIGEON_TYPES) {
+                    if (key === 'base') continue;
+                    cumulative += PIGEON_TYPES[key].chance;
+                    if (roll <= cumulative) {
+                        wonType = key;
+                        break;
+                    }
+                }
+
+                if (!GAME_STATE.unlockedPigeons.includes(wonType)) {
+                    GAME_STATE.unlockedPigeons.push(wonType);
+                }
+
+                ui.showUnlockModal(wonType);
+                
+                // Equip immediately if desired, or let them choose
+                this.equipPigeon(wonType);
+            },
+
+            equipPigeon: function(type) {
+                if (GAME_STATE.unlockedPigeons.includes(type)) {
+                    GAME_STATE.equippedPigeon = type;
+                    engine.loadPigeonModel(type);
+                    ui.populateInventory(); // refresh selection state
+                }
+            }
+        };
+
+        // --- UI LOGIC ---
+        const ui = {
+            updateStats: function() {
+                document.getElementById('bread-display').innerText = Math.floor(GAME_STATE.bread);
+                document.getElementById('diamond-display').innerText = Math.floor(GAME_STATE.diamonds);
+                
+                document.getElementById('upgrade-cost-display').innerText = `Cost: ${GAME_STATE.upgradeCost} 🍞 (Lvl ${GAME_STATE.digSpeed})`;
+                document.getElementById('auto-cost-display').innerText = `Cost: ${GAME_STATE.autoCost} 🍞 (${GAME_STATE.autoSpeed}/sec)`;
+
+                const nextMineIdx = GAME_STATE.currentMine + 1;
+                if (nextMineIdx < MINES.length) {
+                    document.getElementById('mine-cost-display').innerText = `Cost: ${MINES[nextMineIdx].unlockCost} 🍞`;
+                } else {
+                    document.getElementById('mine-cost-display').innerText = `MAX LEVEL`;
+                }
+                
+                document.getElementById('sell-rate-display').innerText = `Current Multiplier: x${MINES[GAME_STATE.currentMine].multiplier}`;
+            },
+
+            showFloatingText: function(x, y, text, isCrit = false) {
+                const el = document.createElement('div');
+                el.className = 'floating-text';
+                el.innerText = text;
+                
+                if (isCrit) {
+                    el.style.color = '#facc15'; // Gold color for critical hits
+                    el.style.fontSize = '2.5rem';
+                    el.style.textShadow = '0 0 15px rgba(250, 204, 21, 1)';
+                    el.style.zIndex = '10';
+                }
+
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                document.body.appendChild(el);
+                
+                setTimeout(() => {
+                    el.remove();
+                }, 1000);
+            },
+
+            showToast: function(msg) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.style.opacity = 1;
+                setTimeout(() => toast.style.opacity = 0, 2000);
+            },
+
+            openInventory: function() {
+                this.populateInventory();
+                document.getElementById('modal-inventory').style.display = 'flex';
+            },
+
+            closeModal: function(id) {
+                document.getElementById(id).style.display = 'none';
+            },
+
+            populateInventory: function() {
+                const grid = document.getElementById('inventory-grid');
+                grid.innerHTML = '';
+
+                for (const key in PIGEON_TYPES) {
+                    const data = PIGEON_TYPES[key];
+                    const isUnlocked = GAME_STATE.unlockedPigeons.includes(key);
+                    const isEquipped = GAME_STATE.equippedPigeon === key;
+
+                    const div = document.createElement('div');
+                    div.className = `inv-item ${isUnlocked ? '' : 'locked'} ${isEquipped ? 'active' : ''}`;
+                    
+                    let content = `<div style="font-size:2rem; margin-bottom:5px;">🐦</div>`;
+                    content += `<div class="${data.color}" style="font-weight:bold">${data.name}</div>`;
+                    if(isEquipped) content += `<div style="color:#4ade80; font-size:0.7rem; margin-top:5px;">Equipped</div>`;
+                    
+                    div.innerHTML = content;
+
+                    if (isUnlocked && !isEquipped) {
+                        div.onclick = () => {
+                            game.equipPigeon(key);
+                            this.closeModal('modal-inventory');
+                        };
+                    }
+
+                    grid.appendChild(div);
+                }
+            },
+
+            showUnlockModal: function(type) {
+                const data = PIGEON_TYPES[type];
+                document.getElementById('unlocked-name').innerText = data.name;
+                document.getElementById('unlocked-name').className = data.color;
+                
+                let desc = `You unboxed a ${data.rarity} pigeon!`;
+                if(type === 'worm') desc = "WOW! The 5% Legendary Worm Pigeon!";
+                if(type === 'golden') desc = "INCREDIBLE! The 1% Mythic Golden Pigeon!";
+                
+                document.getElementById('unlocked-desc').innerText = desc;
+                document.getElementById('modal-unlocked').style.display = 'flex';
+            },
+
+            showOfflineModal: function(seconds, diamonds) {
+                const minutes = Math.floor(seconds / 60);
+                document.getElementById('offline-stats').innerText = `Time Away: ${minutes} min\nDiamonds Mined: +${diamonds} 💎`;
+                document.getElementById('modal-offline').style.display = 'flex';
+            }
+        };
+
+        // --- MAIN LOOP ---
+        function animateLoop() {
+            requestAnimationFrame(animateLoop);
+            engine.update();
+        }
+
+        window.onload = function() {
+            game.loadGame(); // Load before initializing the engine so the correct mine loads
+            engine.init();
+            ui.updateStats();
+            animateLoop();
+
+            // Autosave every 5 seconds
+            setInterval(() => game.saveGame(), 5000);
+        };
+
+    </script>
+</body>
+</html>
