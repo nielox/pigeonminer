@@ -287,6 +287,10 @@
                 🎁 Buy Mystery Box
                 <span class="sub" id="box-cost-display">Cost: 50 🍞</span>
             </button>
+            <button class="btn-mine" onclick="ui.openSaveModal()">
+                💾 Save Slots
+                <span class="sub">Switch or Delete</span>
+            </button>
             <button class="full-width" onclick="ui.openInventory()">
                 🐦 Pigeon Collection
             </button>
@@ -295,6 +299,16 @@
 
     <!-- Modals -->
     <div id="toast">Message</div>
+
+    <div id="modal-saves" class="modal-overlay">
+        <div class="modal">
+            <h2>Save Slots</h2>
+            <div id="save-slots-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <!-- Populated by JS -->
+            </div>
+            <button class="modal-close" onclick="ui.closeModal('modal-saves')">Close</button>
+        </div>
+    </div>
 
     <div id="modal-inventory" class="modal-overlay">
         <div class="modal">
@@ -372,6 +386,8 @@
             sellRate: 2, 
             lastSaveTime: null
         };
+
+        let CURRENT_SLOT = 1;
 
         // --- THREE.JS ENGINE ---
         const engine = {
@@ -949,11 +965,19 @@
         const game = {
             saveGame: function() {
                 GAME_STATE.lastSaveTime = Date.now();
-                localStorage.setItem('pigeonMinerSave', JSON.stringify(GAME_STATE));
+                localStorage.setItem(`pigeonMinerSave_${CURRENT_SLOT}`, JSON.stringify(GAME_STATE));
+                localStorage.setItem('pigeonMinerLastSlot', CURRENT_SLOT.toString());
             },
 
-            loadGame: function() {
-                const saved = localStorage.getItem('pigeonMinerSave');
+            loadGame: function(slot = null) {
+                if (slot !== null) {
+                    CURRENT_SLOT = slot;
+                } else {
+                    const lastSlot = localStorage.getItem('pigeonMinerLastSlot');
+                    if (lastSlot) CURRENT_SLOT = parseInt(lastSlot);
+                }
+
+                const saved = localStorage.getItem(`pigeonMinerSave_${CURRENT_SLOT}`);
                 if (saved) {
                     try {
                         const parsed = JSON.parse(saved);
@@ -982,8 +1006,67 @@
                         }
                     } catch (e) {
                         console.error("Save file corrupted, starting fresh.");
+                        this.resetGame();
                     }
+                } else {
+                    this.resetGame();
                 }
+            },
+
+            resetGame: function() {
+                GAME_STATE.bread = 0;
+                GAME_STATE.diamonds = 0;
+                GAME_STATE.digSpeed = 1;
+                GAME_STATE.autoSpeed = 0;
+                GAME_STATE.factoryLevel = 0;
+                GAME_STATE.upgradeCost = 10;
+                GAME_STATE.autoCost = 50;
+                GAME_STATE.factoryCost = 1000;
+                GAME_STATE.boxCost = 50;
+                GAME_STATE.currentMine = 0;
+                GAME_STATE.unlockedPigeons = ['base'];
+                GAME_STATE.equippedPigeon = 'base';
+                GAME_STATE.sellRate = 2;
+                GAME_STATE.lastSaveTime = null;
+            },
+
+            switchSave: function(slot) {
+                this.saveGame(); // Save current progress before switching
+                CURRENT_SLOT = slot;
+                this.resetGame();
+                this.loadGame(slot);
+                
+                engine.buildMine(GAME_STATE.currentMine);
+                engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                ui.updateStats();
+                ui.closeModal('modal-saves');
+                ui.showToast(`Loaded Save Slot ${slot}`);
+            },
+
+            deleteSave: function(slot, btnElement) {
+                // Safety confirmation without using browser alert()
+                if (btnElement.innerText !== "Sure?") {
+                    btnElement.innerText = "Sure?";
+                    btnElement.style.borderColor = "#ef4444";
+                    btnElement.style.background = "#dc2626";
+                    setTimeout(() => {
+                        if (btnElement && document.body.contains(btnElement)) {
+                            btnElement.innerText = "Delete";
+                            btnElement.style.background = "";
+                        }
+                    }, 3000);
+                    return;
+                }
+                
+                localStorage.removeItem(`pigeonMinerSave_${slot}`);
+                if (CURRENT_SLOT === slot) {
+                    this.resetGame();
+                    engine.buildMine(GAME_STATE.currentMine);
+                    engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                    ui.updateStats();
+                }
+                ui.populateSaveModal();
+                ui.showToast(`Deleted Save Slot ${slot}`);
             },
 
             mine: function(x, y) {
@@ -1170,6 +1253,70 @@
 
             closeModal: function(id) {
                 document.getElementById(id).style.display = 'none';
+            },
+
+            openSaveModal: function() {
+                this.populateSaveModal();
+                document.getElementById('modal-saves').style.display = 'flex';
+            },
+
+            populateSaveModal: function() {
+                const container = document.getElementById('save-slots-container');
+                container.innerHTML = '';
+                
+                for (let i = 1; i <= 3; i++) {
+                    const saved = localStorage.getItem(`pigeonMinerSave_${i}`);
+                    const slotDiv = document.createElement('div');
+                    slotDiv.style.background = '#334155';
+                    slotDiv.style.padding = '10px';
+                    slotDiv.style.borderRadius = '10px';
+                    slotDiv.style.display = 'flex';
+                    slotDiv.style.justifyContent = 'space-between';
+                    slotDiv.style.alignItems = 'center';
+                    slotDiv.style.border = (CURRENT_SLOT === i) ? '2px solid #4ade80' : '2px solid #475569';
+
+                    let infoHTML = `<div style="text-align: left;">
+                        <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Current)' : ''}</div>
+                        <div style="font-size: 0.8rem; color: #cbd5e1;">Empty</div>
+                    </div>`;
+
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            infoHTML = `<div style="text-align: left;">
+                                <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Current)' : ''}</div>
+                                <div style="font-size: 0.8rem; color: #cbd5e1;">Bread: ${Math.floor(data.bread)} | 💎: ${Math.floor(data.diamonds)}</div>
+                            </div>`;
+                        } catch(e) {}
+                    }
+
+                    const btnDiv = document.createElement('div');
+                    btnDiv.style.display = 'flex';
+                    btnDiv.style.gap = '5px';
+
+                    if (CURRENT_SLOT !== i) {
+                        const loadBtn = document.createElement('button');
+                        loadBtn.innerText = "Load";
+                        loadBtn.style.padding = '5px 10px';
+                        loadBtn.style.fontSize = '0.8rem';
+                        loadBtn.onclick = () => game.switchSave(i);
+                        btnDiv.appendChild(loadBtn);
+                    }
+
+                    if (saved) {
+                        const delBtn = document.createElement('button');
+                        delBtn.innerText = "Delete";
+                        delBtn.style.padding = '5px 10px';
+                        delBtn.style.fontSize = '0.8rem';
+                        delBtn.style.borderColor = '#ef4444';
+                        delBtn.onclick = function() { game.deleteSave(i, this); };
+                        btnDiv.appendChild(delBtn);
+                    }
+
+                    slotDiv.innerHTML = infoHTML;
+                    slotDiv.appendChild(btnDiv);
+                    container.appendChild(slotDiv);
+                }
             },
 
             populateInventory: function() {
