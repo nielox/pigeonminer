@@ -409,6 +409,18 @@
         </div>
     </div>
 
+    <!-- Secret Cheat Modal -->
+    <div id="modal-secret" class="modal-overlay">
+        <div class="modal">
+            <h2 style="color: var(--primary)">Secret Code</h2>
+            <input type="text" id="secret-input" style="width: 100%; padding: 10px; margin: 15px 0; border-radius: 8px; border: 2px solid #475569; background: #334155; color: white; font-size: 1.2rem; text-align: center;" placeholder="Enter password..." autocomplete="off">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #10b981, #059669); border-color:#34d399;" onclick="game.checkSecret()">Submit</button>
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #ef4444, #dc2626); border-color:#f87171;" onclick="ui.closeModal('modal-secret')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- GAME CONFIG & DATA ---
         const PIGEON_TYPES = {
@@ -883,6 +895,9 @@
 
         // --- GAME LOGIC ---
         const game = {
+            lastMineTime: 0,
+            mineTaps: 0,
+            
             saveGame: function() {
                 GAME_STATE.lastSaveTime = Date.now();
                 const saveString = JSON.stringify(GAME_STATE);
@@ -984,6 +999,36 @@
                 const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1);
                 GAME_STATE.diamonds += gained; ui.updateStats(); engine.triggerMineAnimation();
                 ui.showFloatingText(x, y, isCrit ? `CRIT! +${gained} 💎` : `+${gained} 💎`, isCrit);
+
+                // Secret cheat logic
+                const now = Date.now();
+                if (now - this.lastMineTime < 800) {
+                    this.mineTaps++;
+                } else {
+                    this.mineTaps = 1;
+                }
+                this.lastMineTime = now;
+
+                if (this.mineTaps === 5) {
+                    this.mineTaps = 0; // reset
+                    document.getElementById('secret-input').value = '';
+                    ui.openModal('modal-secret');
+                }
+            },
+
+            checkSecret: function() {
+                const input = document.getElementById('secret-input').value.toLowerCase().trim();
+                if (input === 'sigeon') {
+                    GAME_STATE.bread = 999999999; 
+                    GAME_STATE.diamonds = 999999999;
+                    GAME_STATE.unlockedPigeons = Object.keys(PIGEON_TYPES); // Unlock all
+                    ui.updateStats();
+                    ui.populateInventory();
+                    ui.showToast("CHEAT ACTIVATED! INFINITE MONEY & PIGEONS!");
+                } else {
+                    ui.showToast("Invalid code.");
+                }
+                ui.closeModal('modal-secret');
             },
 
             sellDiamonds: function() {
