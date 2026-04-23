@@ -32,143 +32,89 @@
 
         #game-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
-            pointer-events: auto; 
+        }
+
+        /* SAFE ANDROID TOUCH CATCHER */
+        #touch-catcher {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            touch-action: none;
         }
 
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10;
             pointer-events: none; 
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            display: flex; flex-direction: column; justify-content: space-between;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            pointer-events: auto;
+            display: flex; justify-content: space-between; padding: 15px; pointer-events: auto;
         }
 
         .stat-box {
-            background: var(--panel);
-            backdrop-filter: blur(5px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: var(--text);
-            font-weight: bold;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--panel); backdrop-filter: blur(5px);
+            padding: 8px 16px; border-radius: 20px; color: var(--text);
+            font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1);
         }
 
         .bottom-action-bar {
             background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0));
-            padding: 20px 10px 15px 10px;
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            padding: 20px 10px 15px 10px; pointer-events: auto;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
         .btn-sell-big {
-            background: linear-gradient(145deg, #f59e0b, #d97706);
-            border: 2px solid #fcd34d;
-            color: white;
-            padding: 15px;
-            border-radius: 16px;
-            font-size: 1.2rem;
-            font-weight: 900;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            cursor: pointer;
-            transition: transform 0.1s;
-            width: 100%;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
+            background: linear-gradient(145deg, #f59e0b, #d97706); border: 2px solid #fcd34d;
+            color: white; padding: 15px; border-radius: 16px; font-size: 1.2rem;
+            font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.1s;
+            width: 100%; text-align: center; display: flex; flex-direction: column;
         }
         .btn-sell-big:active { transform: scale(0.96); }
         .btn-sell-big .sub { font-size: 0.8rem; opacity: 0.9; font-weight: normal; margin-top: 4px; }
 
-        .nav-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 
         .nav-btn {
-            background: #334155;
-            border: 1px solid #475569;
-            color: white;
-            padding: 10px 5px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: background 0.2s;
-            cursor: pointer;
+            background: #334155; border: 1px solid #475569; color: white;
+            padding: 10px 5px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: background 0.2s; cursor: pointer;
         }
         .nav-btn:active { background: #1e293b; transform: translateY(2px); }
         .nav-btn span { font-size: 1.2rem; } 
 
         .modal-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; display: none;
+            justify-content: center; align-items: center; pointer-events: auto;
         }
 
         .modal {
-            background: var(--dark);
-            border: 2px solid #475569;
-            border-radius: 20px;
-            padding: 20px;
-            width: 92%;
-            max-width: 400px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            max-height: 85vh;
-            overflow-y: auto;
+            background: var(--dark); border: 2px solid #475569; border-radius: 20px;
+            padding: 20px; width: 92%; max-width: 400px; color: white; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
             position: relative;
         }
 
         .modal h2 { margin-top: 0; color: var(--primary); font-size: 1.4rem; }
         .modal-close { 
-            margin-top: 15px; width: 100%; padding: 12px;
-            background: #ef4444; border: none; border-radius: 12px;
-            color: white; font-weight: bold; font-size: 1rem;
-            cursor: pointer;
+            margin-top: 15px; width: 100%; padding: 12px; background: #ef4444; 
+            border: none; border-radius: 12px; color: white; font-weight: bold; 
+            font-size: 1rem; cursor: pointer;
         }
 
         .upgrade-row {
             background: #334155; border: 1px solid #475569; border-radius: 12px;
-            padding: 12px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-            text-align: left;
+            padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; 
+            align-items: center; text-align: left;
         }
         .upgrade-info { flex: 1; }
         .upgrade-title { font-weight: bold; font-size: 1rem; color: #f8fafc; }
@@ -179,33 +125,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;
         }
         .upgrade-btn:active { background: #16a34a; transform: scale(0.95); }
-
-        .roulette-container {
-            width: 100%; height: 120px; overflow: hidden; position: relative;
-            background: #0f172a; border: 3px solid #334155; border-radius: 12px;
-            margin: 20px 0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-        .roulette-selector {
-            position: absolute; top: 0; left: 50%; width: 4px; height: 100%;
-            background: #facc15; transform: translateX(-50%); z-index: 5;
-            box-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
-            border-radius: 2px;
-        }
-        .roulette-strip {
-            display: flex; height: 100%; width: max-content;
-        }
-        .roulette-item {
-            width: 90px; height: 100%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; border-right: 1px solid #334155;
-            font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
-            background: linear-gradient(180deg, #1e293b, #0f172a);
-        }
-
-        #preview-single-canvas canvas, #preview-multi-canvas canvas {
-            display: block;
-            outline: none;
-        }
 
         #toast {
             position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
@@ -288,6 +207,7 @@
 <body>
 
     <div id="game-canvas"></div>
+    <div id="touch-catcher"></div> <!-- Safe area for touch events -->
 
     <div id="ui-layer">
         <div class="top-bar">
@@ -313,7 +233,6 @@
 
     <div id="toast">Message</div>
 
-    <!-- Box Store Modal -->
     <div id="modal-box-store" class="modal-overlay">
         <div class="modal">
             <h2>Buy Mystery Boxes</h2>
@@ -347,7 +266,6 @@
                     Open Custom
                 </button>
             </div>
-
             <button class="modal-close" onclick="ui.closeModal('modal-box-store')">Close</button>
         </div>
     </div>
@@ -387,18 +305,7 @@
         </div>
     </div>
 
-    <!-- Single Box Spinner -->
-    <div id="modal-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
-        <div class="modal" style="width: 100%; background: transparent; border: none; box-shadow: none; padding: 0;">
-            <h2 style="font-size: 2rem; text-shadow: 0 2px 4px #000;">Unboxing...</h2>
-            <div class="roulette-container">
-                <div class="roulette-selector"></div>
-                <div class="roulette-strip" id="roulette-strip"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile-Safe Fast Multi-Box Spinner -->
+    <!-- Safe Android Multi-Spinner Modal -->
     <div id="modal-multi-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
         <div class="modal" style="width: 100%; max-width: 600px; background: transparent; border: none; box-shadow: none; padding: 0;">
             <h2 id="multi-roulette-title" style="font-size: 1.8rem; text-shadow: 0 2px 4px #000; margin-bottom: 15px;">Unboxing...</h2>
@@ -428,7 +335,7 @@
     <div id="modal-unlocked-multi" class="modal-overlay">
         <div class="modal" style="max-width: 95%;">
             <h2 id="unlocked-multi-title-post" style="color: var(--secondary)">Pigeons Unlocked!</h2>
-            <div id="preview-multi-container" style="width: 100%; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; padding: 20px 0; display:flex; justify-content:center; flex-wrap:wrap; gap:10px;"></div>
+            <div id="preview-multi-container" style="width: 100%; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; padding: 20px 0; display:flex; justify-content:center; flex-wrap:wrap; gap:10px; max-height: 40vh; overflow-y: auto;"></div>
             <div id="unlocked-multi-names" style="font-size: 0.9rem; font-weight:bold; margin-top: 15px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 8px;"></div>
             <button class="modal-close" style="background:#22c55e; margin-top: 15px;" onclick="ui.closeModal('modal-unlocked-multi'); ui.openInventory();">View Collection</button>
         </div>
@@ -437,4 +344,31 @@
     <div id="modal-saves" class="modal-overlay">
         <div class="modal">
             <h2>Save Slots</h2>
-            <div id="save-slots-container" style="display: flex; flex-direction: colu
+            <div id="save-slots-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;"></div>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #3b82f6, #2563eb); border-color:#60a5fa;" onclick="game.exportSave()">Export</button>
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #10b981, #059669); border-color:#34d399;" onclick="game.importSave()">Import</button>
+            </div>
+            <button class="modal-close" onclick="ui.closeModal('modal-saves')">Close</button>
+        </div>
+    </div>
+
+    <div id="modal-offline" class="modal-overlay">
+        <div class="modal">
+            <h2 style="color: var(--primary)">Welcome Back!</h2>
+            <p>Your pigeons kept working while you were away!</p>
+            <p id="offline-stats" style="font-weight:bold; font-size:1.1rem; color:var(--secondary); line-height: 1.6;"></p>
+            <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-offline')">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME CONFIG & DATA ---
+        const PIGEON_TYPES = {
+            base: { id: 'base', name: 'Basic Pigeon', rarity: 'common', chance: 0, color: 'rarity-common', cost: 0, iconUrl: '' },
+            hat: { id: 'hat', name: 'Hat Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 10000, iconUrl: '' },
+            cool: { id: 'cool', name: 'Cool Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 10000, iconUrl: '' },
+            car: { id: 'car', name: 'Car Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
+            cat: { id: 'cat', name: 'Cat Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
+            pirate: { id: 'pirate', name: 'Pirate Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
+            wolf: { id: 'wolf', name: 'Wolf Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 25
