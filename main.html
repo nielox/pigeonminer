@@ -588,9 +588,9 @@
                     
                     const intersects = raycaster.intersectObject(this.mineBlock, true);
                     if (intersects.length > 0) {
-                        game.mine(clientX, clientY);
+                        game.mine(clientX, clientY, true);
                     } else if (mouse.y > -0.5 && mouse.y < 0.5) {
-                        game.mine(clientX, clientY);
+                        game.mine(clientX, clientY, false);
                     }
                 };
 
@@ -993,7 +993,7 @@
                 }
             },
 
-            mine: function(x, y) {
+            mine: function(x, y, isDirectHit = true) {
                 document.getElementById('mine-hint').style.display = 'none';
                 const isCrit = Math.random() < 0.1;
                 const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1);
@@ -1001,18 +1001,22 @@
                 ui.showFloatingText(x, y, isCrit ? `CRIT! +${gained} 💎` : `+${gained} 💎`, isCrit);
 
                 // Secret cheat logic
-                const now = Date.now();
-                if (now - this.lastMineTime < 800) {
-                    this.mineTaps++;
-                } else {
-                    this.mineTaps = 1;
-                }
-                this.lastMineTime = now;
+                if (isDirectHit) {
+                    const now = Date.now();
+                    if (now - this.lastMineTime < 800) {
+                        this.mineTaps++;
+                    } else {
+                        this.mineTaps = 1;
+                    }
+                    this.lastMineTime = now;
 
-                if (this.mineTaps === 5) {
-                    this.mineTaps = 0; // reset
-                    document.getElementById('secret-input').value = '';
-                    ui.openModal('modal-secret');
+                    if (this.mineTaps === 5) {
+                        this.mineTaps = 0; // reset
+                        document.getElementById('secret-input').value = '';
+                        ui.openModal('modal-secret');
+                    }
+                } else {
+                    this.mineTaps = 0; // Reset if they tap off the diamond
                 }
             },
 
