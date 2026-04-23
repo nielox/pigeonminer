@@ -129,7 +129,7 @@
             transition: background 0.2s;
         }
         .nav-btn:active { background: #1e293b; transform: translateY(2px); }
-        .nav-btn span { font-size: 1.2rem; } /* Icon size */
+        .nav-btn span { font-size: 1.2rem; } 
 
         /* Modals */
         .modal-overlay {
@@ -197,13 +197,17 @@
         }
         .roulette-strip {
             display: flex; height: 100%; width: max-content;
-            /* Transition applied via JS */
         }
         .roulette-item {
             width: 90px; height: 100%; display: flex; flex-direction: column;
             justify-content: center; align-items: center; border-right: 1px solid #334155;
             font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
             background: linear-gradient(180deg, #1e293b, #0f172a);
+        }
+
+        #preview-single-canvas canvas, #preview-multi-canvas canvas {
+            display: block;
+            outline: none;
         }
 
         /* Utilities */
@@ -266,7 +270,7 @@
             </button>
             <div class="nav-grid">
                 <button class="nav-btn" onclick="ui.openModal('modal-upgrades')"><span>⬆️</span> Upgrades</button>
-                <button class="nav-btn" onclick="game.startRoulette()"><span>🎁</span> Box <span style="font-size: 0.7rem" id="box-cost-nav">50🍞</span></button>
+                <button class="nav-btn" onclick="game.openBoxStore()"><span>🎁</span> Store</button>
                 <button class="nav-btn" onclick="ui.openInventory()"><span>🐦</span> Pigeons</button>
                 <button class="nav-btn" onclick="ui.openSaveModal()"><span>💾</span> Saves</button>
             </div>
@@ -275,6 +279,24 @@
 
     <!-- Modals -->
     <div id="toast">Message</div>
+
+    <!-- Box Store Modal -->
+    <div id="modal-box-store" class="modal-overlay">
+        <div class="modal">
+            <h2>Buy Mystery Boxes</h2>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <button class="btn-sell-big" style="flex:1; font-size:1rem;" onclick="game.buyBox(1)">
+                    Open 1x
+                    <span class="sub" id="store-cost-1">50 🍞</span>
+                </button>
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; background: linear-gradient(145deg, #ec4899, #be185d); border-color:#f472b6;" onclick="game.buyBox(5)">
+                    Open 5x
+                    <span class="sub" id="store-cost-5">250 🍞</span>
+                </button>
+            </div>
+            <button class="modal-close" onclick="ui.closeModal('modal-box-store')">Close</button>
+        </div>
+    </div>
 
     <!-- Upgrades Modal -->
     <div id="modal-upgrades" class="modal-overlay">
@@ -339,13 +361,28 @@
         </div>
     </div>
 
-    <!-- Unlocked Info -->
+    <!-- Unlocked Info (Single) -->
     <div id="modal-unlocked" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--secondary)">New Pigeon Unlocked!</h2>
+            <!-- 3D Preview Canvas injected here -->
+            <div id="preview-single-canvas" style="width: 100%; height: 220px; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; margin: 15px 0;"></div>
+            
             <h3 id="unlocked-name" style="margin: 10px 0; font-size: 1.8rem;">???</h3>
             <p id="unlocked-desc">You got a new miner.</p>
             <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-unlocked'); ui.openInventory();">Equip & View</button>
+        </div>
+    </div>
+
+    <!-- Unlocked Info (Multi 5x) -->
+    <div id="modal-unlocked-multi" class="modal-overlay">
+        <div class="modal" style="max-width: 95%;">
+            <h2 style="color: var(--secondary)">5x Pigeons Unlocked!</h2>
+            <!-- 3D Preview Canvas injected here -->
+            <div id="preview-multi-canvas" style="width: 100%; height: 250px; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; margin: 15px 0;"></div>
+            
+            <div id="unlocked-multi-names" style="font-size: 0.85rem; font-weight:bold; margin-bottom: 15px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 5px;"></div>
+            <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-unlocked-multi'); ui.openInventory();">View Collection</button>
         </div>
     </div>
 
@@ -354,6 +391,10 @@
         <div class="modal">
             <h2>Save Slots</h2>
             <div id="save-slots-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;"></div>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #3b82f6, #2563eb); border-color:#60a5fa;" onclick="game.exportSave()">Export</button>
+                <button class="btn-sell-big" style="flex:1; font-size:1rem; padding:10px; background:linear-gradient(145deg, #10b981, #059669); border-color:#34d399;" onclick="game.importSave()">Import</button>
+            </div>
             <button class="modal-close" onclick="ui.closeModal('modal-saves')">Close</button>
         </div>
     </div>
@@ -417,12 +458,76 @@
         };
 
         let CURRENT_SLOT = 1;
-        let isSpinning = false; // Prevents interacting while roulette spins
+        let isSpinning = false; 
 
-        // --- THREE.JS ENGINE ---
+        // --- SECONDARY 3D ENGINE FOR BOX PREVIEWS ---
+        const previewEngine = {
+            renderer: null, scene: null, camera: null, pigeons: [], animationId: null,
+
+            init: function(containerId) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                this.scene = new THREE.Scene();
+                
+                const aspect = container.clientWidth / container.clientHeight;
+                this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
+                
+                if(!this.renderer) {
+                    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                }
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(this.renderer.domElement);
+
+                const amb = new THREE.AmbientLight(0xffffff, 0.8);
+                const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+                dir.position.set(5, 5, 5);
+                this.scene.add(amb, dir);
+            },
+
+            show: function(types, containerId) {
+                if (this.animationId) cancelAnimationFrame(this.animationId);
+                this.init(containerId);
+                this.pigeons = [];
+
+                const isMulti = types.length > 1;
+                const spacing = 0.85; 
+                const startX = isMulti ? -((types.length - 1) * spacing) / 2 : 0;
+
+                types.forEach((type, i) => {
+                    const p = engine.createPigeon(type);
+                    p.position.set(startX + i * spacing, -0.3, 0);
+                    p.rotation.y = Math.PI + Math.PI / 8; // slight angle towards camera
+                    if (isMulti) p.scale.set(0.55, 0.55, 0.55); 
+                    
+                    this.scene.add(p);
+                    this.pigeons.push(p);
+                });
+                
+                if(isMulti) {
+                     this.camera.position.set(0, 0.8, 4.2);
+                     this.camera.lookAt(0, 0.1, 0);
+                } else {
+                     this.camera.position.set(0, 0.5, 2.8);
+                     this.camera.lookAt(0, 0.2, 0);
+                }
+
+                this.animate();
+            },
+
+            animate: function() {
+                this.animationId = requestAnimationFrame(this.animate.bind(this));
+                // Slowly rotate to show off models
+                this.pigeons.forEach(p => p.rotation.y += 0.015);
+                this.renderer.render(this.scene, this.camera);
+            }
+        };
+
+        // --- PRIMARY THREE.JS ENGINE ---
         const engine = {
             scene: null, camera: null, renderer: null, pigeonGroup: null, 
             mineBlock: null, particles: [], isAnimatingMine: false, mineAnimationProgress: 0, clock: new THREE.Clock(),
+            textureCache: {},
 
             init: function() {
                 const container = document.getElementById('game-canvas');
@@ -543,6 +648,9 @@
             },
 
             generateTexture: function(baseColor, accentColor, isWorm = false) {
+                const key = baseColor + accentColor + (isWorm ? "1" : "0");
+                if (this.textureCache[key]) return this.textureCache[key];
+
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 256;
                 const ctx = canvas.getContext('2d');
@@ -559,14 +667,12 @@
                 const texture = new THREE.CanvasTexture(canvas);
                 texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
                 texture.repeat.set(isWorm ? 1 : 2, isWorm ? 1 : 2);
+                this.textureCache[key] = texture;
                 return texture;
             },
 
-            loadPigeonModel: function(type) {
-                if (this.pigeonGroup) this.scene.remove(this.pigeonGroup);
-                this.pigeonGroup = new THREE.Group();
-                this.pigeonGroup.position.set(0, 0, 1.5);
-                
+            createPigeon: function(type) {
+                const pigeonGroup = new THREE.Group();
                 const texGrey = this.generateTexture('#9ca3af', '#4b5563');
                 const texDarkGrey = this.generateTexture('#4b5563', '#1f2937');
                 const texPink = this.generateTexture('#f472b6', '#be185d', true);
@@ -585,8 +691,8 @@
                 if (type === 'worm') {
                     for (let i = 0; i < 8; i++) {
                         const seg = new THREE.Mesh(new THREE.SphereGeometry(0.3 - (i*0.02), 16, 16), matPink);
-                        seg.position.z = -i * 0.4 + 1.5; seg.position.y = 0.3 + Math.sin(i * 0.5) * 0.1; seg.castShadow = true;
-                        this.pigeonGroup.add(seg);
+                        seg.position.z = -i * 0.4; seg.position.y = 0.3 + Math.sin(i * 0.5) * 0.1; seg.castShadow = true;
+                        pigeonGroup.add(seg);
                         if (i === 0) {
                             const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); e1.position.set(0.1, 0.1, 0.25);
                             const e2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); e2.position.set(-0.1, 0.1, 0.25);
@@ -595,12 +701,12 @@
                         }
                     }
                 } else if (type === 'car') {
-                    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.5), matGrey); body.position.y = 0.6; body.castShadow = true; this.pigeonGroup.add(body);
-                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), matGrey); head.position.set(0, 1.1, 0.7); this.pigeonGroup.add(head);
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.5), matGrey); body.position.y = 0.6; body.castShadow = true; pigeonGroup.add(body);
+                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), matGrey); head.position.set(0, 1.1, 0.7); pigeonGroup.add(head);
                     const matWheel = new THREE.MeshStandardMaterial({color: 0x111111});
                     [[0.6, 0.25, 0.5], [-0.6, 0.25, 0.5], [0.6, 0.25, -0.5], [-0.6, 0.25, -0.5]].forEach(pos => {
                         const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16), matWheel);
-                        wheel.rotation.z = Math.PI / 2; wheel.position.set(...pos); wheel.castShadow = true; this.pigeonGroup.add(wheel);
+                        wheel.rotation.z = Math.PI / 2; wheel.position.set(...pos); wheel.castShadow = true; pigeonGroup.add(wheel);
                     });
                     this.addFace(head, matEye, matBeak);
                 } else {
@@ -616,10 +722,10 @@
                     
                     const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), customMat);
                     body.scale.set(0.9, 1.4, 0.9); body.rotation.x = Math.PI / 2; body.position.y = 0.6; body.castShadow = true;
-                    this.pigeonGroup.add(body);
+                    pigeonGroup.add(body);
 
                     const head = new THREE.Mesh(new THREE.SphereGeometry(0.3), customMat);
-                    head.position.set(0, 1.0, 0.4); head.castShadow = true; this.pigeonGroup.add(head);
+                    head.position.set(0, 1.0, 0.4); head.castShadow = true; pigeonGroup.add(head);
 
                     if (type === 'wolf') {
                         const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.3), matDarkGrey); snout.rotation.x = Math.PI / 2; snout.position.set(0, 0, 0.3); head.add(snout);
@@ -651,16 +757,16 @@
                     if (type === 'cat') {
                         const e1 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matGrey); e1.position.set(0.2, 0.25, 0);
                         const e2 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matGrey); e2.position.set(-0.2, 0.25, 0); head.add(e1, e2);
-                        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; this.pigeonGroup.add(t);
+                        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; pigeonGroup.add(t);
                     }
-                    if (type === 'super') { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide})); c.position.set(0, 0.5, -0.5); c.rotation.x = -Math.PI / 6; this.pigeonGroup.add(c); }
+                    if (type === 'super') { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide})); c.position.set(0, 0.5, -0.5); c.rotation.x = -Math.PI / 6; pigeonGroup.add(c); }
                     if (type === 'wizard') {
                         const wH = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 16), new THREE.MeshStandardMaterial({color: 0x1e3a8a})); wH.position.y = 0.5; wH.rotation.x = -0.1;
                         const wB = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.05), new THREE.MeshStandardMaterial({color: 0x1e3a8a})); wB.position.y = 0.15; head.add(wH, wB);
                     }
                     if (type === 'astronaut') {
                         const h = new THREE.Mesh(new THREE.SphereGeometry(0.45), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.5})); head.add(h);
-                        const p = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({color: 0xdddddd})); p.position.set(0, 0.6, -0.5); this.pigeonGroup.add(p);
+                        const p = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({color: 0xdddddd})); p.position.set(0, 0.6, -0.5); pigeonGroup.add(p);
                     }
                     if (type === 'king') { const cr = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.2, 0.2, 8, 1, true), new THREE.MeshStandardMaterial({color: 0xfacc15, metalness: 1.0, roughness: 0.2})); cr.position.y = 0.3; cr.material.side = THREE.DoubleSide; head.add(cr); }
                     if (type === 'dragon') {
@@ -669,9 +775,16 @@
                         const h2 = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.3, 8), hM); h2.position.set(-0.15, 0.25, -0.1); h2.rotation.x = -0.5; head.add(h1, h2);
                         const wM = new THREE.MeshStandardMaterial({color: 0xb91c1c, side: THREE.DoubleSide});
                         const w1 = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), wM); w1.position.set(0.4, 0.7, -0.2); w1.rotation.y = -Math.PI/4;
-                        const w2 = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), wM); w2.position.set(-0.4, 0.7, -0.2); w2.rotation.y = Math.PI/4; this.pigeonGroup.add(w1, w2);
+                        const w2 = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), wM); w2.position.set(-0.4, 0.7, -0.2); w2.rotation.y = Math.PI/4; pigeonGroup.add(w1, w2);
                     }
                 }
+                return pigeonGroup;
+            },
+
+            loadPigeonModel: function(type) {
+                if (this.pigeonGroup) this.scene.remove(this.pigeonGroup);
+                this.pigeonGroup = this.createPigeon(type);
+                this.pigeonGroup.position.set(0, 0, 1.5);
                 this.pigeonGroup.rotation.y = Math.PI; 
                 this.scene.add(this.pigeonGroup);
             },
@@ -817,6 +930,47 @@
                 ui.populateSaveModal(); ui.showToast(`Deleted Slot ${slot}`);
             },
 
+            exportSave: function() {
+                try {
+                    GAME_STATE.lastSaveTime = Date.now();
+                    const saveData = btoa(JSON.stringify(GAME_STATE));
+                    
+                    const el = document.createElement('textarea');
+                    el.value = saveData;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    
+                    ui.showToast("Save Code Copied!");
+                } catch (err) {
+                    ui.showToast("Export failed.");
+                }
+            },
+
+            importSave: function() {
+                const saveString = prompt("Paste your Save Code here to overwrite your CURRENT slot:");
+                if (saveString) {
+                    try {
+                        const decoded = atob(saveString);
+                        const parsed = JSON.parse(decoded);
+                        if (parsed && typeof parsed.bread !== 'undefined') {
+                            Object.assign(GAME_STATE, parsed);
+                            this.saveGame(); 
+                            engine.buildMine(GAME_STATE.currentMine);
+                            engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                            ui.updateStats();
+                            ui.populateSaveModal();
+                            ui.showToast("Save Imported!");
+                        } else {
+                            ui.showToast("Invalid Save Code!");
+                        }
+                    } catch(e) {
+                        ui.showToast("Invalid Save Code!");
+                    }
+                }
+            },
+
             mine: function(x, y) {
                 document.getElementById('mine-hint').style.display = 'none';
                 const isCrit = Math.random() < 0.1;
@@ -863,11 +1017,24 @@
                 } else ui.showToast("Max mine reached!");
             },
 
-            startRoulette: function() {
-                if (GAME_STATE.bread >= GAME_STATE.boxCost && !isSpinning) {
-                    GAME_STATE.bread -= GAME_STATE.boxCost;
+            openBoxStore: function() {
+                document.getElementById('store-cost-1').innerText = `${GAME_STATE.boxCost} 🍞`;
+                document.getElementById('store-cost-5').innerText = `${GAME_STATE.boxCost * 5} 🍞`;
+                ui.openModal('modal-box-store');
+            },
+
+            buyBox: function(amount) {
+                const totalCost = GAME_STATE.boxCost * amount;
+                if (GAME_STATE.bread >= totalCost && !isSpinning) {
+                    GAME_STATE.bread -= totalCost;
                     ui.updateStats();
-                    this.executeRoulette();
+                    ui.closeModal('modal-box-store');
+                    
+                    if (amount === 1) {
+                        this.executeRoulette();
+                    } else if (amount === 5) {
+                        this.executeFiveBoxes();
+                    }
                 } else if(!isSpinning) {
                     ui.showToast("Not enough Bread!");
                 }
@@ -891,7 +1058,7 @@
 
                 const itemWidth = 90;
                 const totalItems = 50;
-                const winIndex = 43; // Lands on the 43rd item
+                const winIndex = 43; 
 
                 for(let i=0; i<totalItems; i++) {
                     let type = wonType;
@@ -908,19 +1075,14 @@
 
                 ui.openModal('modal-roulette');
 
-                // Wait a frame to ensure modal is rendered and width is calculable
                 requestAnimationFrame(() => {
                     const containerWidth = document.querySelector('.roulette-container').offsetWidth;
-                    // Calculate center of screen minus half container to align the selector
                     const targetX = (winIndex * itemWidth) + (itemWidth / 2) - (containerWidth / 2);
-                    // Add slight random offset so it doesn't always land dead center
                     const randomOffset = (Math.random() - 0.5) * (itemWidth * 0.8);
                     const finalX = targetX + randomOffset;
 
-                    // Trigger reflow
                     strip.offsetHeight; 
                     
-                    // CS2 Spin effect: fast start, slow end friction
                     strip.style.transition = 'transform 5s cubic-bezier(0.1, 0.9, 0.2, 1)';
                     strip.style.transform = `translateX(-${finalX}px)`;
 
@@ -928,10 +1090,36 @@
                         isSpinning = false;
                         ui.closeModal('modal-roulette');
                         if (!GAME_STATE.unlockedPigeons.includes(wonType)) GAME_STATE.unlockedPigeons.push(wonType);
-                        ui.showUnlockModal(wonType);
+                        ui.showUnlockModalSingle(wonType);
                         this.equipPigeon(wonType);
-                    }, 5500); // Wait for transition + small buffer
+                    }, 5500); 
                 });
+            },
+
+            executeFiveBoxes: function() {
+                ui.showToast("Unboxing 5 Pigeons...");
+                isSpinning = true;
+                
+                setTimeout(() => {
+                    const wonTypes = [];
+                    for(let i=0; i<5; i++) {
+                        const roll = Math.random() * 100;
+                        let wonType = 'base';
+                        let cumulative = 0;
+                        for (const key in PIGEON_TYPES) {
+                            if (key === 'base') continue;
+                            cumulative += PIGEON_TYPES[key].chance;
+                            if (roll <= cumulative) { wonType = key; break; }
+                        }
+                        wonTypes.push(wonType);
+                        if (!GAME_STATE.unlockedPigeons.includes(wonType)) {
+                            GAME_STATE.unlockedPigeons.push(wonType);
+                        }
+                    }
+                    isSpinning = false;
+                    ui.showUnlockModalMulti(wonTypes);
+                    this.equipPigeon(wonTypes[wonTypes.length - 1]); // Auto equip the last one drawn
+                }, 800); // Quick suspense delay
             },
 
             equipPigeon: function(type) {
@@ -948,7 +1136,6 @@
                 document.getElementById('bread-display').innerText = Math.floor(GAME_STATE.bread);
                 document.getElementById('diamond-display').innerText = Math.floor(GAME_STATE.diamonds);
                 
-                // Update text in Upgrades modal
                 document.getElementById('btn-dig').innerText = `${GAME_STATE.upgradeCost} 🍞`;
                 document.getElementById('desc-dig').innerText = `Lvl ${GAME_STATE.digSpeed} (+${GAME_STATE.digSpeed} 💎/tap)`;
                 
@@ -963,7 +1150,6 @@
                 if(!nextMine) document.getElementById('btn-mine').style.background = '#64748b';
                 
                 document.getElementById('sell-rate-display').innerText = `Multiplier: x${MINES[GAME_STATE.currentMine].multiplier}`;
-                document.getElementById('box-cost-nav').innerText = `${GAME_STATE.boxCost} 🍞`;
             },
 
             showFloatingText: function(x, y, text, isCrit = false, isBread = false) {
@@ -980,7 +1166,13 @@
                 setTimeout(() => toast.style.opacity = 0, 2000);
             },
             openModal: function(id) { document.getElementById(id).style.display = 'flex'; },
-            closeModal: function(id) { document.getElementById(id).style.display = 'none'; },
+            
+            closeModal: function(id) { 
+                document.getElementById(id).style.display = 'none'; 
+                if (id === 'modal-unlocked' || id === 'modal-unlocked-multi') {
+                    if (previewEngine.animationId) cancelAnimationFrame(previewEngine.animationId);
+                }
+            },
             
             openInventory: function() { this.populateInventory(); this.openModal('modal-inventory'); },
             openSaveModal: function() { this.populateSaveModal(); this.openModal('modal-saves'); },
@@ -1035,16 +1227,36 @@
                 }
             },
 
-            showUnlockModal: function(type) {
+            showUnlockModalSingle: function(type) {
                 const data = PIGEON_TYPES[type];
                 document.getElementById('unlocked-name').innerText = data.name;
                 document.getElementById('unlocked-name').className = data.color;
+                
                 let desc = `You unboxed a ${data.rarity} pigeon!`;
                 if(type === 'worm') desc = "WOW! The Legendary Worm Pigeon!";
                 if(type === 'golden') desc = "INCREDIBLE! The Mythic Golden Pigeon!";
                 if(type === 'dragon') desc = "UNBELIEVABLE! THE SECRET DRAGON PIGEON (0.2%)!";
+                
                 document.getElementById('unlocked-desc').innerText = desc;
+                
                 this.openModal('modal-unlocked');
+                previewEngine.show([type], 'preview-single-canvas');
+            },
+
+            showUnlockModalMulti: function(types) {
+                const namesContainer = document.getElementById('unlocked-multi-names');
+                namesContainer.innerHTML = '';
+                
+                types.forEach(type => {
+                    const data = PIGEON_TYPES[type];
+                    const span = document.createElement('span');
+                    span.className = data.color;
+                    span.innerText = data.name;
+                    namesContainer.appendChild(span);
+                });
+
+                this.openModal('modal-unlocked-multi');
+                previewEngine.show(types, 'preview-multi-canvas');
             },
 
             showOfflineModal: function(seconds, diamonds, bread) {
