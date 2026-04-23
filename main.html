@@ -386,7 +386,7 @@
         </div>
     </div>
 
-    <!-- Save Slots -->
+    <!-- Save Slots & Export/Import -->
     <div id="modal-saves" class="modal-overlay">
         <div class="modal">
             <h2>Save Slots</h2>
@@ -399,6 +399,7 @@
         </div>
     </div>
 
+    <!-- Offline Modal -->
     <div id="modal-offline" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--primary)">Welcome Back!</h2>
@@ -884,8 +885,14 @@
         const game = {
             saveGame: function() {
                 GAME_STATE.lastSaveTime = Date.now();
-                localStorage.setItem(`pigeonMinerSave_${CURRENT_SLOT}`, JSON.stringify(GAME_STATE));
+                const saveString = JSON.stringify(GAME_STATE);
+                localStorage.setItem(`pigeonMinerSave_${CURRENT_SLOT}`, saveString);
                 localStorage.setItem('pigeonMinerLastSlot', CURRENT_SLOT.toString());
+
+                // --- ANDROID BRIDGE: Send save data to the App ---
+                if (window.Android && typeof window.Android.saveGameData === 'function') {
+                    window.Android.saveGameData(saveString);
+                }
             },
 
             loadGame: function(slot = null) {
@@ -1265,11 +1272,45 @@
             }
         };
 
+        // --- ANDROID BRIDGE: Receive save data from the App ---
+        window.loadGameFromAndroid = function(saveString) {
+            if (saveString && saveString.trim() !== "") {
+                try {
+                    const parsed = JSON.parse(saveString);
+                    if (parsed && typeof parsed.bread !== 'undefined') {
+                        Object.assign(GAME_STATE, parsed);
+                        engine.buildMine(GAME_STATE.currentMine); 
+                        engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                        ui.updateStats();
+                        
+                        // Calculate offline progress after Android loads the save
+                        if (GAME_STATE.lastSaveTime) {
+                            const secs = Math.floor((Date.now() - GAME_STATE.lastSaveTime) / 1000);
+                            if (secs > 60) {
+                                let d=0, b=0;
+                                if (GAME_STATE.autoSpeed > 0) { d = secs * GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier; GAME_STATE.diamonds += d; }
+                                if (GAME_STATE.factoryLevel > 0) { b = secs * GAME_STATE.factoryLevel * 15; GAME_STATE.bread += b; }
+                                if(d > 0 || b > 0) setTimeout(() => ui.showOfflineModal(secs, d, b), 1000);
+                            }
+                        }
+                        ui.showToast("App Save Loaded!");
+                    }
+                } catch(e) {
+                    console.error("Failed to parse Android save", e);
+                }
+            }
+        };
+
         function animateLoop() { requestAnimationFrame(animateLoop); engine.update(); }
 
         window.onload = function() {
             game.loadGame(); engine.init(); ui.updateStats(); animateLoop();
             setInterval(() => game.saveGame(), 5000);
+
+            // Tell Android the game is fully loaded and ready to receive the save file
+            if (window.Android && window.Android.onGameReady) {
+                window.Android.onGameReady();
+            }
         };
     </script>
 </body>
