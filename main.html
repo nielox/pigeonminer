@@ -34,10 +34,9 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
-            pointer-events: none; /* Let touch catcher handle it */
+            pointer-events: none; 
         }
 
-        /* SAFE ANDROID TOUCH CATCHER */
         #touch-catcher {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -101,7 +100,7 @@
 
         .modal {
             background: var(--dark); border: 2px solid #475569; border-radius: 20px;
-            padding: 20px; width: 92%; max-width: 400px; color: white; text-align: center;
+            padding: 20px; width: 92%; max-width: 500px; color: white; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
             position: relative;
         }
@@ -131,18 +130,14 @@
         .roulette-container {
             width: 100%; height: 120px; overflow: hidden; position: relative;
             background: #0f172a; border: 3px solid #334155; border-radius: 12px;
-            margin: 20px 0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            margin: 20px 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
         .roulette-selector {
             position: absolute; top: 0; left: 50%; width: 4px; height: 100%;
             background: #facc15; transform: translateX(-50%); z-index: 5;
-            box-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
-            border-radius: 2px;
+            box-shadow: 0 0 10px #facc15, 0 0 20px #facc15; border-radius: 2px;
         }
-        .roulette-strip {
-            display: flex; height: 100%; width: max-content;
-        }
+        .roulette-strip { display: flex; height: 100%; width: max-content; }
         .roulette-item {
             width: 90px; height: 100%; display: flex; flex-direction: column;
             justify-content: center; align-items: center; border-right: 1px solid #334155;
@@ -257,38 +252,37 @@
 
     <div id="toast">Message</div>
 
-    <!-- Box Store Modal -->
     <div id="modal-box-store" class="modal-overlay">
         <div class="modal">
             <h2>Buy Mystery Boxes</h2>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
                 <button class="btn-sell-big" style="font-size:1rem;" onclick="game.buyBox(1)">
                     Open 1x
-                    <span class="sub" id="store-cost-1">50 🍞</span>
+                    <span class="sub" id="store-cost-1">5,000 🍞</span>
                 </button>
-                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #ec4899, #be185d); border-color:#f472b6;" onclick="game.buyBox(5)">
-                    Open 5x
-                    <span class="sub" id="store-cost-5">250 🍞</span>
-                </button>
-                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #8b5cf6, #4c1d95); border-color:#c084fc;" onclick="game.buyBox(10)">
+                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #ec4899, #be185d); border-color:#f472b6;" onclick="game.buyBox(10)">
                     Open 10x
-                    <span class="sub" id="store-cost-10">500 🍞</span>
+                    <span class="sub" id="store-cost-10">50,000 🍞</span>
                 </button>
-                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #10b981, #047857); border-color:#34d399;" onclick="game.buyBox(50)">
-                    Open 50x
-                    <span class="sub" id="store-cost-50">2500 🍞</span>
-                </button>
-                <button class="btn-sell-big" style="grid-column: span 2; font-size:1rem; background: linear-gradient(145deg, #f43f5e, #be123c); border-color:#fb7185;" onclick="game.buyBox(100)">
+                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #8b5cf6, #4c1d95); border-color:#c084fc;" onclick="game.buyBox(100)">
                     Open 100x
-                    <span class="sub" id="store-cost-100">5000 🍞</span>
+                    <span class="sub" id="store-cost-100">500k 🍞</span>
+                </button>
+                <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #10b981, #047857); border-color:#34d399;" onclick="game.buyBox(1000)">
+                    Open 1,000x
+                    <span class="sub" id="store-cost-1k">5M 🍞</span>
+                </button>
+                <button class="btn-sell-big" style="grid-column: span 2; font-size:1rem; background: linear-gradient(145deg, #f43f5e, #be123c); border-color:#fb7185;" onclick="game.buyBox(10000)">
+                    Open 10,000x
+                    <span class="sub" id="store-cost-10k">50M 🍞</span>
                 </button>
             </div>
             
             <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #475569;">
                 <h3 style="margin: 0 0 10px 0; font-size: 1rem; color: #cbd5e1;">Custom Amount</h3>
-                <input type="number" id="custom-box-amount" class="custom-amount-input" min="1" max="9999" value="1" placeholder="Max 9999">
+                <input type="number" id="custom-box-amount" class="custom-amount-input" min="1" max="99999999" value="1" placeholder="Max 99,999,999">
                 <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #3b82f6, #1d4ed8); border-color:#60a5fa;" onclick="game.buyCustomBox()">
-                    Open Custom
+                    Open Custom Boxes
                 </button>
             </div>
             <button class="modal-close" onclick="ui.closeModal('modal-box-store')">Close</button>
@@ -303,28 +297,28 @@
                     <div class="upgrade-title">⛏️ Dig Speed</div>
                     <div class="upgrade-desc" id="desc-dig">Lvl 1 (+1 💎/tap)</div>
                 </div>
-                <button class="upgrade-btn" id="btn-dig" onclick="game.upgradeSpeed()">10 🍞</button>
+                <button class="upgrade-btn" id="btn-dig" onclick="game.upgradeSpeed()">1,000 🍞</button>
             </div>
             <div class="upgrade-row">
                 <div class="upgrade-info">
                     <div class="upgrade-title">🤖 Auto-Miner</div>
                     <div class="upgrade-desc" id="desc-auto">Lvl 0 (0 💎/sec)</div>
                 </div>
-                <button class="upgrade-btn" id="btn-auto" onclick="game.upgradeAuto()">50 🍞</button>
+                <button class="upgrade-btn" id="btn-auto" onclick="game.upgradeAuto()">5,000 🍞</button>
             </div>
             <div class="upgrade-row">
                 <div class="upgrade-info">
                     <div class="upgrade-title">🏭 Bread Factory</div>
                     <div class="upgrade-desc" id="desc-factory">Lvl 0 (0 🍞/sec)</div>
                 </div>
-                <button class="upgrade-btn" id="btn-factory" style="background:#ea580c" onclick="game.upgradeFactory()">1,000 🍞</button>
+                <button class="upgrade-btn" id="btn-factory" style="background:#ea580c" onclick="game.upgradeFactory()">50,000 🍞</button>
             </div>
             <div class="upgrade-row">
                 <div class="upgrade-info">
                     <div class="upgrade-title">🗺️ Next Mine Area</div>
                     <div class="upgrade-desc" id="desc-mine">Massive multiplier!</div>
                 </div>
-                <button class="upgrade-btn" id="btn-mine" style="background:#ec4899" onclick="game.upgradeMine()">500 🍞</button>
+                <button class="upgrade-btn" id="btn-mine" style="background:#ec4899" onclick="game.upgradeMine()">100k 🍞</button>
             </div>
             <button class="modal-close" onclick="ui.closeModal('modal-upgrades')">Close</button>
         </div>
@@ -341,12 +335,12 @@
         </div>
     </div>
 
-    <!-- Mobile-Safe Fast Multi-Box Spinner -->
+    <!-- Multi-Box Visual Spinner -->
     <div id="modal-multi-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
         <div class="modal" style="width: 100%; max-width: 600px; background: transparent; border: none; box-shadow: none; padding: 0;">
             <h2 id="multi-roulette-title" style="font-size: 1.8rem; text-shadow: 0 2px 4px #000; margin-bottom: 15px;">Unboxing...</h2>
-            <div id="multi-roulette-grid" style="display: grid; gap: 4px; justify-content: center; align-content: center; max-height: 75vh; overflow-y: auto; padding: 10px;">
-            </div>
+            <div id="multi-roulette-grid" style="display: grid; gap: 4px; justify-content: center; align-content: center; max-height: 60vh; overflow-y: auto; padding: 10px;"></div>
+            <div id="multi-roulette-overflow" style="color: var(--secondary); font-weight: bold; margin-top: 10px; text-shadow: 0 2px 4px #000;"></div>
         </div>
     </div>
 
@@ -361,7 +355,7 @@
     <div id="modal-unlocked" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--secondary)">New Pigeon Unlocked!</h2>
-            <div id="preview-single-container" style="width: 100%; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; padding: 20px 0;"></div>
+            <div id="preview-single-container" style="width: 100%; background: radial-gradient(circle, #334155 0%, #0f172a 100%); border-radius: 12px; padding: 20px 0; display:flex; justify-content:center;"></div>
             <h3 id="unlocked-name" style="margin: 10px 0; font-size: 1.8rem;">???</h3>
             <p id="unlocked-desc">You got a new miner.</p>
             <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-unlocked'); ui.openInventory();">Equip & View</button>
@@ -402,50 +396,53 @@
         // --- GAME CONFIG & DATA ---
         const PIGEON_TYPES = {
             base: { id: 'base', name: 'Basic Pigeon', rarity: 'common', chance: 0, color: 'rarity-common', cost: 0, iconUrl: '' },
-            hat: { id: 'hat', name: 'Hat Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 10000, iconUrl: '' },
-            cool: { id: 'cool', name: 'Cool Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 10000, iconUrl: '' },
-            car: { id: 'car', name: 'Car Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
-            cat: { id: 'cat', name: 'Cat Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
-            pirate: { id: 'pirate', name: 'Pirate Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 50000, iconUrl: '' },
-            wolf: { id: 'wolf', name: 'Wolf Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            super: { id: 'super', name: 'Super Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            robot: { id: 'robot', name: 'Robot Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            ninja: { id: 'ninja', name: 'Ninja Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            wizard: { id: 'wizard', name: 'Wizard Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            cyborg: { id: 'cyborg', name: 'Cyborg Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            zombie: { id: 'zombie', name: 'Zombie Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 250000, iconUrl: '' },
-            worm: { id: 'worm', name: 'Realistic Worm', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            ghost: { id: 'ghost', name: 'Ghost Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            astronaut: { id: 'astronaut', name: 'Astro Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            alien: { id: 'alien', name: 'Alien Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            vampire: { id: 'vampire', name: 'Vamp Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            ice: { id: 'ice', name: 'Ice Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 5000000, iconUrl: '' },
-            golden: { id: 'golden', name: 'Golden Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 100000000, iconUrl: '' },
-            king: { id: 'king', name: 'King Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 100000000, iconUrl: '' },
-            dragon: { id: 'dragon', name: 'Dragon Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 100000000, iconUrl: '' },
-            angel: { id: 'angel', name: 'Angel Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 100000000, iconUrl: '' },
-            rainbow: { id: 'rainbow', name: 'Rainbow Pigeon', rarity: 'mythic', chance: 0.5, color: 'rarity-mythic', cost: 100000000, iconUrl: '' },
-            glitch: { id: 'glitch', name: 'Glitch Pigeon', rarity: 'mythic', chance: 0.1, color: 'rarity-mythic', cost: 500000000, iconUrl: '' },
-            dragon_wolf: { id: 'dragon_wolf', name: 'Dragon Wolf', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 1000000000, iconUrl: '' },
-            fire: { id: 'fire', name: 'Fire Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 1000000000, iconUrl: '' },
-            pixel: { id: 'pixel', name: 'Pixel Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 1000000000, iconUrl: '' },
-            godly_fire: { id: 'godly_fire', name: 'Godly Fire', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000, iconUrl: '' },
-            ozzie: { id: 'ozzie', name: 'Ozzie Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000, iconUrl: '' },
-            pepper: { id: 'pepper', name: 'Pepper Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000, iconUrl: '' }
+            hat: { id: 'hat', name: 'Hat Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 1000000, iconUrl: '' },
+            cool: { id: 'cool', name: 'Cool Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 1000000, iconUrl: '' },
+            car: { id: 'car', name: 'Car Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
+            cat: { id: 'cat', name: 'Cat Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
+            pirate: { id: 'pirate', name: 'Pirate Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
+            wolf: { id: 'wolf', name: 'Wolf Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            super: { id: 'super', name: 'Super Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            robot: { id: 'robot', name: 'Robot Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            ninja: { id: 'ninja', name: 'Ninja Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            wizard: { id: 'wizard', name: 'Wizard Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            cyborg: { id: 'cyborg', name: 'Cyborg Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            zombie: { id: 'zombie', name: 'Zombie Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+            worm: { id: 'worm', name: 'Realistic Worm', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            ghost: { id: 'ghost', name: 'Ghost Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            astronaut: { id: 'astronaut', name: 'Astro Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            alien: { id: 'alien', name: 'Alien Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            vampire: { id: 'vampire', name: 'Vamp Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            diamond: { id: 'diamond', name: 'Diamond Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+            golden: { id: 'golden', name: 'Golden Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            king: { id: 'king', name: 'King Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            dragon: { id: 'dragon', name: 'Dragon Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            angel: { id: 'angel', name: 'Angel Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            rainbow: { id: 'rainbow', name: 'Rainbow Pigeon', rarity: 'mythic', chance: 0.5, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            neon: { id: 'neon', name: 'Neon Pigeon', rarity: 'mythic', chance: 0.4, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            glitch: { id: 'glitch', name: 'Glitch Pigeon', rarity: 'mythic', chance: 0.1, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+            dragon_wolf: { id: 'dragon_wolf', name: 'Dragon Wolf', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
+            fire: { id: 'fire', name: 'Fire Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
+            pixel: { id: 'pixel', name: 'Pixel Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
+            void: { id: 'void', name: 'Void Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
+            godly_fire: { id: 'godly_fire', name: 'Godly Fire', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
+            ozzie: { id: 'ozzie', name: 'Ozzie Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
+            pepper: { id: 'pepper', name: 'Pepper Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
+            quantum: { id: 'quantum', name: 'Quantum Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' }
         };
 
         const MINES = [
             { name: "Diamond Mine", rockColor: 0x475569, crystalColor: 0x38bdf8, multiplier: 1, unlockCost: 0 },
-            { name: "Ruby Mine", rockColor: 0x2d3748, crystalColor: 0xf43f5e, multiplier: 5, unlockCost: 500 },
-            { name: "Emerald Mine", rockColor: 0x1a202c, crystalColor: 0x10b981, multiplier: 25, unlockCost: 2500 },
-            { name: "Amethyst Mine", rockColor: 0x1e1b4b, crystalColor: 0xa855f7, multiplier: 100, unlockCost: 10000 },
-            { name: "Obsidian Mine", rockColor: 0x111111, crystalColor: 0xf97316, multiplier: 500, unlockCost: 50000 },
-            { name: "Cosmic Mine", rockColor: 0x0f172a, crystalColor: 0xffffff, multiplier: 2500, unlockCost: 250000 },
+            { name: "Ruby Mine", rockColor: 0x2d3748, crystalColor: 0xf43f5e, multiplier: 5, unlockCost: 100000 },
+            { name: "Emerald Mine", rockColor: 0x1a202c, crystalColor: 0x10b981, multiplier: 25, unlockCost: 2500000 },
+            { name: "Amethyst Mine", rockColor: 0x1e1b4b, crystalColor: 0xa855f7, multiplier: 100, unlockCost: 50000000 },
+            { name: "Obsidian Mine", rockColor: 0x111111, crystalColor: 0xf97316, multiplier: 500, unlockCost: 1000000000 },
+            { name: "Cosmic Mine", rockColor: 0x0f172a, crystalColor: 0xffffff, multiplier: 2500, unlockCost: 50000000000 },
         ];
 
         const GAME_STATE = {
             bread: 0, diamonds: 0, digSpeed: 1, autoSpeed: 0, factoryLevel: 0, 
-            upgradeCost: 10, autoCost: 50, factoryCost: 1000, boxCost: 50,
+            upgradeCost: 1000, autoCost: 5000, factoryCost: 50000, boxCost: 5000,
             currentMine: 0, unlockedPigeons: ['base'], equippedPigeon: 'base',
             sellRate: 2, lastSaveTime: null
         };
@@ -457,12 +454,11 @@
         const engine = {
             scene: null, camera: null, renderer: null, pigeonGroup: null, 
             mineBlock: null, particles: [], isAnimatingMine: false, mineAnimationProgress: 0, clock: new THREE.Clock(),
-            textureCache: {}, fireCanvas: null, fireCtx: null, fireTex: null, iconScene: null, iconCamera: null,
+            textureCache: {}, fireCanvas: null, fireCtx: null, fireTex: null,
 
             init: function() {
                 try {
                     const container = document.getElementById('game-canvas');
-                    
                     let w = window.innerWidth || document.documentElement.clientWidth || window.screen.width;
                     let h = window.innerHeight || document.documentElement.clientHeight || window.screen.height;
 
@@ -474,12 +470,9 @@
                     this.camera.position.set(0, 4, 8);
                     this.camera.lookAt(0, 1, 0);
 
-                    // HIGHLY COMPATIBLE RENDERER - No ToneMapping, No preserved buffer
                     this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
                     this.renderer.setSize(w, h);
                     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-                    
-                    // Basic shadows for mobile performance
                     this.renderer.shadowMap.enabled = true;
                     this.renderer.shadowMap.type = THREE.PCFShadowMap; 
                     
@@ -496,10 +489,10 @@
                     const raycaster = new THREE.Raycaster();
                     const mouse = new THREE.Vector2();
 
-                    // TOUCH CATCHER FIX - Safest way to handle taps on Android
                     const catcher = document.getElementById('touch-catcher');
                     const handleTap = function(e) {
                         if(isSpinning) return;
+                        e.preventDefault(); 
                         
                         let clientX = e.clientX;
                         let clientY = e.clientY;
@@ -507,7 +500,7 @@
                             clientX = e.changedTouches[0].clientX;
                             clientY = e.changedTouches[0].clientY;
                         } else if(e.type.startsWith('touch')) {
-                            return; // Invalid touch
+                            return; 
                         }
                         
                         mouse.x = (clientX / window.innerWidth) * 2 - 1;
@@ -516,17 +509,15 @@
                         raycaster.setFromCamera(mouse, engine.camera);
                         const intersects = raycaster.intersectObject(engine.mineBlock, true);
                         if (intersects.length > 0 || (mouse.y > -0.3 && mouse.y < 0.6)) {
-                            e.preventDefault(); 
                             game.mine(clientX, clientY);
                         }
                     };
                     
-                    catcher.addEventListener('mousedown', handleTap);
+                    catcher.addEventListener('pointerdown', handleTap);
                     catcher.addEventListener('touchstart', handleTap, {passive: false});
 
                     document.getElementById('mine-hint').style.display = 'block';
 
-                    // Background generation of icons
                     setTimeout(function() { engine.generateIconsSafely(); }, 1000);
 
                 } catch(err) {
@@ -541,7 +532,6 @@
                 const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
                 dirLight.position.set(5, 10, 5);
                 dirLight.castShadow = true;
-                // Low res shadows for mobile safety
                 dirLight.shadow.mapSize.width = 512; 
                 dirLight.shadow.mapSize.height = 512;
                 dirLight.shadow.camera.top = 10; dirLight.shadow.camera.bottom = -10;
@@ -577,7 +567,6 @@
                 
                 const geo = new THREE.DodecahedronGeometry(1.5, 1);
                 const mat = new THREE.MeshStandardMaterial({ color: mineData.rockColor, roughness: 0.7, metalness: 0.2, flatShading: true });
-                if (mineData.name === "Cosmic Mine") { mat.emissive = new THREE.Color(0x111122); mat.metalness = 0.9; }
 
                 const baseRock = new THREE.Mesh(geo, mat);
                 baseRock.castShadow = true; baseRock.receiveShadow = true; baseRock.position.y = 1;
@@ -585,9 +574,7 @@
 
                 const crystalGeo = new THREE.ConeGeometry(0.4, 1.5, 4);
                 const crystalMat = new THREE.MeshStandardMaterial({
-                    color: mineData.crystalColor, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, flatShading: true,
-                    emissive: mineData.name === "Obsidian Mine" || mineData.name === "Cosmic Mine" ? mineData.crystalColor : 0x000000,
-                    emissiveIntensity: 0.8
+                    color: mineData.crystalColor, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, flatShading: true
                 });
 
                 for(let i=0; i<8; i++) {
@@ -660,6 +647,37 @@
                 return texture;
             },
 
+            generateQuantumTexture: function() {
+                if (this.textureCache['quantum']) return this.textureCache['quantum'];
+                const canvas = document.createElement('canvas');
+                canvas.width = 256; canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = "#05001a"; ctx.fillRect(0,0,256,256);
+                for(let i=0; i<200; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#00ffff';
+                    ctx.beginPath(); ctx.arc(Math.random()*256, Math.random()*256, Math.random()*2, 0, Math.PI*2); ctx.fill();
+                }
+                const texture = new THREE.CanvasTexture(canvas);
+                this.textureCache['quantum'] = texture;
+                return texture;
+            },
+
+            generateNeonTexture: function() {
+                if (this.textureCache['neon']) return this.textureCache['neon'];
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = "#111"; ctx.fillRect(0,0,128,128);
+                ctx.lineWidth = 4;
+                for(let i=0; i<10; i++) {
+                    ctx.strokeStyle = `hsl(${Math.random()*360}, 100%, 50%)`;
+                    ctx.beginPath(); ctx.moveTo(Math.random()*128, Math.random()*128); ctx.lineTo(Math.random()*128, Math.random()*128); ctx.stroke();
+                }
+                const texture = new THREE.CanvasTexture(canvas);
+                this.textureCache['neon'] = texture;
+                return texture;
+            },
+
             updateFireTexture: function() {
                 if (!this.fireCanvas) {
                     this.fireCanvas = document.createElement('canvas');
@@ -715,12 +733,15 @@
                 const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
                 const matGlitch = new THREE.MeshStandardMaterial({ map: this.generateGlitchTexture(), emissive: 0x222222 });
                 const matZombie = new THREE.MeshStandardMaterial({ map: texZombie, roughness: 1.0 });
-                const matIce = new THREE.MeshStandardMaterial({ color: 0xaaffff, transparent: true, opacity: 0.6, roughness: 0.1, metalness: 0.1 });
                 const matRainbow = new THREE.MeshStandardMaterial({ map: this.generateRainbowTexture(), roughness: 0.4 });
                 const matPixel = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8, flatShading: true });
                 const matOzzie = new THREE.MeshStandardMaterial({ map: texOzzie, roughness: 0.9 });
                 const matPepper = new THREE.MeshStandardMaterial({ map: texPepper, roughness: 1.0 });
-                
+                const matDiamond = new THREE.MeshStandardMaterial({ color: 0xaaffff, transparent: true, opacity: 0.7, roughness: 0.1, metalness: 0.5 });
+                const matVoid = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const matNeon = new THREE.MeshStandardMaterial({ map: this.generateNeonTexture(), emissive: 0x555555 });
+                const matQuantum = new THREE.MeshStandardMaterial({ map: this.generateQuantumTexture(), emissive: 0x05001a });
+
                 const matFire = new THREE.MeshStandardMaterial({ 
                     map: this.updateFireTexture(), transparent: true, opacity: 0.95
                 });
@@ -770,11 +791,14 @@
                     if (type === 'glitch') customMat = matGlitch;
                     if (type === 'cyborg') customMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9, roughness: 0.4 });
                     if (type === 'zombie') customMat = matZombie;
-                    if (type === 'ice') customMat = matIce;
+                    if (type === 'ice' || type === 'diamond') customMat = matDiamond;
                     if (type === 'rainbow') customMat = matRainbow;
                     if (type === 'fire' || type === 'godly_fire') customMat = matFire;
                     if (type === 'ozzie') customMat = matOzzie;
                     if (type === 'pepper') customMat = matPepper;
+                    if (type === 'void') customMat = matVoid;
+                    if (type === 'neon') customMat = matNeon;
+                    if (type === 'quantum') customMat = matQuantum;
                     
                     const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), customMat);
                     body.scale.set(0.9, 1.4, 0.9); body.rotation.x = Math.PI / 2; body.position.y = 0.6; body.castShadow = true;
@@ -783,7 +807,7 @@
                     const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 32), customMat);
                     head.position.set(0, 1.0, 0.4); head.castShadow = true; pigeonGroup.add(head);
 
-                    // --- ACCURATE WINGS ---
+                    // WINGS FOR ALL STANDARD BIRDS
                     const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel'];
                     if (noWings.indexOf(type) === -1) {
                         const wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
@@ -853,6 +877,7 @@
                         const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 16), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; pigeonGroup.add(t);
                     }
                     if (type === 'super') { 
+                        // FIXED SUPER CAPE (on the back now)
                         const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide})); 
                         c.position.set(0, 0.6, -0.6); c.rotation.x = -Math.PI / 4; pigeonGroup.add(c); 
                     }
@@ -891,47 +916,37 @@
                 return pigeonGroup;
             },
 
-            // ANDROID SAFE BACKGROUND GENERATOR
+            // ANDROID SAFE BACKGROUND ICON GENERATOR (Uses the single main engine!)
             generateIconsSafely: function() {
-                try {
-                    const size = 256; 
-                    const iconCanvas = document.createElement('canvas');
-                    iconCanvas.width = size; iconCanvas.height = size;
+                const keys = Object.keys(PIGEON_TYPES).filter(function(k) { return k !== 'base'; });
+                let index = 0;
+                
+                // Temporarily hide the main scene to render icons
+                engine.scene.remove(engine.mineBlock);
+                if(engine.pigeonGroup) engine.scene.remove(engine.pigeonGroup);
+
+                function processNext() {
+                    if (index >= keys.length) {
+                        // Restore main scene
+                        engine.scene.add(engine.mineBlock);
+                        if(engine.pigeonGroup) engine.scene.add(engine.pigeonGroup);
+                        return;
+                    }
                     
-                    const r = new THREE.WebGLRenderer({ canvas: iconCanvas, alpha: true, antialias: false });
-                    r.setPixelRatio(1);
-                    
-                    const scene = new THREE.Scene();
-                    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-                    camera.position.set(0, 0.4, 2.4);
-                    camera.lookAt(0, 0.1, 0);
-
-                    const amb = new THREE.AmbientLight(0xffffff, 0.8);
-                    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
-                    dir.position.set(5, 5, 5);
-                    scene.add(amb, dir);
-
-                    const keys = Object.keys(PIGEON_TYPES).filter(function(k) { return k !== 'base'; });
-                    let index = 0;
-                    const _this = this;
-
-                    function processNext() {
-                        if (index >= keys.length) {
-                            r.dispose(); 
-                            try{ r.forceContextLoss(); } catch(e){}
-                            return;
-                        }
+                    const key = keys[index];
+                    if (!PIGEON_TYPES[key].iconUrl) {
                         try {
-                            const key = keys[index];
-                            const p = _this.createPigeon(key);
+                            const p = engine.createPigeon(key);
                             p.position.set(0, -0.3, 0);
                             p.rotation.y = Math.PI + Math.PI / 8;
-                            scene.add(p);
+                            engine.scene.add(p);
                             
-                            r.render(scene, camera);
-                            PIGEON_TYPES[key].iconUrl = iconCanvas.toDataURL('image/png');
+                            // Render snapshot
+                            engine.renderer.render(engine.scene, engine.camera);
+                            PIGEON_TYPES[key].iconUrl = engine.renderer.domElement.toDataURL('image/png');
                             
-                            scene.remove(p);
+                            // Cleanup
+                            engine.scene.remove(p);
                             p.traverse(function(child) {
                                 if (child.geometry) child.geometry.dispose();
                                 if (child.material) {
@@ -939,15 +954,12 @@
                                     else child.material.dispose();
                                 }
                             });
-                        } catch(e) { }
-                        
-                        index++;
-                        setTimeout(processNext, 50); 
+                        } catch(e) {}
                     }
-                    processNext();
-                } catch(e) {
-                    console.error("Icon generator failed", e);
+                    index++;
+                    setTimeout(processNext, 50); // Small pause prevents WebView crash
                 }
+                processNext();
             },
 
             loadPigeonModel: function(type) {
@@ -1086,8 +1098,8 @@
             },
             onWindowResize: function() { 
                 if(!this.camera || !this.renderer) return;
-                const w = window.innerWidth || document.documentElement.clientWidth || window.screen.width;
-                const h = window.innerHeight || document.documentElement.clientHeight || window.screen.height;
+                let w = window.innerWidth || document.documentElement.clientWidth || window.screen.width;
+                let h = window.innerHeight || document.documentElement.clientHeight || window.screen.height;
                 this.camera.aspect = w / h; 
                 this.camera.updateProjectionMatrix(); 
                 this.renderer.setSize(w, h); 
@@ -1134,8 +1146,8 @@
 
             resetGame: function() {
                 GAME_STATE.bread = 0; GAME_STATE.diamonds = 0; GAME_STATE.digSpeed = 1;
-                GAME_STATE.autoSpeed = 0; GAME_STATE.factoryLevel = 0; GAME_STATE.upgradeCost = 10;
-                GAME_STATE.autoCost = 50; GAME_STATE.factoryCost = 1000; GAME_STATE.boxCost = 50;
+                GAME_STATE.autoSpeed = 0; GAME_STATE.factoryLevel = 0; GAME_STATE.upgradeCost = 1000;
+                GAME_STATE.autoCost = 5000; GAME_STATE.factoryCost = 50000; GAME_STATE.boxCost = 5000;
                 GAME_STATE.currentMine = 0; GAME_STATE.unlockedPigeons = ['base']; GAME_STATE.equippedPigeon = 'base';
                 GAME_STATE.sellRate = 2; GAME_STATE.lastSaveTime = null;
             },
@@ -1219,21 +1231,21 @@
             upgradeSpeed: function() {
                 if (GAME_STATE.bread >= GAME_STATE.upgradeCost) {
                     GAME_STATE.bread -= GAME_STATE.upgradeCost; GAME_STATE.digSpeed += 1;
-                    GAME_STATE.upgradeCost = Math.floor(GAME_STATE.upgradeCost * 1.5);
+                    GAME_STATE.upgradeCost = Math.floor(GAME_STATE.upgradeCost * 1.8);
                     ui.updateStats();
                 } else ui.showToast("Not enough Bread!");
             },
             upgradeAuto: function() {
                 if (GAME_STATE.bread >= GAME_STATE.autoCost) {
                     GAME_STATE.bread -= GAME_STATE.autoCost; GAME_STATE.autoSpeed += 1;
-                    GAME_STATE.autoCost = Math.floor(GAME_STATE.autoCost * 1.6);
+                    GAME_STATE.autoCost = Math.floor(GAME_STATE.autoCost * 2.0);
                     document.getElementById('mine-hint').style.display = 'none'; ui.updateStats();
                 } else ui.showToast("Not enough Bread!");
             },
             upgradeFactory: function() {
                 if (GAME_STATE.bread >= GAME_STATE.factoryCost) {
                     GAME_STATE.bread -= GAME_STATE.factoryCost; GAME_STATE.factoryLevel += 1;
-                    GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 1.8); ui.updateStats();
+                    GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 2.2); ui.updateStats();
                 } else ui.showToast("Not enough Bread!");
             },
             upgradeMine: function() {
@@ -1248,17 +1260,17 @@
 
             openBoxStore: function() {
                 document.getElementById('store-cost-1').innerText = `${ui.formatNumber(GAME_STATE.boxCost)} 🍞`;
-                document.getElementById('store-cost-5').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 5)} 🍞`;
                 document.getElementById('store-cost-10').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 10)} 🍞`;
-                document.getElementById('store-cost-50').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 50)} 🍞`;
                 document.getElementById('store-cost-100').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 100)} 🍞`;
+                document.getElementById('store-cost-1k').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 1000)} 🍞`;
+                document.getElementById('store-cost-10k').innerText = `${ui.formatNumber(GAME_STATE.boxCost * 10000)} 🍞`;
                 ui.openModal('modal-box-store');
             },
 
             buyCustomBox: function() {
                 let amount = parseInt(document.getElementById('custom-box-amount').value);
                 if(isNaN(amount) || amount <= 0) amount = 1;
-                if(amount > 9999) amount = 9999;
+                if(amount > 99999999) amount = 99999999;
                 this.buyBox(amount);
             },
 
@@ -1365,26 +1377,44 @@
             },
 
             executeMultiBoxes: function(amount) {
-                ui.showToast(`Unboxing ${amount} Pigeons...`);
+                ui.showToast(`Unboxing ${ui.formatNumber(amount)} Pigeons...`);
                 isSpinning = true;
                 
                 let totalWeight = 0;
                 for(const k in PIGEON_TYPES) if(k!=='base') totalWeight += PIGEON_TYPES[k].chance;
 
                 const wonTypes = [];
-                for(let i=0; i<amount; i++) {
-                    wonTypes.push(this.getRolledPigeon(totalWeight));
+                
+                // SAFE MATH UNBOXING FOR HUGE AMOUNTS (Up to 99M!)
+                if (amount > 10000) {
+                    for (const key in PIGEON_TYPES) {
+                        if (key === 'base') continue;
+                        const chance = PIGEON_TYPES[key].chance / totalWeight;
+                        const expected = amount * chance;
+                        const variance = expected * 0.1 * (Math.random() - 0.5);
+                        const actual = Math.floor(expected + variance);
+                        if (actual > 0) {
+                            if (GAME_STATE.unlockedPigeons.indexOf(key) === -1) GAME_STATE.unlockedPigeons.push(key);
+                            for(let j=0; j<Math.min(actual, 100); j++) wonTypes.push(key); // Cap visual array size
+                        }
+                    }
+                } else {
+                    for(let i=0; i<amount; i++) {
+                        const roll = this.getRolledPigeon(totalWeight);
+                        wonTypes.push(roll);
+                        if (GAME_STATE.unlockedPigeons.indexOf(roll) === -1) GAME_STATE.unlockedPigeons.push(roll);
+                    }
                 }
 
                 const container = document.getElementById('multi-roulette-grid');
                 container.innerHTML = '';
                 
-                // SAFE ANDROID ROULETTE: Limit DOM items so memory won't crash
+                // SAFE ANDROID ROULETTE: Display max 100 boxes on screen
                 const displayLimit = 100; 
-                const visualAmount = Math.min(amount, displayLimit);
+                const visualAmount = Math.min(wonTypes.length, displayLimit);
                 let size = visualAmount > 50 ? '30px' : (visualAmount > 10 ? '45px' : '60px');
                 container.style.gridTemplateColumns = `repeat(auto-fit, minmax(${size}, 1fr))`;
-                document.getElementById('multi-roulette-title').innerText = `Unboxing ${amount}x...`;
+                document.getElementById('multi-roulette-title').innerText = `Unboxing ${ui.formatNumber(amount)}x...`;
 
                 const validKeys = Object.keys(PIGEON_TYPES).filter(function(k){return k !== 'base'});
                 const visualBoxes = [];
@@ -1407,7 +1437,32 @@
                     visualBoxes.push({ img: img, finalType: wonTypes[i] });
                 }
 
+                if(amount > displayLimit) {
+                    document.getElementById('multi-roulette-overflow').innerText = `+${ui.formatNumber(amount - displayLimit)} more opened!`;
+                } else {
+                    document.getElementById('multi-roulette-overflow').innerText = ``;
+                }
+
                 ui.openModal('modal-multi-roulette');
+
+                // Skip full spin loop on 10k+ to instantly show results
+                if (amount >= 1000) {
+                    setTimeout(function() {
+                        visualBoxes.forEach(function(vb) {
+                            if(PIGEON_TYPES[vb.finalType].iconUrl) {
+                                vb.img.src = PIGEON_TYPES[vb.finalType].iconUrl;
+                                vb.img.style.animation = 'popIn 0.3s forwards';
+                            }
+                        });
+                        setTimeout(function() {
+                            isSpinning = false;
+                            ui.closeModal('modal-multi-roulette');
+                            ui.showUnlockModalMulti(wonTypes, amount);
+                            game.equipPigeon(wonTypes[wonTypes.length - 1]);
+                        }, 1500);
+                    }, 500);
+                    return;
+                }
 
                 let spins = 0;
                 const maxSpins = 20; 
@@ -1430,10 +1485,7 @@
                         setTimeout(function() {
                             isSpinning = false;
                             ui.closeModal('modal-multi-roulette');
-                            wonTypes.forEach(function(t) {
-                                if (GAME_STATE.unlockedPigeons.indexOf(t) === -1) GAME_STATE.unlockedPigeons.push(t);
-                            });
-                            ui.showUnlockModalMulti(wonTypes);
+                            ui.showUnlockModalMulti(wonTypes, amount);
                             game.equipPigeon(wonTypes[wonTypes.length - 1]);
                         }, 1500);
                     }
@@ -1575,23 +1627,23 @@
                 this.openModal('modal-unlocked');
             },
 
-            showUnlockModalMulti: function(types) {
+            showUnlockModalMulti: function(types, amount) {
                 const namesContainer = document.getElementById('unlocked-multi-names');
                 namesContainer.innerHTML = '';
                 
-                document.getElementById('unlocked-multi-title-post').innerText = `${types.length}x Pigeons Unlocked!`;
+                document.getElementById('unlocked-multi-title-post').innerText = `${ui.formatNumber(amount)}x Pigeons Unlocked!`;
 
                 let counts = {silent:0, secret:0, mythic:0, legendary:0, epic:0, rare:0, common:0};
                 types.forEach(function(t) { counts[PIGEON_TYPES[t].rarity]++; });
                 
                 let summaryHTML = `<div style="width:100%; text-align:center; line-height:1.5;">`;
-                if(counts.silent>0) summaryHTML += `<span class="rarity-silent" style="font-size:1.4rem;">SILENT: ${counts.silent}</span><br>`;
-                if(counts.secret>0) summaryHTML += `<span class="rarity-secret" style="font-size:1.2rem;">SECRET: ${counts.secret}</span><br>`;
-                if(counts.mythic>0) summaryHTML += `<span class="rarity-mythic">Mythic: ${counts.mythic}</span><br>`;
-                if(counts.legendary>0) summaryHTML += `<span class="rarity-legendary">Legendary: ${counts.legendary}</span><br>`;
-                if(counts.epic>0) summaryHTML += `<span class="rarity-epic">Epic: ${counts.epic}</span><br>`;
-                if(counts.rare>0) summaryHTML += `<span class="rarity-rare">Rare: ${counts.rare}</span><br>`;
-                if(counts.common>0) summaryHTML += `<span class="rarity-common">Common: ${counts.common}</span>`;
+                if(counts.silent>0) summaryHTML += `<span class="rarity-silent" style="font-size:1.4rem;">SILENT: ${ui.formatNumber(counts.silent)}</span><br>`;
+                if(counts.secret>0) summaryHTML += `<span class="rarity-secret" style="font-size:1.2rem;">SECRET: ${ui.formatNumber(counts.secret)}</span><br>`;
+                if(counts.mythic>0) summaryHTML += `<span class="rarity-mythic">Mythic: ${ui.formatNumber(counts.mythic)}</span><br>`;
+                if(counts.legendary>0) summaryHTML += `<span class="rarity-legendary">Legendary: ${ui.formatNumber(counts.legendary)}</span><br>`;
+                if(counts.epic>0) summaryHTML += `<span class="rarity-epic">Epic: ${ui.formatNumber(counts.epic)}</span><br>`;
+                if(counts.rare>0) summaryHTML += `<span class="rarity-rare">Rare: ${ui.formatNumber(counts.rare)}</span><br>`;
+                if(counts.common>0) summaryHTML += `<span class="rarity-common">Common: ${ui.formatNumber(counts.common)}</span>`;
                 summaryHTML += `</div>`;
                 namesContainer.innerHTML = summaryHTML;
 
@@ -1606,7 +1658,7 @@
                 });
                 
                 if (types.length > 10) {
-                    previewContainer.innerHTML += `<div style="width:100%; text-align:center; color:#cbd5e1; font-weight:bold; margin-top:10px;">...and ${types.length - 10} more!</div>`;
+                    previewContainer.innerHTML += `<div style="width:100%; text-align:center; color:#cbd5e1; font-weight:bold; margin-top:10px;">...and ${ui.formatNumber(types.length - 10)} more!</div>`;
                 }
 
                 this.openModal('modal-unlocked-multi');
