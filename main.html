@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pigeon Miner 3D</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --primary: #facc15; /* Bread color */
-            --secondary: #38bdf8; /* Diamond color */
+            --primary: #facc15; 
+            --secondary: #38bdf8; 
             --dark: #1e293b;
             --panel: rgba(30, 41, 59, 0.85);
             --text: #f8fafc;
@@ -18,14 +18,16 @@
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEEB; /* Sky blue fallback */
+            background-color: #87CEEB; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none; /* Prevent default scroll/zoom on mobile */
+            touch-action: none; 
         }
 
         #game-canvas {
@@ -45,10 +47,11 @@
             width: 100%;
             height: 100%;
             z-index: 10;
-            pointer-events: none; /* Let clicks pass through to canvas when not on UI */
+            pointer-events: none; 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         /* Top Stats Bar */
@@ -62,80 +65,77 @@
         .stat-box {
             background: var(--panel);
             backdrop-filter: blur(5px);
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 20px;
             color: var(--text);
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 2px solid rgba(255,255,255,0.1);
         }
 
-        .icon-bread { color: var(--primary); }
-        .icon-diamond { color: var(--secondary); }
-
-        /* Bottom Controls */
-        .bottom-controls {
-            padding: 15px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        /* Mobile Optimized Bottom Controls */
+        .bottom-action-bar {
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0));
+            padding: 20px 10px 15px 10px;
             pointer-events: auto;
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-            max-height: 40vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .full-width { grid-column: 1 / -1; }
-
-        button {
-            background: linear-gradient(145deg, #334155, #1e293b);
-            border: 2px solid #475569;
+        .btn-sell-big {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            border: 2px solid #fcd34d;
             color: white;
-            padding: 10px 8px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: bold;
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.1s, filter 0.1s;
+            transition: transform 0.1s;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .btn-sell-big:active { transform: scale(0.96); }
+        .btn-sell-big .sub { font-size: 0.8rem; opacity: 0.9; font-weight: normal; margin-top: 4px; }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: #334155;
+            border: 1px solid #475569;
+            color: white;
+            padding: 10px 5px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s;
         }
+        .nav-btn:active { background: #1e293b; transform: translateY(2px); }
+        .nav-btn span { font-size: 1.2rem; } /* Icon size */
 
-        button:active {
-            transform: translateY(2px);
-            filter: brightness(0.8);
-        }
-
-        button span.sub {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        .btn-sell { border-color: var(--primary); }
-        .btn-upgrade { border-color: #4ade80; }
-        .btn-box { border-color: #c084fc; background: linear-gradient(145deg, #6b21a8, #4c1d95); }
-        .btn-auto { border-color: #f59e0b; }
-        .btn-factory { border-color: #ea580c; }
-        .btn-mine { border-color: #ec4899; }
-
-        /* Modals & Notifications */
+        /* Modals */
         .modal-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             z-index: 100;
             display: none;
             justify-content: center;
@@ -148,99 +148,102 @@
             border: 2px solid #475569;
             border-radius: 20px;
             padding: 20px;
-            width: 90%;
+            width: 92%;
             max-width: 400px;
             color: white;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            max-height: 80vh;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            max-height: 85vh;
             overflow-y: auto;
+            position: relative;
         }
 
-        .modal h2 { margin-top: 0; color: var(--primary); }
-        .modal p { color: #cbd5e1; line-height: 1.5; }
-        .modal-close { margin-top: 15px; width: 100%; background: #ef4444; border-color: #dc2626; }
+        .modal h2 { margin-top: 0; color: var(--primary); font-size: 1.4rem; }
+        .modal-close { 
+            margin-top: 15px; width: 100%; padding: 12px;
+            background: #ef4444; border: none; border-radius: 12px;
+            color: white; font-weight: bold; font-size: 1rem;
+        }
 
-        /* Notification Toast */
+        /* Upgrades Menu Layout */
+        .upgrade-row {
+            background: #334155; border: 1px solid #475569; border-radius: 12px;
+            padding: 12px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            text-align: left;
+        }
+        .upgrade-info { flex: 1; }
+        .upgrade-title { font-weight: bold; font-size: 1rem; color: #f8fafc; }
+        .upgrade-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+        .upgrade-btn {
+            background: #22c55e; border: none; border-radius: 8px; padding: 8px 12px;
+            color: white; font-weight: bold; font-size: 0.9rem; margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .upgrade-btn:active { background: #16a34a; transform: scale(0.95); }
+
+        /* CS2 Style Roulette */
+        .roulette-container {
+            width: 100%; height: 120px; overflow: hidden; position: relative;
+            background: #0f172a; border: 3px solid #334155; border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        .roulette-selector {
+            position: absolute; top: 0; left: 50%; width: 4px; height: 100%;
+            background: #facc15; transform: translateX(-50%); z-index: 5;
+            box-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
+            border-radius: 2px;
+        }
+        .roulette-strip {
+            display: flex; height: 100%; width: max-content;
+            /* Transition applied via JS */
+        }
+        .roulette-item {
+            width: 90px; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; border-right: 1px solid #334155;
+            font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+        }
+
+        /* Utilities */
         #toast {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 50;
-            pointer-events: none;
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-weight: bold; opacity: 0; transition: opacity 0.3s;
+            z-index: 50; pointer-events: none;
         }
-
-        /* Floating Text for mining */
         .floating-text {
-            position: absolute;
-            color: var(--secondary);
-            font-weight: bold;
-            font-size: 1.5rem;
-            pointer-events: none;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            animation: floatUp 1s ease-out forwards;
-            z-index: 5;
+            position: absolute; color: var(--secondary); font-weight: bold; font-size: 1.5rem;
+            pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: floatUp 1s ease-out forwards; z-index: 5;
         }
-
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
         }
+        #mine-hint {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.7); font-size: 1.5rem; pointer-events: none;
+            animation: pulse 2s infinite; text-align: center; width: 100%; font-weight: bold;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.95); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.95); }
+        }
 
         /* Inventory Grid */
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .inv-item {
-            background: #334155;
-            border: 2px solid #475569;
-            border-radius: 10px;
-            padding: 10px 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .inv-item.active { border-color: #4ade80; background: #166534; }
-        .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+        .inv-item { background: #334155; border: 2px solid #475569; border-radius: 10px; padding: 8px 4px; cursor: pointer; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .inv-item.active { border-color: #4ade80; background: #166534; box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.5); }
+        .inv-item.locked { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
 
         .rarity-common { color: #cbd5e1; }
         .rarity-rare { color: #38bdf8; }
         .rarity-epic { color: #c084fc; }
         .rarity-legendary { color: #facc15; text-shadow: 0 0 5px rgba(250, 204, 21, 0.5); }
         .rarity-mythic { color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.8); }
-        
-        #mine-hint {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.7);
-            font-size: 1.5rem;
-            pointer-events: none;
-            animation: pulse 2s infinite;
-            text-align: center;
-            width: 100%;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
-            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
-            100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
-        }
 
     </style>
 </head>
@@ -250,82 +253,108 @@
 
     <div id="ui-layer">
         <div class="top-bar">
-            <div class="stat-box">
-                <span class="icon-bread">🍞</span>
-                <span id="bread-display">0</span>
-            </div>
-            <div class="stat-box">
-                <span class="icon-diamond">💎</span>
-                <span id="diamond-display">0</span>
-            </div>
+            <div class="stat-box"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
+            <div class="stat-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
         </div>
 
-        <div id="mine-hint">TAP ROCK TO MINE</div>
+        <div id="mine-hint">TAP TO MINE</div>
 
-        <div class="bottom-controls">
-            <button class="btn-sell full-width" onclick="game.sellDiamonds()">
-                Sell Stones
-                <span class="sub" id="sell-rate-display">1 💎 = 2 🍞</span>
+        <div class="bottom-action-bar">
+            <button class="btn-sell-big" onclick="game.sellDiamonds()">
+                SELL STONES
+                <span class="sub" id="sell-rate-display">Multiplier: x1</span>
             </button>
-            <button class="btn-upgrade" onclick="game.upgradeSpeed()">
-                Upgrade Dig Speed
-                <span class="sub" id="upgrade-cost-display">Cost: 10 🍞 (Lvl 1)</span>
-            </button>
-            <button class="btn-auto" onclick="game.upgradeAuto()">
-                Buy Auto-Miner
-                <span class="sub" id="auto-cost-display">Cost: 50 🍞 (0/sec)</span>
-            </button>
-            <button class="btn-factory full-width" onclick="game.upgradeFactory()">
-                🏭 Buy Bread Factory
-                <span class="sub" id="factory-cost-display">Cost: 1000 🍞 (0/sec)</span>
-            </button>
-            <button class="btn-mine" onclick="game.upgradeMine()">
-                Next Mine Area
-                <span class="sub" id="mine-cost-display">Cost: 500 🍞</span>
-            </button>
-            <button class="btn-box" onclick="game.buyBox()">
-                🎁 Buy Mystery Box
-                <span class="sub" id="box-cost-display">Cost: 50 🍞</span>
-            </button>
-            <button class="btn-mine" onclick="ui.openSaveModal()">
-                💾 Save Slots
-                <span class="sub">Switch or Delete</span>
-            </button>
-            <button class="full-width" onclick="ui.openInventory()">
-                🐦 Pigeon Collection
-            </button>
+            <div class="nav-grid">
+                <button class="nav-btn" onclick="ui.openModal('modal-upgrades')"><span>⬆️</span> Upgrades</button>
+                <button class="nav-btn" onclick="game.startRoulette()"><span>🎁</span> Box <span style="font-size: 0.7rem" id="box-cost-nav">50🍞</span></button>
+                <button class="nav-btn" onclick="ui.openInventory()"><span>🐦</span> Pigeons</button>
+                <button class="nav-btn" onclick="ui.openSaveModal()"><span>💾</span> Saves</button>
+            </div>
         </div>
     </div>
 
     <!-- Modals -->
     <div id="toast">Message</div>
 
-    <div id="modal-saves" class="modal-overlay">
+    <!-- Upgrades Modal -->
+    <div id="modal-upgrades" class="modal-overlay">
         <div class="modal">
-            <h2>Save Slots</h2>
-            <div id="save-slots-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <!-- Populated by JS -->
+            <h2>Upgrades & Factory</h2>
+            
+            <div class="upgrade-row">
+                <div class="upgrade-info">
+                    <div class="upgrade-title">⛏️ Dig Speed</div>
+                    <div class="upgrade-desc" id="desc-dig">Lvl 1 (+1 💎/tap)</div>
+                </div>
+                <button class="upgrade-btn" id="btn-dig" onclick="game.upgradeSpeed()">10 🍞</button>
             </div>
-            <button class="modal-close" onclick="ui.closeModal('modal-saves')">Close</button>
+
+            <div class="upgrade-row">
+                <div class="upgrade-info">
+                    <div class="upgrade-title">🤖 Auto-Miner</div>
+                    <div class="upgrade-desc" id="desc-auto">Lvl 0 (0 💎/sec)</div>
+                </div>
+                <button class="upgrade-btn" id="btn-auto" onclick="game.upgradeAuto()">50 🍞</button>
+            </div>
+
+            <div class="upgrade-row">
+                <div class="upgrade-info">
+                    <div class="upgrade-title">🏭 Bread Factory</div>
+                    <div class="upgrade-desc" id="desc-factory">Lvl 0 (0 🍞/sec)</div>
+                </div>
+                <button class="upgrade-btn" id="btn-factory" style="background:#ea580c" onclick="game.upgradeFactory()">1000 🍞</button>
+            </div>
+
+            <div class="upgrade-row">
+                <div class="upgrade-info">
+                    <div class="upgrade-title">🗺️ Next Mine Area</div>
+                    <div class="upgrade-desc" id="desc-mine">Massive multiplier boost!</div>
+                </div>
+                <button class="upgrade-btn" id="btn-mine" style="background:#ec4899" onclick="game.upgradeMine()">500 🍞</button>
+            </div>
+
+            <button class="modal-close" onclick="ui.closeModal('modal-upgrades')">Close</button>
         </div>
     </div>
 
+    <!-- Roulette Modal -->
+    <div id="modal-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
+        <div class="modal" style="width: 100%; background: transparent; border: none; box-shadow: none; padding: 0;">
+            <h2 style="font-size: 2rem; text-shadow: 0 2px 4px #000;">Unboxing...</h2>
+            <div class="roulette-container">
+                <div class="roulette-selector"></div>
+                <div class="roulette-strip" id="roulette-strip">
+                    <!-- JS fills this -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pigeon Collection -->
     <div id="modal-inventory" class="modal-overlay">
         <div class="modal">
             <h2>Pigeon Collection</h2>
-            <div class="inventory-grid" id="inventory-grid">
-                <!-- Populated by JS -->
-            </div>
+            <div class="inventory-grid" id="inventory-grid"></div>
             <button class="modal-close" onclick="ui.closeModal('modal-inventory')">Close</button>
         </div>
     </div>
 
+    <!-- Unlocked Info -->
     <div id="modal-unlocked" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--secondary)">New Pigeon Unlocked!</h2>
-            <h3 id="unlocked-name" style="margin: 10px 0; font-size: 1.5rem;">???</h3>
+            <h3 id="unlocked-name" style="margin: 10px 0; font-size: 1.8rem;">???</h3>
             <p id="unlocked-desc">You got a new miner.</p>
-            <button class="btn-upgrade" style="width:100%; margin-top:15px;" onclick="ui.closeModal('modal-unlocked'); ui.openInventory();">View Collection</button>
+            <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-unlocked'); ui.openInventory();">Equip & View</button>
+        </div>
+    </div>
+
+    <!-- Save Slots -->
+    <div id="modal-saves" class="modal-overlay">
+        <div class="modal">
+            <h2>Save Slots</h2>
+            <div id="save-slots-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;"></div>
+            <button class="modal-close" onclick="ui.closeModal('modal-saves')">Close</button>
         </div>
     </div>
 
@@ -334,7 +363,7 @@
             <h2 style="color: var(--primary)">Welcome Back!</h2>
             <p>Your pigeons kept working while you were away!</p>
             <p id="offline-stats" style="font-weight:bold; font-size:1.1rem; color:var(--secondary); line-height: 1.6;"></p>
-            <button class="btn-upgrade" style="width:100%; margin-top:15px;" onclick="ui.closeModal('modal-offline')">Awesome!</button>
+            <button class="modal-close" style="background:#22c55e" onclick="ui.closeModal('modal-offline')">Awesome!</button>
         </div>
     </div>
 
@@ -375,7 +404,7 @@
             diamonds: 0,
             digSpeed: 1,
             autoSpeed: 0,
-            factoryLevel: 0, // Generates passive bread
+            factoryLevel: 0, 
             upgradeCost: 10,
             autoCost: 50,
             factoryCost: 1000,
@@ -388,26 +417,18 @@
         };
 
         let CURRENT_SLOT = 1;
+        let isSpinning = false; // Prevents interacting while roulette spins
 
         // --- THREE.JS ENGINE ---
         const engine = {
-            scene: null,
-            camera: null,
-            renderer: null,
-            pigeonGroup: null, 
-            mineBlock: null,
-            particles: [],
-            isAnimatingMine: false,
-            mineAnimationProgress: 0,
-            clock: new THREE.Clock(),
+            scene: null, camera: null, renderer: null, pigeonGroup: null, 
+            mineBlock: null, particles: [], isAnimatingMine: false, mineAnimationProgress: 0, clock: new THREE.Clock(),
 
             init: function() {
                 const container = document.getElementById('game-canvas');
-                
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x87CEEB);
                 this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.02);
-
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
                 this.camera.position.set(0, 4, 8);
                 this.camera.lookAt(0, 1, 0);
@@ -430,6 +451,7 @@
                 const mouse = new THREE.Vector2();
 
                 const handleTap = (event) => {
+                    if(isSpinning) return;
                     if(event.target.tagName === 'BUTTON' || event.target.closest('#ui-layer > div')) return;
 
                     let clientX, clientY;
@@ -447,47 +469,35 @@
                     raycaster.setFromCamera(mouse, this.camera);
                     
                     const intersects = raycaster.intersectObject(this.mineBlock, true);
-                    
                     if (intersects.length > 0) {
                         game.mine(clientX, clientY);
-                    } else {
-                        if (mouse.y > -0.5 && mouse.y < 0.5) {
-                            game.mine(clientX, clientY);
-                        }
+                    } else if (mouse.y > -0.5 && mouse.y < 0.5) {
+                        game.mine(clientX, clientY);
                     }
                 };
 
                 window.addEventListener('mousedown', handleTap);
                 window.addEventListener('touchstart', handleTap, {passive: false});
-
                 document.getElementById('mine-hint').style.display = 'block';
             },
 
             setupLighting: function() {
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
                 this.scene.add(ambientLight);
-
                 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
                 dirLight.position.set(5, 10, 5);
                 dirLight.castShadow = true;
-                dirLight.shadow.camera.top = 10;
-                dirLight.shadow.camera.bottom = -10;
-                dirLight.shadow.camera.left = -10;
-                dirLight.shadow.camera.right = 10;
+                dirLight.shadow.camera.top = 10; dirLight.shadow.camera.bottom = -10;
+                dirLight.shadow.camera.left = -10; dirLight.shadow.camera.right = 10;
                 dirLight.shadow.bias = -0.001;
                 this.scene.add(dirLight);
             },
 
             setupEnvironment: function() {
                 const groundGeo = new THREE.PlaneGeometry(50, 50);
-                const groundMat = new THREE.MeshStandardMaterial({ 
-                    color: 0x3d2817,
-                    roughness: 1,
-                    metalness: 0
-                });
+                const groundMat = new THREE.MeshStandardMaterial({ color: 0x3d2817, roughness: 1, metalness: 0 });
                 const ground = new THREE.Mesh(groundGeo, groundMat);
-                ground.rotation.x = -Math.PI / 2;
-                ground.receiveShadow = true;
+                ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
                 this.scene.add(ground);
 
                 const rockGeo = new THREE.DodecahedronGeometry(0.5);
@@ -503,95 +513,57 @@
             },
 
             buildMine: function(mineIndex = 0) {
-                if (this.mineBlock) {
-                    this.scene.remove(this.mineBlock);
-                }
-
+                if (this.mineBlock) this.scene.remove(this.mineBlock);
                 const mineData = MINES[mineIndex];
                 this.mineBlock = new THREE.Group();
                 
                 const geo = new THREE.DodecahedronGeometry(1.5, 1);
-                const mat = new THREE.MeshStandardMaterial({ 
-                    color: mineData.rockColor,
-                    roughness: 0.7,
-                    metalness: 0.2,
-                    flatShading: true
-                });
-                
-                if (mineData.name === "Cosmic Mine") {
-                    mat.emissive = new THREE.Color(0x111122);
-                    mat.metalness = 0.9;
-                }
+                const mat = new THREE.MeshStandardMaterial({ color: mineData.rockColor, roughness: 0.7, metalness: 0.2, flatShading: true });
+                if (mineData.name === "Cosmic Mine") { mat.emissive = new THREE.Color(0x111122); mat.metalness = 0.9; }
 
                 const baseRock = new THREE.Mesh(geo, mat);
-                baseRock.castShadow = true;
-                baseRock.receiveShadow = true;
-                baseRock.position.y = 1;
+                baseRock.castShadow = true; baseRock.receiveShadow = true; baseRock.position.y = 1;
                 this.mineBlock.add(baseRock);
 
                 const crystalGeo = new THREE.ConeGeometry(0.4, 1.5, 4);
                 const crystalMat = new THREE.MeshStandardMaterial({
-                    color: mineData.crystalColor,
-                    roughness: 0.1,
-                    metalness: 0.8,
-                    transparent: true,
-                    opacity: 0.9,
-                    flatShading: true,
+                    color: mineData.crystalColor, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, flatShading: true,
                     emissive: mineData.name === "Obsidian Mine" || mineData.name === "Cosmic Mine" ? mineData.crystalColor : 0x000000,
                     emissiveIntensity: 0.4
                 });
 
                 for(let i=0; i<6; i++) {
                     const crystal = new THREE.Mesh(crystalGeo, crystalMat);
-                    crystal.position.set(
-                        (Math.random() - 0.5) * 1.5,
-                        1 + Math.random(),
-                        (Math.random() - 0.5) * 1.5
-                    );
+                    crystal.position.set((Math.random() - 0.5) * 1.5, 1 + Math.random(), (Math.random() - 0.5) * 1.5);
                     crystal.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
                     this.mineBlock.add(crystal);
                 }
-
                 this.mineBlock.position.set(0, 0, -2);
                 this.scene.add(this.mineBlock);
             },
 
             generateTexture: function(baseColor, accentColor, isWorm = false) {
                 const canvas = document.createElement('canvas');
-                canvas.width = 256;
-                canvas.height = 256;
+                canvas.width = 256; canvas.height = 256;
                 const ctx = canvas.getContext('2d');
-                
-                ctx.fillStyle = baseColor;
-                ctx.fillRect(0, 0, 256, 256);
+                ctx.fillStyle = baseColor; ctx.fillRect(0, 0, 256, 256);
                 
                 for(let i = 0; i < 800; i++) {
-                    ctx.fillStyle = accentColor;
-                    ctx.globalAlpha = Math.random() * 0.4;
-                    const x = Math.random() * 256;
-                    const y = Math.random() * 256;
-                    
+                    ctx.fillStyle = accentColor; ctx.globalAlpha = Math.random() * 0.4;
+                    const x = Math.random() * 256; const y = Math.random() * 256;
                     ctx.beginPath();
-                    if (isWorm) {
-                        ctx.ellipse(x, y, Math.random() * 20 + 10, Math.random() * 2 + 1, 0, 0, Math.PI * 2);
-                    } else {
-                        ctx.ellipse(x, y, Math.random() * 8 + 4, Math.random() * 3 + 1, Math.random() * Math.PI, 0, Math.PI * 2);
-                    }
+                    if (isWorm) ctx.ellipse(x, y, Math.random() * 20 + 10, Math.random() * 2 + 1, 0, 0, Math.PI * 2);
+                    else ctx.ellipse(x, y, Math.random() * 8 + 4, Math.random() * 3 + 1, Math.random() * Math.PI, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                
                 const texture = new THREE.CanvasTexture(canvas);
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
+                texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
                 texture.repeat.set(isWorm ? 1 : 2, isWorm ? 1 : 2);
                 return texture;
             },
 
             loadPigeonModel: function(type) {
-                if (this.pigeonGroup) {
-                    this.scene.remove(this.pigeonGroup);
-                }
-
+                if (this.pigeonGroup) this.scene.remove(this.pigeonGroup);
                 this.pigeonGroup = new THREE.Group();
                 this.pigeonGroup.position.set(0, 0, 1.5);
                 
@@ -611,55 +583,27 @@
                 const matDragon = new THREE.MeshStandardMaterial({ map: texDragon, roughness: 0.8, metalness: 0.3 });
 
                 if (type === 'worm') {
-                    const segments = 8;
-                    for (let i = 0; i < segments; i++) {
-                        const segGeo = new THREE.SphereGeometry(0.3 - (i*0.02), 16, 16);
-                        const seg = new THREE.Mesh(segGeo, matPink);
-                        seg.position.z = -i * 0.4 + 1.5;
-                        seg.position.y = 0.3 + Math.sin(i * 0.5) * 0.1;
-                        seg.castShadow = true;
+                    for (let i = 0; i < 8; i++) {
+                        const seg = new THREE.Mesh(new THREE.SphereGeometry(0.3 - (i*0.02), 16, 16), matPink);
+                        seg.position.z = -i * 0.4 + 1.5; seg.position.y = 0.3 + Math.sin(i * 0.5) * 0.1; seg.castShadow = true;
                         this.pigeonGroup.add(seg);
-                        
                         if (i === 0) {
-                            const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                            eye1.position.set(0.1, 0.1, 0.25);
-                            const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                            eye2.position.set(-0.1, 0.1, 0.25);
-                            const beak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 4), matBeak);
-                            beak.rotation.x = Math.PI / 2;
-                            beak.position.set(0, 0, 0.3);
-                            seg.add(eye1, eye2, beak);
+                            const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); e1.position.set(0.1, 0.1, 0.25);
+                            const e2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); e2.position.set(-0.1, 0.1, 0.25);
+                            const beak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 4), matBeak); beak.rotation.x = Math.PI / 2; beak.position.set(0, 0, 0.3);
+                            seg.add(e1, e2, beak);
                         }
                     }
-                    this.pigeonGroup.rotation.y = Math.PI; 
                 } else if (type === 'car') {
-                    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.5), matGrey);
-                    body.position.y = 0.6;
-                    body.castShadow = true;
-                    this.pigeonGroup.add(body);
-
-                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), matGrey);
-                    head.position.set(0, 1.1, 0.7);
-                    this.pigeonGroup.add(head);
-
-                    const wheelGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16);
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.5), matGrey); body.position.y = 0.6; body.castShadow = true; this.pigeonGroup.add(body);
+                    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), matGrey); head.position.set(0, 1.1, 0.7); this.pigeonGroup.add(head);
                     const matWheel = new THREE.MeshStandardMaterial({color: 0x111111});
-                    const positions = [
-                        [0.6, 0.25, 0.5], [-0.6, 0.25, 0.5],
-                        [0.6, 0.25, -0.5], [-0.6, 0.25, -0.5]
-                    ];
-                    positions.forEach(pos => {
-                        const wheel = new THREE.Mesh(wheelGeo, matWheel);
-                        wheel.rotation.z = Math.PI / 2;
-                        wheel.position.set(...pos);
-                        wheel.castShadow = true;
-                        this.pigeonGroup.add(wheel);
+                    [[0.6, 0.25, 0.5], [-0.6, 0.25, 0.5], [0.6, 0.25, -0.5], [-0.6, 0.25, -0.5]].forEach(pos => {
+                        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16), matWheel);
+                        wheel.rotation.z = Math.PI / 2; wheel.position.set(...pos); wheel.castShadow = true; this.pigeonGroup.add(wheel);
                     });
-                    
                     this.addFace(head, matEye, matBeak);
-                    this.pigeonGroup.rotation.y = Math.PI;
                 } else {
-                    // Base Bird structure
                     let customMat = matGrey;
                     if (type === 'wolf') customMat = matDarkGrey;
                     if (type === 'robot') customMat = new THREE.MeshStandardMaterial({ color: 0xa3a3a3, metalness: 0.8, roughness: 0.2 });
@@ -670,193 +614,91 @@
                     if (type === 'astronaut') customMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
                     if (type === 'dragon') customMat = matDragon;
                     
-                    const bodyGeo = new THREE.SphereGeometry(0.45, 16, 16);
-                    const body = new THREE.Mesh(bodyGeo, customMat);
-                    body.scale.set(0.9, 1.4, 0.9);
-                    body.rotation.x = Math.PI / 2;
-                    body.position.y = 0.6;
-                    body.castShadow = true;
+                    const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), customMat);
+                    body.scale.set(0.9, 1.4, 0.9); body.rotation.x = Math.PI / 2; body.position.y = 0.6; body.castShadow = true;
                     this.pigeonGroup.add(body);
 
                     const head = new THREE.Mesh(new THREE.SphereGeometry(0.3), customMat);
-                    head.position.set(0, 1.0, 0.4);
-                    head.castShadow = true;
-                    this.pigeonGroup.add(head);
+                    head.position.set(0, 1.0, 0.4); head.castShadow = true; this.pigeonGroup.add(head);
 
-                    // Custom Faces
                     if (type === 'wolf') {
-                        const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.3), matDarkGrey);
-                        snout.rotation.x = Math.PI / 2;
-                        snout.position.set(0, 0, 0.3);
-                        head.add(snout);
-                        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                        nose.position.set(0, 0, 0.15);
-                        snout.add(nose);
-                        const earGeo = new THREE.ConeGeometry(0.1, 0.3, 4);
-                        const ear1 = new THREE.Mesh(earGeo, matDarkGrey);
-                        ear1.position.set(0.2, 0.3, -0.1);
-                        const ear2 = new THREE.Mesh(earGeo, matDarkGrey);
-                        ear2.position.set(-0.2, 0.3, -0.1);
-                        head.add(ear1, ear2);
-                        this.addEyesOnly(head, matEye);
+                        const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.3), matDarkGrey); snout.rotation.x = Math.PI / 2; snout.position.set(0, 0, 0.3); head.add(snout);
+                        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); nose.position.set(0, 0, 0.15); snout.add(nose);
+                        const ear1 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.3, 4), matDarkGrey); ear1.position.set(0.2, 0.3, -0.1);
+                        const ear2 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.3, 4), matDarkGrey); ear2.position.set(-0.2, 0.3, -0.1);
+                        head.add(ear1, ear2); this.addEyesOnly(head, matEye);
                     } else if (type === 'robot') {
-                        const roboEye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000}));
-                        roboEye.position.set(0, 0.1, 0.26);
-                        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({color: 0x666666, metalness:0.8}));
-                        beak.rotation.x = Math.PI / 2;
-                        beak.position.set(0, 0, 0.3);
+                        const roboEye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000})); roboEye.position.set(0, 0.1, 0.26);
+                        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({color: 0x666666, metalness:0.8})); beak.rotation.x = Math.PI / 2; beak.position.set(0, 0, 0.3);
                         head.add(roboEye, beak);
                     } else if (type === 'alien') {
-                        // Big black alien eyes
-                        const bigEye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1), matEye);
-                        bigEye1.scale.set(1, 1.5, 0.5);
-                        bigEye1.position.set(0.18, 0.1, 0.2);
-                        bigEye1.rotation.z = Math.PI/6;
-                        const bigEye2 = new THREE.Mesh(new THREE.SphereGeometry(0.1), matEye);
-                        bigEye2.scale.set(1, 1.5, 0.5);
-                        bigEye2.position.set(-0.18, 0.1, 0.2);
-                        bigEye2.rotation.z = -Math.PI/6;
+                        const bigEye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1), matEye); bigEye1.scale.set(1, 1.5, 0.5); bigEye1.position.set(0.18, 0.1, 0.2); bigEye1.rotation.z = Math.PI/6;
+                        const bigEye2 = new THREE.Mesh(new THREE.SphereGeometry(0.1), matEye); bigEye2.scale.set(1, 1.5, 0.5); bigEye2.position.set(-0.18, 0.1, 0.2); bigEye2.rotation.z = -Math.PI/6;
                         head.add(bigEye1, bigEye2);
-                        // No beak
-                    } else {
-                        this.addFace(head, matEye, matBeak);
-                    }
+                    } else { this.addFace(head, matEye, matBeak); }
 
-                    // Decorations
+                    // Custom Decorations
                     if (type === 'pirate') {
-                        const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1), new THREE.MeshBasicMaterial({color: 0x000000}));
-                        patch.rotation.x = Math.PI/2;
-                        patch.position.set(0.15, 0.05, 0.26);
-                        const strap = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.4), new THREE.MeshBasicMaterial({color: 0x000000}));
-                        strap.position.set(0, 0.05, 0);
-                        head.add(patch, strap);
+                        const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1), new THREE.MeshBasicMaterial({color: 0x000000})); patch.rotation.x = Math.PI/2; patch.position.set(0.15, 0.05, 0.26);
+                        const strap = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.4), new THREE.MeshBasicMaterial({color: 0x000000})); strap.position.set(0, 0.05, 0); head.add(patch, strap);
                     }
-                    if (type === 'ninja') {
-                        const headband = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000}));
-                        headband.position.y = 0.1;
-                        head.add(headband);
-                    }
+                    if (type === 'ninja') { const hb = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000})); hb.position.y = 0.1; head.add(hb); }
                     if (type === 'hat') {
-                        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05), new THREE.MeshStandardMaterial({color: 0x111111}));
-                        brim.position.y = 0.25;
-                        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.4), new THREE.MeshStandardMaterial({color: 0x111111}));
-                        top.position.y = 0.45;
-                        head.add(brim, top);
+                        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05), new THREE.MeshStandardMaterial({color: 0x111111})); brim.position.y = 0.25;
+                        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.4), new THREE.MeshStandardMaterial({color: 0x111111})); top.position.y = 0.45; head.add(brim, top);
                     }
-                    if (type === 'cool') {
-                        const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), new THREE.MeshStandardMaterial({color: 0x111111}));
-                        glasses.position.set(0, 0.05, 0.26);
-                        head.add(glasses);
-                    }
+                    if (type === 'cool') { const g = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), new THREE.MeshStandardMaterial({color: 0x111111})); g.position.set(0, 0.05, 0.26); head.add(g); }
                     if (type === 'cat') {
-                        const earGeo = new THREE.ConeGeometry(0.1, 0.2, 4);
-                        const ear1 = new THREE.Mesh(earGeo, matGrey);
-                        ear1.position.set(0.2, 0.25, 0);
-                        const ear2 = new THREE.Mesh(earGeo, matGrey);
-                        ear2.position.set(-0.2, 0.25, 0);
-                        head.add(ear1, ear2);
-                        const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), matGrey);
-                        tail.position.set(0, 0.5, -0.7);
-                        tail.rotation.x = Math.PI / 4;
-                        this.pigeonGroup.add(tail);
+                        const e1 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matGrey); e1.position.set(0.2, 0.25, 0);
+                        const e2 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matGrey); e2.position.set(-0.2, 0.25, 0); head.add(e1, e2);
+                        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; this.pigeonGroup.add(t);
                     }
-                    if (type === 'super') {
-                        const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide}));
-                        cape.position.set(0, 0.5, -0.5);
-                        cape.rotation.x = -Math.PI / 6;
-                        this.pigeonGroup.add(cape);
-                    }
+                    if (type === 'super') { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide})); c.position.set(0, 0.5, -0.5); c.rotation.x = -Math.PI / 6; this.pigeonGroup.add(c); }
                     if (type === 'wizard') {
-                        const wizHat = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 16), new THREE.MeshStandardMaterial({color: 0x1e3a8a}));
-                        wizHat.position.y = 0.5;
-                        wizHat.rotation.x = -0.1;
-                        const wizBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.05), new THREE.MeshStandardMaterial({color: 0x1e3a8a}));
-                        wizBrim.position.y = 0.15;
-                        head.add(wizHat, wizBrim);
+                        const wH = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 16), new THREE.MeshStandardMaterial({color: 0x1e3a8a})); wH.position.y = 0.5; wH.rotation.x = -0.1;
+                        const wB = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.05), new THREE.MeshStandardMaterial({color: 0x1e3a8a})); wB.position.y = 0.15; head.add(wH, wB);
                     }
                     if (type === 'astronaut') {
-                        const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.45), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.5}));
-                        head.add(helmet);
-                        const pack = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({color: 0xdddddd}));
-                        pack.position.set(0, 0.6, -0.5);
-                        this.pigeonGroup.add(pack);
+                        const h = new THREE.Mesh(new THREE.SphereGeometry(0.45), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.5})); head.add(h);
+                        const p = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({color: 0xdddddd})); p.position.set(0, 0.6, -0.5); this.pigeonGroup.add(p);
                     }
-                    if (type === 'king') {
-                        const crownMat = new THREE.MeshStandardMaterial({color: 0xfacc15, metalness: 1.0, roughness: 0.2});
-                        const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.2, 0.2, 8, 1, true), crownMat);
-                        crown.position.y = 0.3;
-                        crown.material.side = THREE.DoubleSide;
-                        head.add(crown);
-                    }
+                    if (type === 'king') { const cr = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.2, 0.2, 8, 1, true), new THREE.MeshStandardMaterial({color: 0xfacc15, metalness: 1.0, roughness: 0.2})); cr.position.y = 0.3; cr.material.side = THREE.DoubleSide; head.add(cr); }
                     if (type === 'dragon') {
-                        const hornGeo = new THREE.ConeGeometry(0.05, 0.3, 8);
-                        const hornMat = new THREE.MeshStandardMaterial({color: 0xfef08a});
-                        const horn1 = new THREE.Mesh(hornGeo, hornMat);
-                        horn1.position.set(0.15, 0.25, -0.1);
-                        horn1.rotation.x = -0.5;
-                        const horn2 = new THREE.Mesh(hornGeo, hornMat);
-                        horn2.position.set(-0.15, 0.25, -0.1);
-                        horn2.rotation.x = -0.5;
-                        head.add(horn1, horn2);
-
-                        const wingGeo = new THREE.PlaneGeometry(0.8, 0.5);
-                        const wingMat = new THREE.MeshStandardMaterial({color: 0xb91c1c, side: THREE.DoubleSide});
-                        const wing1 = new THREE.Mesh(wingGeo, wingMat);
-                        wing1.position.set(0.4, 0.7, -0.2);
-                        wing1.rotation.y = -Math.PI/4;
-                        const wing2 = new THREE.Mesh(wingGeo, wingMat);
-                        wing2.position.set(-0.4, 0.7, -0.2);
-                        wing2.rotation.y = Math.PI/4;
-                        this.pigeonGroup.add(wing1, wing2);
+                        const hM = new THREE.MeshStandardMaterial({color: 0xfef08a});
+                        const h1 = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.3, 8), hM); h1.position.set(0.15, 0.25, -0.1); h1.rotation.x = -0.5;
+                        const h2 = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.3, 8), hM); h2.position.set(-0.15, 0.25, -0.1); h2.rotation.x = -0.5; head.add(h1, h2);
+                        const wM = new THREE.MeshStandardMaterial({color: 0xb91c1c, side: THREE.DoubleSide});
+                        const w1 = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), wM); w1.position.set(0.4, 0.7, -0.2); w1.rotation.y = -Math.PI/4;
+                        const w2 = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), wM); w2.position.set(-0.4, 0.7, -0.2); w2.rotation.y = Math.PI/4; this.pigeonGroup.add(w1, w2);
                     }
-
-                    this.pigeonGroup.rotation.y = Math.PI;
                 }
-
+                this.pigeonGroup.rotation.y = Math.PI; 
                 this.scene.add(this.pigeonGroup);
             },
 
             addFace: function(headObject, matEye, matBeak) {
-                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                eye1.position.set(0.15, 0.05, 0.25);
-                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                eye2.position.set(-0.15, 0.05, 0.25);
-                const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matBeak);
-                beak.rotation.x = Math.PI / 2;
-                beak.position.set(0, 0, 0.3);
+                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); eye1.position.set(0.15, 0.05, 0.25);
+                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); eye2.position.set(-0.15, 0.05, 0.25);
+                const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), matBeak); beak.rotation.x = Math.PI / 2; beak.position.set(0, 0, 0.3);
                 headObject.add(eye1, eye2, beak);
             },
-
             addEyesOnly: function(headObject, matEye) {
-                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                eye1.position.set(0.15, 0.1, 0.2);
-                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye);
-                eye2.position.set(-0.15, 0.1, 0.2);
+                const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); eye1.position.set(0.15, 0.1, 0.2);
+                const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.05), matEye); eye2.position.set(-0.15, 0.1, 0.2);
                 headObject.add(eye1, eye2);
             },
 
             triggerMineAnimation: function() {
-                this.isAnimatingMine = true;
-                this.mineAnimationProgress = 0;
-
+                this.isAnimatingMine = true; this.mineAnimationProgress = 0;
                 const particleColor = MINES[GAME_STATE.currentMine].crystalColor;
                 const mat = new THREE.MeshBasicMaterial({color: particleColor});
                 for(let i=0; i<5; i++) {
                     const size = Math.random() * 0.1 + 0.05;
                     const p = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-                    p.position.copy(this.mineBlock.position);
-                    p.position.y += 1;
-                    
-                    p.userData.velocity = new THREE.Vector3(
-                        (Math.random() - 0.5) * 5,
-                        Math.random() * 5 + 2,
-                        Math.random() * 5
-                    );
-                    p.userData.life = 1.0;
-                    this.scene.add(p);
-                    this.particles.push(p);
+                    p.position.copy(this.mineBlock.position); p.position.y += 1;
+                    p.userData.velocity = new THREE.Vector3((Math.random() - 0.5) * 5, Math.random() * 5 + 2, Math.random() * 5);
+                    p.userData.life = 1.0; this.scene.add(p); this.particles.push(p);
                 }
-
                 this.mineBlock.scale.set(0.9, 0.9, 0.9);
                 setTimeout(() => this.mineBlock.scale.set(1,1,1), 50);
             },
@@ -865,47 +707,35 @@
                 const delta = this.clock.getDelta();
                 const time = this.clock.getElapsedTime();
 
-                // Auto-Miner logic (Diamonds)
-                if(GAME_STATE.autoSpeed > 0 || GAME_STATE.factoryLevel > 0) {
+                if(!isSpinning && (GAME_STATE.autoSpeed > 0 || GAME_STATE.factoryLevel > 0)) {
                     this.autoTimer = (this.autoTimer || 0) + delta;
                     if (this.autoTimer >= 1.0) {
                         this.autoTimer = 0;
-                        
-                        // Auto Mine Diamonds
                         if (GAME_STATE.autoSpeed > 0) {
                             GAME_STATE.diamonds += GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier;
                             this.triggerMineAnimation();
                             if(document.getElementById('mine-hint').style.display === 'none') {
-                               ui.showFloatingText(window.innerWidth/2, window.innerHeight/2 + 50, `+${GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier} 💎 (Auto)`);
+                               ui.showFloatingText(window.innerWidth/2, window.innerHeight/2 + 50, `+${GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier} 💎`);
                             }
                         }
-
-                        // Auto Factory Bread
                         if (GAME_STATE.factoryLevel > 0) {
-                            const breadGen = GAME_STATE.factoryLevel * 15; // 15 bread per second per level
+                            const breadGen = GAME_STATE.factoryLevel * 15; 
                             GAME_STATE.bread += breadGen;
                             ui.showFloatingText(window.innerWidth/2 - 100, 100, `+${breadGen} 🍞`, false, true);
                         }
-
                         ui.updateStats();
                     }
                 }
 
-                // 360 Orbit Camera
-                const orbitRadius = 8;
-                const orbitSpeed = 0.5;
-                this.camera.position.x = Math.sin(time * orbitSpeed) * orbitRadius;
-                this.camera.position.z = Math.cos(time * orbitSpeed) * orbitRadius;
+                // 360 Camera
+                this.camera.position.x = Math.sin(time * 0.5) * 8;
+                this.camera.position.z = Math.cos(time * 0.5) * 8;
                 this.camera.lookAt(0, 1, 0);
 
-                // Day/Night Cycle
                 const cycle = (Math.sin(time * 0.05) + 1) / 2;
-                const dayColor = new THREE.Color(0x87CEEB);
-                const nightColor = new THREE.Color(0x0f172a);
-                this.scene.background.lerpColors(nightColor, dayColor, cycle);
+                this.scene.background.lerpColors(new THREE.Color(0x0f172a), new THREE.Color(0x87CEEB), cycle);
                 this.scene.fog.color.copy(this.scene.background);
 
-                // Idle animation
                 if (this.pigeonGroup && !this.isAnimatingMine) {
                     this.pigeonGroup.position.y = Math.sin(time * 2) * 0.05;
                     if(GAME_STATE.equippedPigeon !== 'worm' && GAME_STATE.equippedPigeon !== 'car') {
@@ -913,52 +743,28 @@
                     }
                 }
 
-                // Mining animation
                 if (this.isAnimatingMine && this.pigeonGroup) {
                     this.mineAnimationProgress += delta * 12;
-                    
                     if (this.mineAnimationProgress < Math.PI) {
-                        const angle = Math.sin(this.mineAnimationProgress) * (Math.PI / 4);
-                        if(GAME_STATE.equippedPigeon !== 'worm') {
-                            this.pigeonGroup.rotation.x = angle;
-                        } else {
-                            this.pigeonGroup.position.z = 1.5 - Math.sin(this.mineAnimationProgress) * 0.5;
-                        }
+                        if(GAME_STATE.equippedPigeon !== 'worm') this.pigeonGroup.rotation.x = Math.sin(this.mineAnimationProgress) * (Math.PI / 4);
+                        else this.pigeonGroup.position.z = 1.5 - Math.sin(this.mineAnimationProgress) * 0.5;
                     } else {
-                        this.isAnimatingMine = false;
-                        this.pigeonGroup.rotation.x = 0;
-                        this.pigeonGroup.position.z = 1.5;
+                        this.isAnimatingMine = false; this.pigeonGroup.rotation.x = 0; this.pigeonGroup.position.z = 1.5;
                     }
                 }
 
-                // Particles
                 for (let i = this.particles.length - 1; i >= 0; i--) {
                     const p = this.particles[i];
                     p.position.addScaledVector(p.userData.velocity, delta);
-                    p.userData.velocity.y -= 9.8 * delta;
-                    p.userData.life -= delta;
-                    
-                    p.rotation.x += delta * 10;
-                    p.rotation.y += delta * 10;
-
-                    if (p.userData.life <= 0 || p.position.y < -1) {
-                        this.scene.remove(p);
-                        this.particles.splice(i, 1);
-                    }
+                    p.userData.velocity.y -= 9.8 * delta; p.userData.life -= delta;
+                    p.rotation.x += delta * 10; p.rotation.y += delta * 10;
+                    if (p.userData.life <= 0 || p.position.y < -1) { this.scene.remove(p); this.particles.splice(i, 1); }
                 }
 
-                if (this.mineBlock) {
-                    this.mineBlock.position.y = Math.sin(time) * 0.1;
-                }
-
+                if (this.mineBlock) this.mineBlock.position.y = Math.sin(time) * 0.1;
                 this.renderer.render(this.scene, this.camera);
             },
-
-            onWindowResize: function() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-            }
+            onWindowResize: function() { this.camera.aspect = window.innerWidth / window.innerHeight; this.camera.updateProjectionMatrix(); this.renderer.setSize(window.innerWidth, window.innerHeight); }
         };
 
         // --- GAME LOGIC ---
@@ -970,227 +776,168 @@
             },
 
             loadGame: function(slot = null) {
-                if (slot !== null) {
-                    CURRENT_SLOT = slot;
-                } else {
-                    const lastSlot = localStorage.getItem('pigeonMinerLastSlot');
-                    if (lastSlot) CURRENT_SLOT = parseInt(lastSlot);
-                }
+                if (slot !== null) CURRENT_SLOT = slot;
+                else { const lastSlot = localStorage.getItem('pigeonMinerLastSlot'); if (lastSlot) CURRENT_SLOT = parseInt(lastSlot); }
 
                 const saved = localStorage.getItem(`pigeonMinerSave_${CURRENT_SLOT}`);
                 if (saved) {
                     try {
-                        const parsed = JSON.parse(saved);
-                        Object.assign(GAME_STATE, parsed);
-                        
-                        // Calculate offline progress
+                        Object.assign(GAME_STATE, JSON.parse(saved));
                         if (GAME_STATE.lastSaveTime) {
-                            const secondsOffline = Math.floor((Date.now() - GAME_STATE.lastSaveTime) / 1000);
-                            if (secondsOffline > 60) {
-                                let gainedDiamonds = 0;
-                                let gainedBread = 0;
-
-                                if (GAME_STATE.autoSpeed > 0) {
-                                    gainedDiamonds = secondsOffline * GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier;
-                                    GAME_STATE.diamonds += gainedDiamonds;
-                                }
-                                if (GAME_STATE.factoryLevel > 0) {
-                                    gainedBread = secondsOffline * GAME_STATE.factoryLevel * 15;
-                                    GAME_STATE.bread += gainedBread;
-                                }
-                                
-                                if(gainedDiamonds > 0 || gainedBread > 0) {
-                                    setTimeout(() => ui.showOfflineModal(secondsOffline, gainedDiamonds, gainedBread), 1000);
-                                }
+                            const secs = Math.floor((Date.now() - GAME_STATE.lastSaveTime) / 1000);
+                            if (secs > 60) {
+                                let d=0, b=0;
+                                if (GAME_STATE.autoSpeed > 0) { d = secs * GAME_STATE.autoSpeed * MINES[GAME_STATE.currentMine].multiplier; GAME_STATE.diamonds += d; }
+                                if (GAME_STATE.factoryLevel > 0) { b = secs * GAME_STATE.factoryLevel * 15; GAME_STATE.bread += b; }
+                                if(d > 0 || b > 0) setTimeout(() => ui.showOfflineModal(secs, d, b), 1000);
                             }
                         }
-                    } catch (e) {
-                        console.error("Save file corrupted, starting fresh.");
-                        this.resetGame();
-                    }
-                } else {
-                    this.resetGame();
-                }
+                    } catch (e) { this.resetGame(); }
+                } else { this.resetGame(); }
             },
 
             resetGame: function() {
-                GAME_STATE.bread = 0;
-                GAME_STATE.diamonds = 0;
-                GAME_STATE.digSpeed = 1;
-                GAME_STATE.autoSpeed = 0;
-                GAME_STATE.factoryLevel = 0;
-                GAME_STATE.upgradeCost = 10;
-                GAME_STATE.autoCost = 50;
-                GAME_STATE.factoryCost = 1000;
-                GAME_STATE.boxCost = 50;
-                GAME_STATE.currentMine = 0;
-                GAME_STATE.unlockedPigeons = ['base'];
-                GAME_STATE.equippedPigeon = 'base';
-                GAME_STATE.sellRate = 2;
-                GAME_STATE.lastSaveTime = null;
+                Object.assign(GAME_STATE, { bread: 0, diamonds: 0, digSpeed: 1, autoSpeed: 0, factoryLevel: 0, upgradeCost: 10, autoCost: 50, factoryCost: 1000, boxCost: 50, currentMine: 0, unlockedPigeons: ['base'], equippedPigeon: 'base', sellRate: 2, lastSaveTime: null });
             },
 
             switchSave: function(slot) {
-                this.saveGame(); // Save current progress before switching
-                CURRENT_SLOT = slot;
-                this.resetGame();
-                this.loadGame(slot);
-                
-                engine.buildMine(GAME_STATE.currentMine);
-                engine.loadPigeonModel(GAME_STATE.equippedPigeon);
-                ui.updateStats();
-                ui.closeModal('modal-saves');
-                ui.showToast(`Loaded Save Slot ${slot}`);
+                this.saveGame(); CURRENT_SLOT = slot; this.resetGame(); this.loadGame(slot);
+                engine.buildMine(GAME_STATE.currentMine); engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                ui.updateStats(); ui.closeModal('modal-saves'); ui.showToast(`Loaded Slot ${slot}`);
             },
 
             deleteSave: function(slot, btnElement) {
-                // Safety confirmation without using browser alert()
                 if (btnElement.innerText !== "Sure?") {
-                    btnElement.innerText = "Sure?";
-                    btnElement.style.borderColor = "#ef4444";
-                    btnElement.style.background = "#dc2626";
-                    setTimeout(() => {
-                        if (btnElement && document.body.contains(btnElement)) {
-                            btnElement.innerText = "Delete";
-                            btnElement.style.background = "";
-                        }
-                    }, 3000);
+                    btnElement.innerText = "Sure?"; btnElement.style.background = "#dc2626";
+                    setTimeout(() => { if (btnElement && document.body.contains(btnElement)) { btnElement.innerText = "Delete"; btnElement.style.background = ""; } }, 3000);
                     return;
                 }
-                
                 localStorage.removeItem(`pigeonMinerSave_${slot}`);
-                if (CURRENT_SLOT === slot) {
-                    this.resetGame();
-                    engine.buildMine(GAME_STATE.currentMine);
-                    engine.loadPigeonModel(GAME_STATE.equippedPigeon);
-                    ui.updateStats();
-                }
-                ui.populateSaveModal();
-                ui.showToast(`Deleted Save Slot ${slot}`);
+                if (CURRENT_SLOT === slot) { this.resetGame(); engine.buildMine(GAME_STATE.currentMine); engine.loadPigeonModel(GAME_STATE.equippedPigeon); ui.updateStats(); }
+                ui.populateSaveModal(); ui.showToast(`Deleted Slot ${slot}`);
             },
 
             mine: function(x, y) {
                 document.getElementById('mine-hint').style.display = 'none';
-
                 const isCrit = Math.random() < 0.1;
-                const critMult = isCrit ? 3 : 1;
-                const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * critMult;
-                
-                GAME_STATE.diamonds += gained;
-                ui.updateStats();
-                engine.triggerMineAnimation();
-                
-                if (isCrit) {
-                    ui.showFloatingText(x, y, `CRIT! +${gained} 💎`, true);
-                } else {
-                    ui.showFloatingText(x, y, `+${gained} 💎`);
-                }
+                const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1);
+                GAME_STATE.diamonds += gained; ui.updateStats(); engine.triggerMineAnimation();
+                ui.showFloatingText(x, y, isCrit ? `CRIT! +${gained} 💎` : `+${gained} 💎`, isCrit);
             },
 
             sellDiamonds: function() {
                 if (GAME_STATE.diamonds > 0) {
-                    const breadGained = GAME_STATE.diamonds * GAME_STATE.sellRate;
-                    GAME_STATE.bread += breadGained;
-                    GAME_STATE.diamonds = 0;
-                    ui.updateStats();
-                    ui.showToast(`Sold diamonds for ${breadGained} 🍞`);
-                } else {
-                    ui.showToast("No diamonds to sell!");
-                }
+                    const gained = GAME_STATE.diamonds * GAME_STATE.sellRate;
+                    GAME_STATE.bread += gained; GAME_STATE.diamonds = 0;
+                    ui.updateStats(); ui.showToast(`Sold for ${gained} 🍞`);
+                } else ui.showToast("No diamonds to sell!");
             },
 
             upgradeSpeed: function() {
                 if (GAME_STATE.bread >= GAME_STATE.upgradeCost) {
-                    GAME_STATE.bread -= GAME_STATE.upgradeCost;
-                    GAME_STATE.digSpeed += 1;
+                    GAME_STATE.bread -= GAME_STATE.upgradeCost; GAME_STATE.digSpeed += 1;
                     GAME_STATE.upgradeCost = Math.floor(GAME_STATE.upgradeCost * 1.5);
                     ui.updateStats();
-                    ui.showToast("Dig Speed Upgraded!");
-                } else {
-                    ui.showToast("Not enough Bread!");
-                }
+                } else ui.showToast("Not enough Bread!");
             },
-
             upgradeAuto: function() {
                 if (GAME_STATE.bread >= GAME_STATE.autoCost) {
-                    GAME_STATE.bread -= GAME_STATE.autoCost;
-                    GAME_STATE.autoSpeed += 1;
+                    GAME_STATE.bread -= GAME_STATE.autoCost; GAME_STATE.autoSpeed += 1;
                     GAME_STATE.autoCost = Math.floor(GAME_STATE.autoCost * 1.6);
-                    document.getElementById('mine-hint').style.display = 'none';
-                    ui.updateStats();
-                    ui.showToast("Auto-Miner Upgraded!");
-                } else {
-                    ui.showToast("Not enough Bread!");
-                }
+                    document.getElementById('mine-hint').style.display = 'none'; ui.updateStats();
+                } else ui.showToast("Not enough Bread!");
             },
-
             upgradeFactory: function() {
                 if (GAME_STATE.bread >= GAME_STATE.factoryCost) {
-                    GAME_STATE.bread -= GAME_STATE.factoryCost;
-                    GAME_STATE.factoryLevel += 1;
-                    GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 1.8);
-                    ui.updateStats();
-                    ui.showToast("Bread Factory Upgraded!");
-                } else {
-                    ui.showToast("Not enough Bread!");
-                }
+                    GAME_STATE.bread -= GAME_STATE.factoryCost; GAME_STATE.factoryLevel += 1;
+                    GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 1.8); ui.updateStats();
+                } else ui.showToast("Not enough Bread!");
             },
-
             upgradeMine: function() {
-                const nextMineIdx = GAME_STATE.currentMine + 1;
-                if (nextMineIdx < MINES.length) {
-                    const nextMine = MINES[nextMineIdx];
+                const nextMine = MINES[GAME_STATE.currentMine + 1];
+                if (nextMine) {
                     if (GAME_STATE.bread >= nextMine.unlockCost) {
-                        GAME_STATE.bread -= nextMine.unlockCost;
-                        GAME_STATE.currentMine = nextMineIdx;
-                        engine.buildMine(GAME_STATE.currentMine);
-                        ui.updateStats();
-                        ui.showToast(`Unlocked ${nextMine.name}!`);
-                    } else {
-                        ui.showToast(`Need ${nextMine.unlockCost} Bread to unlock next mine!`);
-                    }
-                } else {
-                    ui.showToast("Max mine area reached!");
-                }
+                        GAME_STATE.bread -= nextMine.unlockCost; GAME_STATE.currentMine++;
+                        engine.buildMine(GAME_STATE.currentMine); ui.updateStats(); ui.showToast(`Unlocked ${nextMine.name}!`);
+                    } else ui.showToast(`Need ${nextMine.unlockCost} Bread!`);
+                } else ui.showToast("Max mine reached!");
             },
 
-            buyBox: function() {
-                if (GAME_STATE.bread >= GAME_STATE.boxCost) {
+            startRoulette: function() {
+                if (GAME_STATE.bread >= GAME_STATE.boxCost && !isSpinning) {
                     GAME_STATE.bread -= GAME_STATE.boxCost;
                     ui.updateStats();
-                    this.openMysteryBox();
-                } else {
+                    this.executeRoulette();
+                } else if(!isSpinning) {
                     ui.showToast("Not enough Bread!");
                 }
             },
 
-            openMysteryBox: function() {
+            executeRoulette: function() {
+                isSpinning = true;
                 const roll = Math.random() * 100;
                 let wonType = 'base';
-                
                 let cumulative = 0;
                 for (const key in PIGEON_TYPES) {
                     if (key === 'base') continue;
                     cumulative += PIGEON_TYPES[key].chance;
-                    if (roll <= cumulative) {
-                        wonType = key;
-                        break;
+                    if (roll <= cumulative) { wonType = key; break; }
+                }
+
+                const strip = document.getElementById('roulette-strip');
+                strip.style.transition = 'none';
+                strip.style.transform = 'translateX(0px)';
+                strip.innerHTML = '';
+
+                const itemWidth = 90;
+                const totalItems = 50;
+                const winIndex = 43; // Lands on the 43rd item
+
+                for(let i=0; i<totalItems; i++) {
+                    let type = wonType;
+                    if (i !== winIndex) {
+                         const keys = Object.keys(PIGEON_TYPES).filter(k => k !== 'base');
+                         type = keys[Math.floor(Math.random() * keys.length)];
                     }
+                    const data = PIGEON_TYPES[type];
+                    const div = document.createElement('div');
+                    div.className = `roulette-item`;
+                    div.innerHTML = `<div style="font-size:2rem; margin-bottom:5px;">🐦</div><div class="${data.color}">${data.name}</div>`;
+                    strip.appendChild(div);
                 }
 
-                if (!GAME_STATE.unlockedPigeons.includes(wonType)) {
-                    GAME_STATE.unlockedPigeons.push(wonType);
-                }
+                ui.openModal('modal-roulette');
 
-                ui.showUnlockModal(wonType);
-                this.equipPigeon(wonType);
+                // Wait a frame to ensure modal is rendered and width is calculable
+                requestAnimationFrame(() => {
+                    const containerWidth = document.querySelector('.roulette-container').offsetWidth;
+                    // Calculate center of screen minus half container to align the selector
+                    const targetX = (winIndex * itemWidth) + (itemWidth / 2) - (containerWidth / 2);
+                    // Add slight random offset so it doesn't always land dead center
+                    const randomOffset = (Math.random() - 0.5) * (itemWidth * 0.8);
+                    const finalX = targetX + randomOffset;
+
+                    // Trigger reflow
+                    strip.offsetHeight; 
+                    
+                    // CS2 Spin effect: fast start, slow end friction
+                    strip.style.transition = 'transform 5s cubic-bezier(0.1, 0.9, 0.2, 1)';
+                    strip.style.transform = `translateX(-${finalX}px)`;
+
+                    setTimeout(() => {
+                        isSpinning = false;
+                        ui.closeModal('modal-roulette');
+                        if (!GAME_STATE.unlockedPigeons.includes(wonType)) GAME_STATE.unlockedPigeons.push(wonType);
+                        ui.showUnlockModal(wonType);
+                        this.equipPigeon(wonType);
+                    }, 5500); // Wait for transition + small buffer
+                });
             },
 
             equipPigeon: function(type) {
                 if (GAME_STATE.unlockedPigeons.includes(type)) {
                     GAME_STATE.equippedPigeon = type;
-                    engine.loadPigeonModel(type);
-                    ui.populateInventory(); 
+                    engine.loadPigeonModel(type); ui.populateInventory(); 
                 }
             }
         };
@@ -1201,82 +948,54 @@
                 document.getElementById('bread-display').innerText = Math.floor(GAME_STATE.bread);
                 document.getElementById('diamond-display').innerText = Math.floor(GAME_STATE.diamonds);
                 
-                document.getElementById('upgrade-cost-display').innerText = `Cost: ${GAME_STATE.upgradeCost} 🍞 (Lvl ${GAME_STATE.digSpeed})`;
-                document.getElementById('auto-cost-display').innerText = `Cost: ${GAME_STATE.autoCost} 🍞 (${GAME_STATE.autoSpeed}/sec)`;
-                document.getElementById('factory-cost-display').innerText = `Cost: ${GAME_STATE.factoryCost} 🍞 (${GAME_STATE.factoryLevel * 15}/sec)`;
-
-                const nextMineIdx = GAME_STATE.currentMine + 1;
-                if (nextMineIdx < MINES.length) {
-                    document.getElementById('mine-cost-display').innerText = `Cost: ${MINES[nextMineIdx].unlockCost} 🍞`;
-                } else {
-                    document.getElementById('mine-cost-display').innerText = `MAX LEVEL`;
-                }
+                // Update text in Upgrades modal
+                document.getElementById('btn-dig').innerText = `${GAME_STATE.upgradeCost} 🍞`;
+                document.getElementById('desc-dig').innerText = `Lvl ${GAME_STATE.digSpeed} (+${GAME_STATE.digSpeed} 💎/tap)`;
                 
-                document.getElementById('sell-rate-display').innerText = `Current Multiplier: x${MINES[GAME_STATE.currentMine].multiplier}`;
+                document.getElementById('btn-auto').innerText = `${GAME_STATE.autoCost} 🍞`;
+                document.getElementById('desc-auto').innerText = `Lvl ${GAME_STATE.autoSpeed} (${GAME_STATE.autoSpeed}/sec)`;
+
+                document.getElementById('btn-factory').innerText = `${GAME_STATE.factoryCost} 🍞`;
+                document.getElementById('desc-factory').innerText = `Lvl ${GAME_STATE.factoryLevel} (${GAME_STATE.factoryLevel * 15}/sec)`;
+
+                const nextMine = MINES[GAME_STATE.currentMine + 1];
+                document.getElementById('btn-mine').innerText = nextMine ? `${nextMine.unlockCost} 🍞` : 'MAX';
+                if(!nextMine) document.getElementById('btn-mine').style.background = '#64748b';
+                
+                document.getElementById('sell-rate-display').innerText = `Multiplier: x${MINES[GAME_STATE.currentMine].multiplier}`;
+                document.getElementById('box-cost-nav').innerText = `${GAME_STATE.boxCost} 🍞`;
             },
 
             showFloatingText: function(x, y, text, isCrit = false, isBread = false) {
                 const el = document.createElement('div');
-                el.className = 'floating-text';
-                el.innerText = text;
-                
-                if (isCrit) {
-                    el.style.color = '#facc15'; 
-                    el.style.fontSize = '2.5rem';
-                    el.style.textShadow = '0 0 15px rgba(250, 204, 21, 1)';
-                    el.style.zIndex = '10';
-                }
-                if (isBread) {
-                    el.style.color = '#facc15'; 
-                }
-
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
+                el.className = 'floating-text'; el.innerText = text;
+                if (isCrit) { el.style.color = '#facc15'; el.style.fontSize = '2.5rem'; el.style.textShadow = '0 0 15px rgba(250, 204, 21, 1)'; el.style.zIndex = '10'; }
+                if (isBread) { el.style.color = '#facc15'; }
+                el.style.left = x + 'px'; el.style.top = y + 'px';
                 document.body.appendChild(el);
-                
-                setTimeout(() => {
-                    el.remove();
-                }, 1000);
+                setTimeout(() => el.remove(), 1000);
             },
-
             showToast: function(msg) {
-                const toast = document.getElementById('toast');
-                toast.innerText = msg;
-                toast.style.opacity = 1;
+                const toast = document.getElementById('toast'); toast.innerText = msg; toast.style.opacity = 1;
                 setTimeout(() => toast.style.opacity = 0, 2000);
             },
-
-            openInventory: function() {
-                this.populateInventory();
-                document.getElementById('modal-inventory').style.display = 'flex';
-            },
-
-            closeModal: function(id) {
-                document.getElementById(id).style.display = 'none';
-            },
-
-            openSaveModal: function() {
-                this.populateSaveModal();
-                document.getElementById('modal-saves').style.display = 'flex';
-            },
+            openModal: function(id) { document.getElementById(id).style.display = 'flex'; },
+            closeModal: function(id) { document.getElementById(id).style.display = 'none'; },
+            
+            openInventory: function() { this.populateInventory(); this.openModal('modal-inventory'); },
+            openSaveModal: function() { this.populateSaveModal(); this.openModal('modal-saves'); },
 
             populateSaveModal: function() {
-                const container = document.getElementById('save-slots-container');
-                container.innerHTML = '';
-                
+                const container = document.getElementById('save-slots-container'); container.innerHTML = '';
                 for (let i = 1; i <= 3; i++) {
                     const saved = localStorage.getItem(`pigeonMinerSave_${i}`);
                     const slotDiv = document.createElement('div');
-                    slotDiv.style.background = '#334155';
-                    slotDiv.style.padding = '10px';
-                    slotDiv.style.borderRadius = '10px';
-                    slotDiv.style.display = 'flex';
-                    slotDiv.style.justifyContent = 'space-between';
-                    slotDiv.style.alignItems = 'center';
+                    slotDiv.style.background = '#334155'; slotDiv.style.padding = '12px'; slotDiv.style.borderRadius = '12px';
+                    slotDiv.style.display = 'flex'; slotDiv.style.justifyContent = 'space-between'; slotDiv.style.alignItems = 'center';
                     slotDiv.style.border = (CURRENT_SLOT === i) ? '2px solid #4ade80' : '2px solid #475569';
 
                     let infoHTML = `<div style="text-align: left;">
-                        <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Current)' : ''}</div>
+                        <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Active)' : ''}</div>
                         <div style="font-size: 0.8rem; color: #cbd5e1;">Empty</div>
                     </div>`;
 
@@ -1284,66 +1003,34 @@
                         try {
                             const data = JSON.parse(saved);
                             infoHTML = `<div style="text-align: left;">
-                                <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Current)' : ''}</div>
-                                <div style="font-size: 0.8rem; color: #cbd5e1;">Bread: ${Math.floor(data.bread)} | 💎: ${Math.floor(data.diamonds)}</div>
+                                <div style="font-weight: bold; color: var(--primary);">Save Slot ${i} ${(CURRENT_SLOT === i) ? '(Active)' : ''}</div>
+                                <div style="font-size: 0.8rem; color: #cbd5e1;">🍞 ${Math.floor(data.bread)} | 💎 ${Math.floor(data.diamonds)}</div>
                             </div>`;
                         } catch(e) {}
                     }
 
-                    const btnDiv = document.createElement('div');
-                    btnDiv.style.display = 'flex';
-                    btnDiv.style.gap = '5px';
-
+                    const btnDiv = document.createElement('div'); btnDiv.style.display = 'flex'; btnDiv.style.gap = '5px';
                     if (CURRENT_SLOT !== i) {
-                        const loadBtn = document.createElement('button');
-                        loadBtn.innerText = "Load";
-                        loadBtn.style.padding = '5px 10px';
-                        loadBtn.style.fontSize = '0.8rem';
-                        loadBtn.onclick = () => game.switchSave(i);
-                        btnDiv.appendChild(loadBtn);
+                        const loadBtn = document.createElement('button'); loadBtn.innerText = "Load"; loadBtn.style.padding = '8px 12px'; loadBtn.style.fontSize = '0.8rem';
+                        loadBtn.style.borderRadius = '8px'; loadBtn.onclick = () => game.switchSave(i); btnDiv.appendChild(loadBtn);
                     }
-
                     if (saved) {
-                        const delBtn = document.createElement('button');
-                        delBtn.innerText = "Delete";
-                        delBtn.style.padding = '5px 10px';
-                        delBtn.style.fontSize = '0.8rem';
-                        delBtn.style.borderColor = '#ef4444';
-                        delBtn.onclick = function() { game.deleteSave(i, this); };
-                        btnDiv.appendChild(delBtn);
+                        const delBtn = document.createElement('button'); delBtn.innerText = "Delete"; delBtn.style.padding = '8px 12px'; delBtn.style.fontSize = '0.8rem';
+                        delBtn.style.borderRadius = '8px'; delBtn.style.borderColor = '#ef4444'; delBtn.onclick = function() { game.deleteSave(i, this); }; btnDiv.appendChild(delBtn);
                     }
-
-                    slotDiv.innerHTML = infoHTML;
-                    slotDiv.appendChild(btnDiv);
-                    container.appendChild(slotDiv);
+                    slotDiv.innerHTML = infoHTML; slotDiv.appendChild(btnDiv); container.appendChild(slotDiv);
                 }
             },
 
             populateInventory: function() {
-                const grid = document.getElementById('inventory-grid');
-                grid.innerHTML = '';
-
+                const grid = document.getElementById('inventory-grid'); grid.innerHTML = '';
                 for (const key in PIGEON_TYPES) {
-                    const data = PIGEON_TYPES[key];
-                    const isUnlocked = GAME_STATE.unlockedPigeons.includes(key);
-                    const isEquipped = GAME_STATE.equippedPigeon === key;
-
-                    const div = document.createElement('div');
-                    div.className = `inv-item ${isUnlocked ? '' : 'locked'} ${isEquipped ? 'active' : ''}`;
-                    
-                    let content = `<div style="font-size:2rem; margin-bottom:5px;">🐦</div>`;
-                    content += `<div class="${data.color}" style="font-weight:bold">${data.name}</div>`;
-                    if(isEquipped) content += `<div style="color:#4ade80; font-size:0.7rem; margin-top:5px;">Equipped</div>`;
-                    
+                    const data = PIGEON_TYPES[key]; const isUnlocked = GAME_STATE.unlockedPigeons.includes(key); const isEquipped = GAME_STATE.equippedPigeon === key;
+                    const div = document.createElement('div'); div.className = `inv-item ${isUnlocked ? '' : 'locked'} ${isEquipped ? 'active' : ''}`;
+                    let content = `<div style="font-size:2rem; margin-bottom:5px;">🐦</div><div class="${data.color}" style="font-weight:bold">${data.name}</div>`;
+                    if(isEquipped) content += `<div style="color:#4ade80; font-size:0.7rem; margin-top:5px; font-weight:bold">EQUIPPED</div>`;
                     div.innerHTML = content;
-
-                    if (isUnlocked && !isEquipped) {
-                        div.onclick = () => {
-                            game.equipPigeon(key);
-                            this.closeModal('modal-inventory');
-                        };
-                    }
-
+                    if (isUnlocked && !isEquipped) div.onclick = () => { game.equipPigeon(key); this.closeModal('modal-inventory'); };
                     grid.appendChild(div);
                 }
             },
@@ -1352,42 +1039,26 @@
                 const data = PIGEON_TYPES[type];
                 document.getElementById('unlocked-name').innerText = data.name;
                 document.getElementById('unlocked-name').className = data.color;
-                
                 let desc = `You unboxed a ${data.rarity} pigeon!`;
                 if(type === 'worm') desc = "WOW! The Legendary Worm Pigeon!";
                 if(type === 'golden') desc = "INCREDIBLE! The Mythic Golden Pigeon!";
                 if(type === 'dragon') desc = "UNBELIEVABLE! THE SECRET DRAGON PIGEON (0.2%)!";
-                
                 document.getElementById('unlocked-desc').innerText = desc;
-                document.getElementById('modal-unlocked').style.display = 'flex';
+                this.openModal('modal-unlocked');
             },
 
             showOfflineModal: function(seconds, diamonds, bread) {
-                const minutes = Math.floor(seconds / 60);
-                document.getElementById('offline-stats').innerHTML = `
-                    Time Away: ${minutes} min<br/>
-                    Diamonds Mined: +${diamonds} 💎<br/>
-                    Bread Baked: +${bread} 🍞
-                `;
-                document.getElementById('modal-offline').style.display = 'flex';
+                document.getElementById('offline-stats').innerHTML = `Time Away: ${Math.floor(seconds / 60)} min<br/>Diamonds Mined: +${diamonds} 💎<br/>Bread Baked: +${bread} 🍞`;
+                this.openModal('modal-offline');
             }
         };
 
-        // --- MAIN LOOP ---
-        function animateLoop() {
-            requestAnimationFrame(animateLoop);
-            engine.update();
-        }
+        function animateLoop() { requestAnimationFrame(animateLoop); engine.update(); }
 
         window.onload = function() {
-            game.loadGame(); 
-            engine.init();
-            ui.updateStats();
-            animateLoop();
-
+            game.loadGame(); engine.init(); ui.updateStats(); animateLoop();
             setInterval(() => game.saveGame(), 5000);
         };
-
     </script>
 </body>
 </html>
