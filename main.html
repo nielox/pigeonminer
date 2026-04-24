@@ -30,33 +30,28 @@
             touch-action: none; 
         }
 
+        /* LOADING SCREEN */
+        #loading-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+
         #game-canvas {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-            pointer-events: none; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; 
         }
 
         #touch-catcher {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5;
-            touch-action: none;
-            pointer-events: auto;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; touch-action: none; pointer-events: auto;
         }
 
         #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10;
-            pointer-events: none; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; 
             display: flex; flex-direction: column; justify-content: space-between;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
-        .top-bar {
-            display: flex; justify-content: space-between; padding: 15px; pointer-events: auto;
-        }
+        .top-bar { display: flex; justify-content: space-between; padding: 15px; pointer-events: auto; }
 
         .stat-box {
             background: var(--panel); backdrop-filter: blur(5px);
@@ -100,9 +95,8 @@
 
         .modal {
             background: var(--dark); border: 2px solid #475569; border-radius: 20px;
-            padding: 20px; width: 92%; max-width: 500px; color: white; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
-            position: relative;
+            padding: 20px; width: 92%; max-width: 400px; color: white; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; position: relative;
         }
 
         .modal h2 { margin-top: 0; color: var(--primary); font-size: 1.4rem; }
@@ -164,7 +158,7 @@
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             color: rgba(255,255,255,0.7); font-size: 1.5rem; pointer-events: none;
             animation: pulse 2s infinite; text-align: center; width: 100%; font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); display: none;
         }
         @keyframes pulse {
             0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.95); }
@@ -210,8 +204,7 @@
 
         .buy-pigeon-btn {
             margin-top: 5px; padding: 5px 8px; font-size: 0.7rem; background: #3b82f6; 
-            border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;
-            width: 90%;
+            border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; width: 90%;
         }
         .buy-pigeon-btn:active { background: #2563eb; }
         
@@ -220,15 +213,23 @@
             border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold;
             text-align: center; margin-bottom: 10px; outline: none;
         }
-
     </style>
 </head>
 <body>
 
+    <!-- SAFE LOADING SCREEN -->
+    <div id="loading-screen">
+        <h1 style="color: var(--primary); text-shadow: 0 2px 4px #000; margin-bottom: 10px;">Pigeon Miner 3D</h1>
+        <p style="color: white; margin-bottom: 20px; font-weight: bold;">Loading 3D Assets...</p>
+        <div style="width: 80%; max-width: 300px; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; border: 2px solid #475569;">
+            <div id="loading-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s;"></div>
+        </div>
+    </div>
+
     <div id="game-canvas"></div>
     <div id="touch-catcher"></div>
 
-    <div id="ui-layer">
+    <div id="ui-layer" style="display:none;">
         <div class="top-bar">
             <div class="stat-box"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
             <div class="stat-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
@@ -252,6 +253,7 @@
 
     <div id="toast">Message</div>
 
+    <!-- Box Store Modal -->
     <div id="modal-box-store" class="modal-overlay">
         <div class="modal">
             <h2>Buy Mystery Boxes</h2>
@@ -289,6 +291,7 @@
         </div>
     </div>
 
+    <!-- Upgrades Modal -->
     <div id="modal-upgrades" class="modal-overlay">
         <div class="modal">
             <h2>Upgrades & Factory</h2>
@@ -344,6 +347,7 @@
         </div>
     </div>
 
+    <!-- Pigeon Collection -->
     <div id="modal-inventory" class="modal-overlay">
         <div class="modal">
             <h2>Pigeon Collection</h2>
@@ -352,6 +356,7 @@
         </div>
     </div>
 
+    <!-- Unlocked Info (Single) -->
     <div id="modal-unlocked" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--secondary)">New Pigeon Unlocked!</h2>
@@ -362,6 +367,7 @@
         </div>
     </div>
 
+    <!-- Unlocked Info (Multi Summarized) -->
     <div id="modal-unlocked-multi" class="modal-overlay">
         <div class="modal" style="max-width: 95%;">
             <h2 id="unlocked-multi-title-post" style="color: var(--secondary)">Pigeons Unlocked!</h2>
@@ -371,6 +377,7 @@
         </div>
     </div>
 
+    <!-- Save Slots & Export/Import -->
     <div id="modal-saves" class="modal-overlay">
         <div class="modal">
             <h2>Save Slots</h2>
@@ -383,6 +390,7 @@
         </div>
     </div>
 
+    <!-- Offline Modal -->
     <div id="modal-offline" class="modal-overlay">
         <div class="modal">
             <h2 style="color: var(--primary)">Welcome Back!</h2>
@@ -459,70 +467,131 @@
             init: function() {
                 try {
                     const container = document.getElementById('game-canvas');
-                    let w = window.innerWidth || document.documentElement.clientWidth || window.screen.width;
-                    let h = window.innerHeight || document.documentElement.clientHeight || window.screen.height;
+                    let w = window.innerWidth || window.screen.width;
+                    let h = window.innerHeight || window.screen.height;
 
-                    this.scene = new THREE.Scene();
-                    this.scene.background = new THREE.Color(0x87CEEB);
-                    this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.02);
-                    
-                    this.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
-                    this.camera.position.set(0, 4, 8);
-                    this.camera.lookAt(0, 1, 0);
-
-                    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+                    // 1. CREATE ONLY ONE RENDERER EVER
+                    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
                     this.renderer.setSize(w, h);
                     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
                     this.renderer.shadowMap.enabled = true;
                     this.renderer.shadowMap.type = THREE.PCFShadowMap; 
-                    
                     container.appendChild(this.renderer.domElement);
 
-                    this.setupLighting();
-                    this.setupEnvironment();
-                    this.buildMine(GAME_STATE.currentMine);
-                    this.loadPigeonModel(GAME_STATE.equippedPigeon);
-
-                    window.addEventListener('resize', this.onWindowResize.bind(this));
-                    setTimeout(function(){ engine.onWindowResize(); }, 300);
-
-                    const raycaster = new THREE.Raycaster();
-                    const mouse = new THREE.Vector2();
-
-                    const catcher = document.getElementById('touch-catcher');
-                    const handleTap = function(e) {
-                        if(isSpinning) return;
-                        e.preventDefault(); 
+                    // 2. RUN ICON PRELOADER
+                    this.preloadIcons(function() {
+                        // 3. ONCE ICONS ARE DONE, BUILD MAIN SCENE
+                        engine.scene = new THREE.Scene();
+                        engine.scene.background = new THREE.Color(0x87CEEB);
+                        engine.scene.fog = new THREE.FogExp2(0x87CEEB, 0.02);
                         
-                        let clientX = e.clientX;
-                        let clientY = e.clientY;
-                        if(e.changedTouches && e.changedTouches.length > 0) {
-                            clientX = e.changedTouches[0].clientX;
-                            clientY = e.changedTouches[0].clientY;
-                        } else if(e.type.startsWith('touch')) {
-                            return; 
-                        }
+                        engine.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
+                        engine.camera.position.set(0, 4, 8);
+                        engine.camera.lookAt(0, 1, 0);
+
+                        engine.setupLighting();
+                        engine.setupEnvironment();
+                        engine.buildMine(GAME_STATE.currentMine);
+                        engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+
+                        window.addEventListener('resize', engine.onWindowResize.bind(engine));
+                        setTimeout(function(){ engine.onWindowResize(); }, 300);
+
+                        const raycaster = new THREE.Raycaster();
+                        const mouse = new THREE.Vector2();
+
+                        const catcher = document.getElementById('touch-catcher');
+                        const handleTap = function(e) {
+                            if(isSpinning) return;
+                            e.preventDefault(); 
+                            
+                            let clientX = e.clientX;
+                            let clientY = e.clientY;
+                            if(e.changedTouches && e.changedTouches.length > 0) {
+                                clientX = e.changedTouches[0].clientX;
+                                clientY = e.changedTouches[0].clientY;
+                            } else if(e.type.startsWith('touch')) { return; }
+                            
+                            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+                            raycaster.setFromCamera(mouse, engine.camera);
+                            const intersects = raycaster.intersectObject(engine.mineBlock, true);
+                            if (intersects.length > 0 || (mouse.y > -0.3 && mouse.y < 0.6)) {
+                                game.mine(clientX, clientY);
+                            }
+                        };
                         
-                        mouse.x = (clientX / window.innerWidth) * 2 - 1;
-                        mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+                        catcher.addEventListener('pointerdown', handleTap);
+                        catcher.addEventListener('touchstart', handleTap, {passive: false});
 
-                        raycaster.setFromCamera(mouse, engine.camera);
-                        const intersects = raycaster.intersectObject(engine.mineBlock, true);
-                        if (intersects.length > 0 || (mouse.y > -0.3 && mouse.y < 0.6)) {
-                            game.mine(clientX, clientY);
-                        }
-                    };
-                    
-                    catcher.addEventListener('pointerdown', handleTap);
-                    catcher.addEventListener('touchstart', handleTap, {passive: false});
+                        document.getElementById('loading-screen').style.display = 'none';
+                        document.getElementById('ui-layer').style.display = 'flex';
+                        document.getElementById('mine-hint').style.display = 'block';
 
-                    document.getElementById('mine-hint').style.display = 'block';
+                        animateLoop();
 
-                    setTimeout(function() { engine.generateIconsSafely(); }, 1000);
+                        if (window.Android && window.Android.onGameReady) window.Android.onGameReady();
+                    });
 
                 } catch(err) {
-                    console.error("Engine Init Error: " + err.message);
+                    console.error("Engine Init Error: ", err);
+                    document.getElementById('loading-screen').innerHTML = "<h2 style='color:red'>Graphics Error: " + err.message + "</h2>";
                 }
+            },
+
+            preloadIcons: function(callback) {
+                const iconScene = new THREE.Scene();
+                const iconCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+                iconCamera.position.set(0, 0.4, 2.4);
+                iconCamera.lookAt(0, 0.1, 0);
+
+                const amb = new THREE.AmbientLight(0xffffff, 0.6);
+                const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+                dir.position.set(5, 5, 5);
+                iconScene.add(amb, dir);
+
+                const keys = Object.keys(PIGEON_TYPES).filter(function(k) { return k !== 'base'; });
+                let index = 0;
+                const _this = this;
+
+                // Temporarily resize renderer for 256x256 snapshot
+                const origW = window.innerWidth || window.screen.width;
+                const origH = window.innerHeight || window.screen.height;
+                _this.renderer.setSize(256, 256);
+
+                function processNext() {
+                    if (index >= keys.length) {
+                        _this.renderer.setSize(origW, origH);
+                        callback();
+                        return;
+                    }
+                    
+                    const key = keys[index];
+                    try {
+                        const p = _this.createPigeon(key);
+                        p.position.set(0, -0.3, 0);
+                        p.rotation.y = Math.PI + Math.PI / 8;
+                        iconScene.add(p);
+                        
+                        _this.renderer.render(iconScene, iconCamera);
+                        PIGEON_TYPES[key].iconUrl = _this.renderer.domElement.toDataURL('image/png');
+                        
+                        iconScene.remove(p);
+                        p.traverse(function(child) {
+                            if (child.geometry) child.geometry.dispose();
+                            if (child.material) {
+                                if (Array.isArray(child.material)) child.material.forEach(function(m){m.dispose()});
+                                else child.material.dispose();
+                            }
+                        });
+                    } catch(e) {}
+                    
+                    index++;
+                    document.getElementById('loading-bar').style.width = ((index / keys.length) * 100) + '%';
+                    setTimeout(processNext, 10); 
+                }
+                processNext();
             },
 
             setupLighting: function() {
@@ -739,8 +808,8 @@
                 const matPepper = new THREE.MeshStandardMaterial({ map: texPepper, roughness: 1.0 });
                 const matDiamond = new THREE.MeshStandardMaterial({ color: 0xaaffff, transparent: true, opacity: 0.7, roughness: 0.1, metalness: 0.5 });
                 const matVoid = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const matNeon = new THREE.MeshStandardMaterial({ map: this.generateNeonTexture(), emissive: 0x555555 });
-                const matQuantum = new THREE.MeshStandardMaterial({ map: this.generateQuantumTexture(), emissive: 0x05001a });
+                const matNeon = new THREE.MeshStandardMaterial({ map: this.generateNeonTexture() });
+                const matQuantum = new THREE.MeshStandardMaterial({ map: this.generateQuantumTexture() });
 
                 const matFire = new THREE.MeshStandardMaterial({ 
                     map: this.updateFireTexture(), transparent: true, opacity: 0.95
@@ -877,7 +946,6 @@
                         const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 16), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; pigeonGroup.add(t);
                     }
                     if (type === 'super') { 
-                        // FIXED SUPER CAPE (on the back now)
                         const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide})); 
                         c.position.set(0, 0.6, -0.6); c.rotation.x = -Math.PI / 4; pigeonGroup.add(c); 
                     }
@@ -914,52 +982,6 @@
                     }
                 }
                 return pigeonGroup;
-            },
-
-            // ANDROID SAFE BACKGROUND ICON GENERATOR (Uses the single main engine!)
-            generateIconsSafely: function() {
-                const keys = Object.keys(PIGEON_TYPES).filter(function(k) { return k !== 'base'; });
-                let index = 0;
-                
-                // Temporarily hide the main scene to render icons
-                engine.scene.remove(engine.mineBlock);
-                if(engine.pigeonGroup) engine.scene.remove(engine.pigeonGroup);
-
-                function processNext() {
-                    if (index >= keys.length) {
-                        // Restore main scene
-                        engine.scene.add(engine.mineBlock);
-                        if(engine.pigeonGroup) engine.scene.add(engine.pigeonGroup);
-                        return;
-                    }
-                    
-                    const key = keys[index];
-                    if (!PIGEON_TYPES[key].iconUrl) {
-                        try {
-                            const p = engine.createPigeon(key);
-                            p.position.set(0, -0.3, 0);
-                            p.rotation.y = Math.PI + Math.PI / 8;
-                            engine.scene.add(p);
-                            
-                            // Render snapshot
-                            engine.renderer.render(engine.scene, engine.camera);
-                            PIGEON_TYPES[key].iconUrl = engine.renderer.domElement.toDataURL('image/png');
-                            
-                            // Cleanup
-                            engine.scene.remove(p);
-                            p.traverse(function(child) {
-                                if (child.geometry) child.geometry.dispose();
-                                if (child.material) {
-                                    if (Array.isArray(child.material)) child.material.forEach(function(m){m.dispose()});
-                                    else child.material.dispose();
-                                }
-                            });
-                        } catch(e) {}
-                    }
-                    index++;
-                    setTimeout(processNext, 50); // Small pause prevents WebView crash
-                }
-                processNext();
             },
 
             loadPigeonModel: function(type) {
@@ -1042,13 +1064,17 @@
                     }
                 }
 
-                this.camera.position.x = Math.sin(time * 0.5) * 8;
-                this.camera.position.z = Math.cos(time * 0.5) * 8;
-                this.camera.lookAt(0, 1, 0);
+                if (this.camera) {
+                    this.camera.position.x = Math.sin(time * 0.5) * 8;
+                    this.camera.position.z = Math.cos(time * 0.5) * 8;
+                    this.camera.lookAt(0, 1, 0);
+                }
 
-                const cycle = (Math.sin(time * 0.05) + 1) / 2;
-                this.scene.background.lerpColors(new THREE.Color(0x0f172a), new THREE.Color(0x87CEEB), cycle);
-                this.scene.fog.color.copy(this.scene.background);
+                if (this.scene && this.scene.background) {
+                    const cycle = (Math.sin(time * 0.05) + 1) / 2;
+                    this.scene.background.lerpColors(new THREE.Color(0x0f172a), new THREE.Color(0x87CEEB), cycle);
+                    this.scene.fog.color.copy(this.scene.background);
+                }
 
                 if (this.pigeonGroup && !this.isAnimatingMine) {
                     this.pigeonGroup.position.y = Math.sin(time * 2) * 0.05;
@@ -1089,7 +1115,7 @@
 
                 if (this.mineBlock) this.mineBlock.position.y = Math.sin(time) * 0.1;
                 
-                if (this.renderer) {
+                if (this.renderer && this.scene && this.camera) {
                     try { 
                         if(isNaN(this.camera.aspect)) this.onWindowResize();
                         this.renderer.render(this.scene, this.camera); 
@@ -1098,8 +1124,8 @@
             },
             onWindowResize: function() { 
                 if(!this.camera || !this.renderer) return;
-                let w = window.innerWidth || document.documentElement.clientWidth || window.screen.width;
-                let h = window.innerHeight || document.documentElement.clientHeight || window.screen.height;
+                let w = window.innerWidth || window.screen.width;
+                let h = window.innerHeight || window.screen.height;
                 this.camera.aspect = w / h; 
                 this.camera.updateProjectionMatrix(); 
                 this.renderer.setSize(w, h); 
@@ -1385,7 +1411,6 @@
 
                 const wonTypes = [];
                 
-                // SAFE MATH UNBOXING FOR HUGE AMOUNTS (Up to 99M!)
                 if (amount > 10000) {
                     for (const key in PIGEON_TYPES) {
                         if (key === 'base') continue;
@@ -1395,7 +1420,7 @@
                         const actual = Math.floor(expected + variance);
                         if (actual > 0) {
                             if (GAME_STATE.unlockedPigeons.indexOf(key) === -1) GAME_STATE.unlockedPigeons.push(key);
-                            for(let j=0; j<Math.min(actual, 100); j++) wonTypes.push(key); // Cap visual array size
+                            for(let j=0; j<Math.min(actual, 100); j++) wonTypes.push(key); 
                         }
                     }
                 } else {
@@ -1409,10 +1434,10 @@
                 const container = document.getElementById('multi-roulette-grid');
                 container.innerHTML = '';
                 
-                // SAFE ANDROID ROULETTE: Display max 100 boxes on screen
-                const displayLimit = 100; 
+                // SAFE ANDROID ROULETTE: Display max 50 boxes on screen
+                const displayLimit = 50; 
                 const visualAmount = Math.min(wonTypes.length, displayLimit);
-                let size = visualAmount > 50 ? '30px' : (visualAmount > 10 ? '45px' : '60px');
+                let size = visualAmount > 30 ? '35px' : (visualAmount > 10 ? '45px' : '60px');
                 container.style.gridTemplateColumns = `repeat(auto-fit, minmax(${size}, 1fr))`;
                 document.getElementById('multi-roulette-title').innerText = `Unboxing ${ui.formatNumber(amount)}x...`;
 
@@ -1445,7 +1470,6 @@
 
                 ui.openModal('modal-multi-roulette');
 
-                // Skip full spin loop on 10k+ to instantly show results
                 if (amount >= 1000) {
                     setTimeout(function() {
                         visualBoxes.forEach(function(vb) {
@@ -1650,15 +1674,17 @@
                 const previewContainer = document.getElementById('preview-multi-container');
                 previewContainer.innerHTML = '';
                 
-                const displayTypes = types.slice(0, 10);
+                const displayCount = Math.min(types.length, 100); // Safely display up to 100 in the UI grid
+                const displayTypes = types.slice(0, displayCount);
+                
                 displayTypes.forEach(function(type) {
                     if(PIGEON_TYPES[type].iconUrl) {
-                        previewContainer.innerHTML += `<img src="${PIGEON_TYPES[type].iconUrl}" style="width:60px; height:60px; object-fit:contain; animation: popIn 0.5s forwards;">`;
+                        previewContainer.innerHTML += `<img src="${PIGEON_TYPES[type].iconUrl}" style="width:40px; height:40px; object-fit:contain; animation: popIn 0.5s forwards;">`;
                     }
                 });
                 
-                if (types.length > 10) {
-                    previewContainer.innerHTML += `<div style="width:100%; text-align:center; color:#cbd5e1; font-weight:bold; margin-top:10px;">...and ${ui.formatNumber(types.length - 10)} more!</div>`;
+                if (types.length > displayCount) {
+                    previewContainer.innerHTML += `<div style="width:100%; text-align:center; color:#cbd5e1; font-weight:bold; margin-top:10px;">...and ${ui.formatNumber(types.length - displayCount)} more!</div>`;
                 }
 
                 this.openModal('modal-unlocked-multi');
@@ -1678,8 +1704,8 @@
                         for(let k in parsed) {
                             if(parsed.hasOwnProperty(k)) GAME_STATE[k] = parsed[k];
                         }
-                        engine.buildMine(GAME_STATE.currentMine); 
-                        engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                        if(engine.buildMine) engine.buildMine(GAME_STATE.currentMine); 
+                        if(engine.loadPigeonModel) engine.loadPigeonModel(GAME_STATE.equippedPigeon);
                         ui.updateStats();
                         
                         if (GAME_STATE.lastSaveTime) {
@@ -1703,9 +1729,11 @@
         }
 
         window.onload = function() {
-            game.loadGame(); engine.init(); ui.updateStats(); animateLoop();
+            game.loadGame(); 
+            setTimeout(function(){ engine.init(); }, 100); // Short delay to ensure WebView sizing
+            ui.updateStats(); 
+            
             setInterval(function() { game.saveGame(); }, 5000);
-            if (window.Android && window.Android.onGameReady) window.Android.onGameReady();
         };
     </script>
 </body>
