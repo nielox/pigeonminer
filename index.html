@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pigeon Miner 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #facc15;
+            --secondary: #38bdf8;
+            --dark: #1e293b;
+            --panel: rgba(30, 41, 59, 0.85);
+            --text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        button, .inv-item, .equip-slot, .nav-btn, .btn-sell-big {
+            touch-action: manipulation;
+        }
+
+        #loading-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+
+        #game-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        #touch-catcher {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; touch-action: none; pointer-events: auto;
+        }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .top-bar { display: flex; justify-content: space-between; padding: 15px; pointer-events: auto; }
+
+        .stat-box {
+            background: var(--panel); backdrop-filter: blur(5px);
+            padding: 8px 16px; border-radius: 20px; color: var(--text);
+            font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        #power-display {
+            position: absolute; top: 70px; right: 15px; background: rgba(0,0,0,0.6);
+            padding: 5px 12px; border-radius: 12px; border: 2px solid var(--secondary);
+            color: var(--secondary); font-size: 1rem; font-weight: bold; text-shadow: 0 2px 4px #000;
+        }
+
+        #combo-display {
+            position: absolute; top: 70px; left: 15px; background: rgba(0,0,0,0.6);
+            padding: 5px 12px; border-radius: 12px; border: 2px solid var(--primary);
+            color: var(--primary); font-size: 1.2rem; font-weight: 900;
+            text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s;
+        }
+        
+        .combo-pulse { transform: scale(1.1); color: #fff !important; }
+
+        .bottom-action-bar {
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0));
+            padding: 20px 10px 15px 10px; pointer-events: auto;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .btn-sell-big {
+            background: linear-gradient(145deg, #f59e0b, #d97706); border: 2px solid #fcd34d;
+            color: white; padding: 15px; border-radius: 16px; font-size: 1.2rem;
+            font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.1s;
+            width: 100%; text-align: center; display: flex; flex-direction: column;
+        }
+        .btn-sell-big:active { transform: scale(0.96); }
+        .btn-sell-big .sub { font-size: 0.8rem; opacity: 0.9; font-weight: normal; margin-top: 4px; }
+
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+        .nav-btn {
+            background: #334155; border: 1px solid #475569; color: white;
+            padding: 10px 5px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: background 0.2s; cursor: pointer;
+        }
+        .nav-btn:active { background: #1e293b; transform: translateY(2px); }
+        .nav-btn span { font-size: 1.2rem; }
+
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; display: none;
+            justify-content: center; align-items: center; pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--dark); border: 2px solid #475569; border-radius: 20px;
+            padding: 20px; width: 95%; max-width: 420px; color: white; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; position: relative;
+        }
+
+        .modal h2 { margin-top: 0; color: var(--primary); font-size: 1.4rem; }
+        .modal-close {
+            margin-top: 15px; width: 100%; padding: 12px; background: #ef4444;
+            border: none; border-radius: 12px; color: white; font-weight: bold;
+            font-size: 1rem; cursor: pointer;
+        }
+
+        .upgrade-row {
+            background: #334155; border: 1px solid #475569; border-radius: 12px;
+            padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between;
+            align-items: center; text-align: left;
+        }
+        .upgrade-info { flex: 1; }
+        .upgrade-title { font-weight: bold; font-size: 1rem; color: #f8fafc; }
+        .upgrade-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+        .upgrade-btn {
+            background: #22c55e; border: none; border-radius: 8px; padding: 8px 12px;
+            color: white; font-weight: bold; font-size: 0.9rem; margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;
+        }
+        .upgrade-btn:active { background: #16a34a; transform: scale(0.95); }
+
+        .roulette-container {
+            width: 100%; height: 120px; overflow: hidden; position: relative;
+            background: #0f172a; border: 3px solid #334155; border-radius: 12px;
+            margin: 20px 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        .roulette-selector {
+            position: absolute; top: 0; left: 50%; width: 4px; height: 100%;
+            background: #facc15; transform: translateX(-50%); z-index: 5;
+            box-shadow: 0 0 10px #facc15, 0 0 20px #facc15; border-radius: 2px;
+        }
+        .roulette-strip { display: flex; height: 100%; width: max-content; }
+        .roulette-item {
+            width: 90px; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; border-right: 1px solid #334155;
+            font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+        }
+
+        #toast {
+            position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-weight: bold; opacity: 0; transition: opacity 0.3s;
+            z-index: 50; pointer-events: none; text-align: center;
+        }
+        .floating-text {
+            position: absolute; color: var(--secondary); font-weight: bold; font-size: 1.5rem;
+            pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: floatUp 1s ease-out forwards; z-index: 5; white-space: nowrap;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+        #mine-hint {
+            position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.7); font-size: 1.5rem; pointer-events: none;
+            animation: pulse 2s infinite; text-align: center; width: 100%; font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); display: none;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.95); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.95); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.1) rotate(-20deg); opacity: 0; }
+            70% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .preview-img-single {
+            width: 160px; height: 160px; object-fit: contain; margin: 15px auto;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); display: block;
+        }
+
+        /* Squad Equipment UI */
+        .equip-slots-container {
+            display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; 
+            padding: 10px; background: #0f172a; border-radius: 12px; border: 2px solid #334155;
+        }
+        .equip-slot {
+            width: 50px; height: 50px; background: #1e293b; border: 2px dashed #475569;
+            border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+        }
+        .equip-slot.filled { border-style: solid; border-color: #4ade80; background: #0f172a; }
+        .equip-slot img { width: 80%; height: 80%; object-fit: contain; }
+        .equip-slot .unequip-badge {
+            position: absolute; top: -5px; right: -5px; background: #ef4444; color: white;
+            border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 45vh; overflow-y: auto; padding-right: 5px; }
+        .inv-item { background: #334155; border: 2px solid #475569; border-radius: 10px; padding: 8px 4px; cursor: pointer; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; position: relative;}
+        .inv-item.active { border-color: #4ade80; background: #166534; box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.5); }
+        .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: default; }
+
+        .qty-badge {
+            position: absolute; top: -5px; left: -5px; background: var(--primary); color: #000;
+            border-radius: 8px; padding: 2px 6px; font-weight: 900; font-size: 0.7rem; border: 1px solid #000;
+        }
+
+        .rarity-common { color: #cbd5e1; }
+        .rarity-rare { color: #38bdf8; }
+        .rarity-epic { color: #c084fc; }
+        .rarity-legendary { color: #facc15; text-shadow: 0 0 5px rgba(250, 204, 21, 0.5); }
+        .rarity-mythic { color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.8); }
+        .rarity-secret { color: #ef4444; font-weight: 900; text-shadow: 0 0 10px rgba(239, 68, 68, 1), 0 0 20px rgba(239, 68, 68, 0.8); animation: pulseRed 2s infinite; }
+        .rarity-silent { color: #fff; font-weight: 900; background: linear-gradient(90deg, #fff, #fbbf24, #fff); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 15px rgba(255,255,255,0.7); animation: pulseSilent 1.5s infinite; }
+
+        @keyframes pulseRed { 0% { filter: brightness(1); } 50% { filter: brightness(1.3); } 100% { filter: brightness(1); } }
+        @keyframes pulseSilent { 0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); } 50% { filter: drop-shadow(0 0 20px rgba(255,255,255,1)); } 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); } }
+
+        .buy-pigeon-btn {
+            margin-top: 5px; padding: 5px 8px; font-size: 0.7rem; background: #3b82f6;
+            border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; width: 90%;
+        }
+        .buy-pigeon-btn:active { background: #2563eb; }
+
+        .custom-amount-input {
+            width: 100%; padding: 12px; background: #0f172a; border: 2px solid #475569;
+            border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold;
+            text-align: center; margin-bottom: 10px; outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading-screen">
+    <h1 style="color: var(--primary); text-shadow: 0 2px 4px #000; margin-bottom: 10px;">Pigeon Miner 3D</h1>
+    <p style="color: white; margin-bottom: 20px; font-weight: bold;">Loading Realistic Assets...</p>
+    <div style="width: 80%; max-width: 300px; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; border: 2px solid #475569;">
+        <div id="loading-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s;"></div>
+    </div>
+</div>
+
+<div id="game-canvas"></div>
+<div id="touch-catcher"></div>
+
+<div id="ui-layer" style="display:none;">
+    <div class="top-bar">
+        <div class="stat-box"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
+        <div class="stat-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
+    </div>
+    
+    <div id="combo-display">Combo x1.0</div>
+    <div id="power-display">Power: x1.0</div>
+
+    <div id="mine-hint">TAP TO MINE</div>
+
+    <div class="bottom-action-bar">
+        <button class="btn-sell-big" onclick="game.sellDiamonds()">
+            SELL STONES
+            <span class="sub" id="sell-rate-display">Multiplier: x1</span>
+        </button>
+        <div class="nav-grid">
+            <button class="nav-btn" onclick="ui.openModal('modal-upgrades')"><span>⬆️</span> Upgrades</button>
+            <button class="nav-btn" onclick="game.openBoxStore()"><span>🎁</span> Store</button>
+            <button class="nav-btn" onclick="ui.openInventory()"><span>🐦</span> Squad</button>
+            <button class="nav-btn" onclick="ui.openSaveModal()"><span>💾</span> Saves</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Message</div>
+
+<!-- Box Store Modal -->
+<div id="modal-box-store" class="modal-overlay">
+    <div class="modal">
+        <h2>Buy Mystery Boxes</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
+            <button class="btn-sell-big" style="font-size:1rem;" onclick="game.buyBox(1)">Open 1x<span class="sub" id="store-cost-1">5,000 🍞</span></button>
+            <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #ec4899, #be185d); border-color:#f472b6;" onclick="game.buyBox(10)">Open 10x<span class="sub" id="store-cost-10">50,000 🍞</span></button>
+            <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #8b5cf6, #4c1d95); border-color:#c084fc;" onclick="game.buyBox(100)">Open 100x<span class="sub" id="store-cost-100">500k 🍞</span></button>
+            <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #10b981, #047857); border-color:#34d399;" onclick="game.buyBox(1000)">Open 1,000x<span class="sub" id="store-cost-1k">5M 🍞</span></button>
+            <button class="btn-sell-big" style="grid-column: span 2; font-size:1rem; background: linear-gradient(145deg, #f43f5e, #be123c); border-color:#fb7185;" onclick="game.buyBox(10000)">Open 10,000x<span class="sub" id="store-cost-10k">50M 🍞</span></button>
+        </div>
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #475569;">
+            <h3 style="margin: 0 0 10px 0; font-size: 1rem; color: #cbd5e1;">Custom Amount</h3>
+            <input type="number" id="custom-box-amount" class="custom-amount-input" min="1" max="99999999" value="1">
+            <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #3b82f6, #1d4ed8); border-color:#60a5fa;" onclick="game.buyCustomBox()">Open Custom Boxes</button>
+        </div>
+        <button class="modal-close" onclick="ui.closeModal('modal-box-store')">Close</button>
+    </div>
+</div>
+
+<!-- Upgrades Modal -->
+<div id="modal-upgrades" class="modal-overlay">
+    <div class="modal">
+        <h2>Upgrades</h2>
+        <div class="upgrade-row">
+            <div class="upgrade-info"><div class="upgrade-title">⛏️ Dig Speed</div><div class="upgrade-desc" id="desc-dig">Lvl 1</div></div>
+            <button class="upgrade-btn" id="btn-dig" onclick="game.upgradeSpeed()">1,000 🍞</button>
+        </div>
+        <div class="upgrade-row">
+            <div class="upgrade-info"><div class="upgrade-title">🤖 Auto-Miner</div><div class="upgrade-desc" id="desc-auto">Lvl 0</div></div>
+            <button class="upgrade-btn" id="btn-auto" onclick="game.upgradeAuto()">5,000 🍞</button>
+        </div>
+        <div class="upgrade-row">
+            <div class="upgrade-info"><div class="upgrade-title">🏭 Bread Factory</div><div class="upgrade-desc" id="desc-factory">Lvl 0</div></div>
+            <button class="upgrade-btn" id="btn-factory" style="background:#ea580c" onclick="game.upgradeFactory()">50,000 🍞</button>
+        </div>
+        <div class="upgrade-row">
+            <div class="upgrade-info"><div class="upgrade-title">🗺️ Next Mine Area</div><div class="upgrade-desc" id="desc-mine">Massive multiplier!</div></div>
+            <button class="upgrade-btn" id="btn-mine" style="background:#ec4899" onclick="game.upgradeMine()">100k 🍞</button>
+        </div>
+        <button class="modal-close" onclick="ui.closeModal('modal-upgrades')">Close</button>
+    </div>
+</div>
+
+<!-- Roulette Modals -->
+<div id="modal-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
+    <div class="modal" style="width: 100%; background: transparent; border: none; box-shadow: none; padding: 0;">
+        <h2 style="font-size: 2rem; text-shadow: 0 2px 4px #000;">Unboxing...</h2>
+        <div class="roulette-container"><div class="roulette-selector"></div><div class="roulette-strip" id="roulette-strip"></div></div>
+    </div>
+</div>
+
+<div id="modal-multi-roulette" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
+    <div class="modal" style="width: 100%; max-width: 600px; background: transparent; border: none; box-shadow: none; padding: 0;">
+        <h2 id="multi-roulette-title" style="font-size: 1.8rem; text-shadow: 0 2px 4px #000; margin-bottom: 15px;">Unboxing...</h2>
+        <div id="multi-roulette-grid" style="display: grid; gap: 4px; justify-content: center; align-content: center; max-height: 60vh; overflow-y: auto; padding: 10px;"></div>
+        <div id="multi-roulette-overflow" style="color: var(--secondary); font-weight: bold; margin-top: 10px; text-shadow: 0 2px 4px #000;"></div>
+    </div>
+</div>
+
+<!-- SQUAD / INVENTORY MODAL -->
+<div id="modal-inventory" class="modal-overlay">
+    <div class="modal">
+        <h2>Pigeon Squad</h2>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Click slots to unequip. Click inventory to equip.</p>
+        
+        <div class="equip-slots-container" id="equip-slots-container">
+            <!-- Generated via JS -->
+        </div>
+
+        <div class="inventory-grid" id="inventory-grid"></div>
+        <button class="modal-close" onclick="ui.closeModal('modal-inventory')">Close</button>
+    </div>
+</div>
+
+<!-- Unlocked Modals -->
+<div id="modal-unlocked" class="modal-overlay">
+    <div class="modal">
+        <h2 style="color: var(--secondary)">New Pigeon Found!</
