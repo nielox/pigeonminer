@@ -63,13 +63,13 @@
         }
 
         #power-display {
-            position: absolute; top: 85px; right: 15px; background: rgba(0,0,0,0.6);
+            position: absolute; top: 100px; right: 15px; background: rgba(0,0,0,0.6);
             padding: 5px 12px; border-radius: 12px; border: 2px solid var(--secondary);
             color: var(--secondary); font-size: 1rem; font-weight: bold; text-shadow: 0 2px 4px #000;
         }
 
         #combo-display {
-            position: absolute; top: 85px; left: 15px; background: rgba(0,0,0,0.6);
+            position: absolute; top: 100px; left: 15px; background: rgba(0,0,0,0.6);
             padding: 5px 12px; border-radius: 12px; border: 2px solid var(--primary);
             color: var(--primary); font-size: 1.2rem; font-weight: 900;
             text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s;
@@ -157,7 +157,7 @@
         }
 
         #toast {
-            position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 140px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
             border-radius: 20px; font-weight: bold; opacity: 0; transition: opacity 0.3s;
             z-index: 50; pointer-events: none; text-align: center;
@@ -194,26 +194,28 @@
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); display: block;
         }
 
-        /* Squad Equipment UI */
+        /* Squad Equipment UI - Scaled for 20 */
         .equip-slots-container {
-            display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; 
+            display: flex; justify-content: flex-start; align-items: flex-start; gap: 6px; margin-bottom: 15px; 
             padding: 10px; background: #0f172a; border-radius: 12px; border: 2px solid #334155;
+            flex-wrap: wrap; max-height: 160px; overflow-y: auto;
         }
         .equip-slot {
-            width: 52px; height: 52px; background: #1e293b; border: 2px dashed #475569;
+            width: 44px; height: 44px; background: #1e293b; border: 2px dashed #475569;
             border-radius: 8px; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; position: relative; text-align: center; font-size: 0.65rem; 
+            cursor: pointer; position: relative; text-align: center; font-size: 0.6rem; 
             color: #facc15; font-weight: bold; line-height: 1.2; flex-direction: column;
+            flex-shrink: 0;
         }
         .equip-slot.filled { border-style: solid; border-color: #4ade80; background: #0f172a; }
-        .equip-slot img { width: 80%; height: 80%; object-fit: contain; }
+        .equip-slot img { width: 85%; height: 85%; object-fit: contain; }
         .equip-slot .unequip-badge {
             position: absolute; top: -5px; right: -5px; background: #ef4444; color: white;
-            border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold;
+            border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: bold;
             display: flex; justify-content: center; align-items: center;
         }
 
-        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 45vh; overflow-y: auto; padding-right: 5px; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 40vh; overflow-y: auto; padding-right: 5px; }
         .inv-item { background: #334155; border: 2px solid #475569; border-radius: 10px; padding: 8px 4px; cursor: pointer; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; position: relative;}
         .inv-item.active { border-color: #4ade80; background: #166534; box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.5); }
         .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: default; }
@@ -312,6 +314,10 @@
     <div class="modal">
         <h2>Upgrades</h2>
         <div class="upgrade-row">
+            <div class="upgrade-info"><div class="upgrade-title">🐦 Squad Size</div><div class="upgrade-desc" id="desc-squad">1/20 Slots</div></div>
+            <button class="upgrade-btn" id="btn-squad" style="background:#3b82f6" onclick="game.upgradeSquad()">1M 🍞</button>
+        </div>
+        <div class="upgrade-row">
             <div class="upgrade-info"><div class="upgrade-title">⛏️ Dig Speed</div><div class="upgrade-desc" id="desc-dig">Lvl 1</div></div>
             <button class="upgrade-btn" id="btn-dig" onclick="game.upgradeSpeed()">5,000 🍞</button>
         </div>
@@ -351,7 +357,7 @@
 <div id="modal-inventory" class="modal-overlay">
     <div class="modal">
         <h2>Pigeon Squad</h2>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Click slots to unequip. Click inventory to equip.</p>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Click inventory to equip to available slots.</p>
         
         <div class="equip-slots-container" id="equip-slots-container">
             <!-- Generated via JS -->
@@ -411,8 +417,8 @@
         'common': 1, 'rare': 2, 'epic': 5, 'legendary': 15, 'mythic': 30, 'secret': 60, 'silent': 100
     };
 
-    // Slot unlocking prices
-    const SLOT_COSTS = [0, 1000000, 50000000, 1000000000, 100000000000];
+    // Slot unlocking prices up to 20
+    const SLOT_COSTS = [0, 1e6, 5e6, 2.5e7, 1e8, 5e8, 2.5e9, 1e10, 5e10, 2.5e11, 1e12, 5e12, 2.5e13, 1e14, 5e14, 2.5e15, 1e16, 5e16, 2.5e17, 1e18];
 
     const PIGEON_TYPES = {
         base: { id: 'base', name: 'Basic Pigeon', rarity: 'common', chance: 0, color: 'rarity-common', cost: 0, iconUrl: '' },
@@ -593,7 +599,6 @@
 
                 const key = keys[index];
                 try {
-                    // Custom Black Picture for Sunny
                     if (key === 'sunny') {
                         const canvas = document.createElement('canvas');
                         canvas.width = 64; canvas.height = 64;
@@ -735,21 +740,37 @@
             const canvas = document.createElement('canvas');
             canvas.width = 256; canvas.height = 256;
             const ctx = canvas.getContext('2d');
-            // Base grey
             ctx.fillStyle = '#6e7072'; ctx.fillRect(0,0,256,256);
-            // Pinkish breast front
+            
             const grad = ctx.createLinearGradient(0, 0, 0, 256);
             grad.addColorStop(0.3, 'rgba(196, 145, 145, 0)');
             grad.addColorStop(0.6, 'rgba(196, 145, 145, 0.8)');
             grad.addColorStop(1, 'rgba(196, 145, 145, 0)');
             ctx.fillStyle = grad; ctx.fillRect(0,0,256,256);
-            // Feathers noise
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(10, 100, 30, 100);
+            ctx.fillRect(216, 100, 30, 100);
+
+            ctx.beginPath(); ctx.arc(64, 40, 15, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(192, 40, 15, 0, Math.PI*2); ctx.fill();
+
             for(let i=0; i<1500; i++){
                 ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
                 ctx.fillRect(Math.random()*256, Math.random()*256, 3, 1);
             }
             const tex = new THREE.CanvasTexture(canvas);
             this.textureCache['sunny'] = tex; return tex;
+        },
+        
+        generateSunnyWingTexture: function() {
+            if(this.textureCache['sunnyWing']) return this.textureCache['sunnyWing'];
+            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#6e7072'; ctx.fillRect(0,0,64,64);
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 48, 64, 16); 
+            const tex = new THREE.CanvasTexture(canvas);
+            this.textureCache['sunnyWing'] = tex; return tex;
         },
 
         generateGlitchTexture: function() {
@@ -877,7 +898,9 @@
             const matChrono = new THREE.MeshStandardMaterial({ map: texChrono, metalness: 0.6, roughness: 0.4 });
             const matDino = new THREE.MeshStandardMaterial({ map: texDino, roughness: 0.9, metalness: 0.1 });
             const matWorca = new THREE.MeshStandardMaterial({ map: this.generateWorcaTexture(), roughness: 0.6 });
-            const matSunny = new THREE.MeshStandardMaterial({ map: this.generateSunnyTexture(), roughness: 0.8 });
+            const matSunny = new THREE.MeshStandardMaterial({ map: this.generateSunnyTexture(), roughness: 0.9 });
+            const matLion = new THREE.MeshStandardMaterial({ color: 0xcd853f, roughness: 0.9 });
+            const matPhoenix = new THREE.MeshStandardMaterial({ color: 0xff4500, emissive: 0x882200, roughness: 0.2 });
 
             const matFire = new THREE.MeshStandardMaterial({ map: this.updateFireTexture(), transparent: true, opacity: 0.95 });
 
@@ -917,9 +940,9 @@
                 if (type === 'brown_pigeon') customMat = matBrown;
                 if (['dove', 'swan'].includes(type)) customMat = matWhite;
                 if (type === 'hawk') customMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
-                if (type === 'phoenix') customMat = new THREE.MeshStandardMaterial({ color: 0xff4500, roughness: 0.4, emissive: 0x441100 });
-                if (type === 'griffin') customMat = new THREE.MeshStandardMaterial({ color: 0xcd853f, roughness: 0.8 });
-                if (type === 'friend') customMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 }); // Blackbird
+                if (type === 'phoenix') customMat = matPhoenix;
+                if (type === 'griffin') customMat = matLion;
+                if (type === 'friend') customMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 }); 
 
                 if (['wolf', 'vampire', 'dragon_wolf'].includes(type)) customMat = matDarkGrey;
                 if (type === 'robot') customMat = new THREE.MeshStandardMaterial({ color: 0xa3a3a3, metalness: 0.8, roughness: 0.2 });
@@ -945,7 +968,7 @@
                 if (type === 'time_traveler') customMat = matChrono;
                 if (type === 'dino') customMat = matDino;
                 if (type === 'waffle') customMat = matGrey; 
-                if (type === 'worca') customMat = matWorca;
+                if (type === 'worca') customMat = matDarkGrey;
                 if (type === 'sunny') customMat = matSunny;
 
                 const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 24, 24), customMat);
@@ -954,11 +977,11 @@
 
                 if (type === 'swan') body.scale.set(1.1, 1.6, 1.1);
 
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), customMat);
+                const headMat = type === 'griffin' ? matWhite : customMat; // Griffin has white eagle head
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), headMat);
                 head.position.set(0, 1.0, 0.4); head.castShadow = true; 
                 
                 if (type === 'swan') {
-                    // Long neck
                     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.8, 16), customMat);
                     neck.position.set(0, 1.0, 0.3); neck.rotation.x = 0.3;
                     head.position.set(0, 1.4, 0.5);
@@ -968,7 +991,7 @@
                 pigeonGroup.add(head);
 
                 // Tails
-                const hasTail = ['wolf', 'dragon_wolf', 'ozzy', 'pepper', 'cat', 'mecha_dog', 'space_dog', 'dino', 'worca', 'sunny', 'friend'];
+                const hasTail = ['wolf', 'dragon_wolf', 'ozzy', 'pepper', 'cat', 'mecha_dog', 'space_dog', 'dino', 'worca', 'sunny', 'friend', 'phoenix', 'griffin'];
                 if (hasTail.includes(type)) {
                     let tailGeo = new THREE.ConeGeometry(0.12, 0.5, 16);
                     if(type === 'cat') tailGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.6);
@@ -979,16 +1002,43 @@
                     const tailMat = (type === 'mecha_dog') ? new THREE.MeshStandardMaterial({color:0x888888, metalness:0.8}) : customMat;
                     
                     if(type === 'worca') {
-                        // Realistic Orca Fluke
                         const tailGroup = new THREE.Group();
-                        const tBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 0.5), matDarkGrey);
-                        tBase.rotation.x = Math.PI / 2; tBase.position.set(0, 0, -0.15);
-                        const flukeL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 16), matDarkGrey);
-                        flukeL.rotation.z = Math.PI / 2; flukeL.rotation.y = -Math.PI / 6; flukeL.position.set(0.15, 0, -0.4); flukeL.scale.set(1, 1, 0.2);
-                        const flukeR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 16), matDarkGrey);
-                        flukeR.rotation.z = -Math.PI / 2; flukeR.rotation.y = Math.PI / 6; flukeR.position.set(-0.15, 0, -0.4); flukeR.scale.set(1, 1, 0.2);
-                        tailGroup.add(tBase, flukeL, flukeR);
-                        tailGroup.position.set(0, 0.35, -0.5);
+                        
+                        const shape = new THREE.Shape();
+                        shape.moveTo(0, 0);
+                        shape.bezierCurveTo(0.2, 0.2, 0.5, 0.1, 0.6, -0.2); 
+                        shape.bezierCurveTo(0.3, -0.1, 0.1, -0.2, 0, -0.1);  
+                        shape.bezierCurveTo(-0.1, -0.2, -0.3, -0.1, -0.6, -0.2); 
+                        shape.bezierCurveTo(-0.5, 0.1, -0.2, 0.2, 0, 0); 
+                        const flukeGeo = new THREE.ShapeGeometry(shape);
+                        const fluke = new THREE.Mesh(flukeGeo, new THREE.MeshStandardMaterial({color: 0x111111, side: THREE.DoubleSide}));
+                        fluke.rotation.x = Math.PI / 2;
+                        fluke.position.set(0, 0.3, -0.6);
+                        fluke.scale.set(0.6, 0.6, 0.6);
+                        
+                        tailGroup.add(fluke);
+                        pigeonGroup.add(tailGroup);
+                        pigeonGroup.userData.tail = tailGroup;
+                    } else if (type === 'phoenix') {
+                        const tailGroup = new THREE.Group();
+                        for(let i=0; i<3; i++) {
+                            const feather = new THREE.Mesh(new THREE.ConeGeometry(0.08, 1.2, 8), matPhoenix);
+                            feather.position.set((i-1)*0.15, 0, 0);
+                            feather.rotation.x = -Math.PI / 3;
+                            feather.geometry.translate(0, 0.6, 0);
+                            tailGroup.add(feather);
+                        }
+                        tailGroup.position.set(0, 0.4, -0.6);
+                        pigeonGroup.add(tailGroup);
+                        pigeonGroup.userData.tail = tailGroup;
+                    } else if (type === 'griffin') {
+                        const tailGroup = new THREE.Group();
+                        const lionTail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6), matLion);
+                        lionTail.rotation.x = -Math.PI / 3;
+                        const puff = new THREE.Mesh(new THREE.SphereGeometry(0.08), matDarkGrey);
+                        puff.position.set(0, -0.3, 0); lionTail.add(puff);
+                        tailGroup.add(lionTail);
+                        tailGroup.position.set(0, 0.35, -0.6);
                         pigeonGroup.add(tailGroup);
                         pigeonGroup.userData.tail = tailGroup;
                     } else {
@@ -1014,57 +1064,39 @@
                     }
                 }
 
-                // Legs/Fins for Worca
                 if(type === 'worca') {
-                    // Wolf ears on top
                     const wEarGeo = new THREE.ConeGeometry(0.08, 0.25, 16);
                     const we1 = new THREE.Mesh(wEarGeo, matDarkGrey); we1.position.set(0.15, 0.28, 0); we1.rotation.z = -0.2;
                     const we2 = new THREE.Mesh(wEarGeo, matDarkGrey); we2.position.set(-0.15, 0.28, 0); we2.rotation.z = 0.2;
                     head.add(we1, we2);
 
-                    const legGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.3);
-                    const legMat = matDarkGrey;
-                    const p1 = new THREE.Mesh(legGeo, legMat); p1.position.set(0.2, 0.15, 0.2);
-                    const p2 = new THREE.Mesh(legGeo, legMat); p2.position.set(-0.2, 0.15, 0.2);
-                    const p3 = new THREE.Mesh(legGeo, legMat); p3.position.set(0.2, 0.15, -0.3);
-                    const p4 = new THREE.Mesh(legGeo, legMat); p4.position.set(-0.2, 0.15, -0.3);
-                    pigeonGroup.add(p1, p2, p3, p4);
+                    const wFluffGeo = new THREE.DodecahedronGeometry(0.2, 0);
+                    const wFluff1 = new THREE.Mesh(wFluffGeo, matDarkGrey); wFluff1.position.set(0.25, 0.9, 0.2);
+                    const wFluff2 = new THREE.Mesh(wFluffGeo, matDarkGrey); wFluff2.position.set(-0.25, 0.9, 0.2);
+                    pigeonGroup.add(wFluff1, wFluff2);
 
-                    const tinyFin = new THREE.ConeGeometry(0.06, 0.18, 8);
-                    [p1, p2, p3, p4].forEach(p => {
-                        const tf = new THREE.Mesh(tinyFin, matDarkGrey);
-                        tf.position.set(0, 0, -0.08); tf.rotation.x = -Math.PI/3; p.add(tf);
-                    });
-
-                    // Big dorsal fin
-                    const bFin = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 16), matDarkGrey);
-                    bFin.position.set(0, 1.15, -0.1); bFin.rotation.x = -0.4; bFin.scale.set(0.5, 1, 1);
+                    const bFin = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.8, 16), matDarkGrey);
+                    bFin.position.set(0, 1.2, -0.1); bFin.rotation.x = -0.2; bFin.scale.set(0.3, 1, 1);
                     pigeonGroup.add(bFin);
                 }
                 
                 // Wings
                 const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel', 'wolf', 'ozzy', 'pepper', 'cat', 'mecha_dog', 'space_dog', 'dino', 'worca', 'super', 'vampire'];
                 if (!noWings.includes(type)) {
-                    const wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
-                    const wingL = new THREE.Mesh(wingGeo, customMat);
+                    let wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
+                    
+                    const wMat = type === 'griffin' ? matWhite : (type === 'sunny' ? new THREE.MeshStandardMaterial({map: this.generateSunnyWingTexture(), roughness: 0.9}) : customMat);
+
+                    const wingL = new THREE.Mesh(wingGeo, wMat);
                     wingL.scale.set(0.2, 0.8, 1.2); wingL.position.set(0.45, 0.5, -0.1);
-                    const wingR = new THREE.Mesh(wingGeo, customMat);
+                    const wingR = new THREE.Mesh(wingGeo, wMat);
                     wingR.scale.set(0.2, 0.8, 1.2); wingR.position.set(-0.45, 0.5, -0.1);
                     
-                    if (type === 'sunny') {
-                        // White wing stripe for wood pigeon
-                        const wStripe = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.7, 0.1), matWhite);
-                        wStripe.position.set(0.18, 0, 0); wingL.add(wStripe);
-                        const wStripeR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.7, 0.1), matWhite);
-                        wStripeR.position.set(-0.18, 0, 0); wingR.add(wStripeR);
-                        
-                        // White neck spots
-                        const spotGeo = new THREE.SphereGeometry(0.06);
-                        const spotL = new THREE.Mesh(spotGeo, matWhite); spotL.position.set(0.22, -0.05, 0.1);
-                        const spotR = new THREE.Mesh(spotGeo, matWhite); spotR.position.set(-0.22, -0.05, 0.1);
-                        head.add(spotL, spotR);
-                    }
                     if (type === 'swan') { wingL.scale.set(0.2, 1.0, 1.5); wingR.scale.set(0.2, 1.0, 1.5); }
+                    if (type === 'hawk') { 
+                        wingL.scale.set(0.15, 1.0, 1.6); wingL.rotation.z = -0.2; wingL.position.y = 0.6;
+                        wingR.scale.set(0.15, 1.0, 1.6); wingR.rotation.z = 0.2; wingR.position.y = 0.6;
+                    }
 
                     pigeonGroup.add(wingL, wingR);
                     pigeonGroup.userData.wingL = wingL; pigeonGroup.userData.wingR = wingR;
@@ -1072,14 +1104,40 @@
 
                 // Custom Bodies & Details
                 if (type === 'friend') {
-                    // Blackbird: Big cute eyes, bright orange beak
-                    const cEye1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), matEye); cEye1.position.set(0.12, 0.1, 0.24);
-                    const cEye2 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), matEye); cEye2.position.set(-0.12, 0.1, 0.24);
-                    const pupil1 = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), matWhite); pupil1.position.set(0.04, 0.04, 0.06); cEye1.add(pupil1);
-                    const pupil2 = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), matWhite); pupil2.position.set(-0.04, 0.04, 0.06); cEye2.add(pupil2);
+                    const cEye1 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 32, 32), matEye); cEye1.position.set(0.15, 0.1, 0.24);
+                    const cEye2 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 32, 32), matEye); cEye2.position.set(-0.15, 0.1, 0.24);
                     
-                    const cBeak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 16), matOrange); cBeak.rotation.x = Math.PI / 2; cBeak.position.set(0, 0.02, 0.35);
+                    const matCatch = new THREE.MeshBasicMaterial({color: 0xffffff});
+                    const longCatchGeo = new THREE.SphereGeometry(0.04, 16, 16);
+                    
+                    const lc1 = new THREE.Mesh(longCatchGeo, matCatch); lc1.scale.set(0.5, 1.5, 0.5); lc1.position.set(0.07, 0.08, 0.15); lc1.rotation.z = Math.PI/6;
+                    const lc2 = new THREE.Mesh(longCatchGeo, matCatch); lc2.scale.set(0.5, 1.5, 0.5); lc2.position.set(0.07, 0.08, 0.15); lc2.rotation.z = Math.PI/6;
+                    
+                    const spot1Geo = new THREE.SphereGeometry(0.02, 8, 8);
+                    const s1_1 = new THREE.Mesh(spot1Geo, matCatch); s1_1.position.set(-0.06, -0.06, 0.15);
+                    const s1_2 = new THREE.Mesh(spot1Geo, matCatch); s1_2.position.set(-0.06, -0.06, 0.15);
+
+                    const spot2Geo = new THREE.SphereGeometry(0.012, 8, 8);
+                    const s2_1 = new THREE.Mesh(spot2Geo, matCatch); s2_1.position.set(0.09, -0.02, 0.16);
+                    const s2_2 = new THREE.Mesh(spot2Geo, matCatch); s2_2.position.set(0.09, -0.02, 0.16);
+
+                    cEye1.add(lc1, s1_1, s2_1);
+                    cEye2.add(lc2, s1_2, s2_2);
+                    
+                    const cBeak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 16), matOrange); cBeak.rotation.x = Math.PI / 2; cBeak.position.set(0, -0.05, 0.35);
                     head.add(cEye1, cEye2, cBeak);
+
+                    const fluff1 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.48, 1), customMat); pigeonGroup.add(fluff1);
+                    fluff1.position.set(0, 0.6, 0);
+
+                    const footL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.2), matOrange); footL.position.set(0.2, 0.15, 0.1); pigeonGroup.add(footL);
+                    const footR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.2), matOrange); footR.position.set(-0.2, 0.15, 0.1); pigeonGroup.add(footR);
+
+                } else if (type === 'hawk') {
+                    this.addEyesOnly(head, matEye);
+                    const hawkBeak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 16), matBeak);
+                    hawkBeak.position.set(0, -0.05, 0.35); hawkBeak.rotation.x = Math.PI / 2.5; 
+                    head.add(hawkBeak);
                 } else if (type === 'swan') {
                     this.addEyesOnly(head, matEye);
                     const swanBeak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 16), matOrange); 
@@ -1242,9 +1300,9 @@
                     pigeonGroup.add(w1, w2);
                     pigeonGroup.userData.wingL = w1; pigeonGroup.userData.wingR = w2; pigeonGroup.userData.isDragonWing = true;
                 }
-                if (type === 'fire' || type === 'godly_fire') {
+                if (type === 'fire' || type === 'godly_fire' || type === 'phoenix') {
                     pigeonGroup.userData.isFire = true;
-                    if(type === 'godly_fire') pigeonGroup.userData.isGodly = true;
+                    if(type === 'godly_fire' || type === 'phoenix') pigeonGroup.userData.isGodly = true;
                 }
             }
             return pigeonGroup;
@@ -1478,7 +1536,6 @@
                         if(parsed.hasOwnProperty(k)) GAME_STATE[k] = parsed[k];
                     }
                     
-                    // Migrations
                     if (typeof GAME_STATE.freeBoxes === 'undefined') GAME_STATE.freeBoxes = 3;
                     if (typeof GAME_STATE.maxSlots === 'undefined') GAME_STATE.maxSlots = 1;
 
@@ -1619,6 +1676,17 @@
             } else ui.showToast("No diamonds to sell!");
         },
 
+        upgradeSquad: function() {
+            if (GAME_STATE.maxSlots >= 20) { ui.showToast("Max slots reached!"); return; }
+            const cost = SLOT_COSTS[GAME_STATE.maxSlots];
+            if (GAME_STATE.bread >= cost) {
+                GAME_STATE.bread -= cost;
+                GAME_STATE.maxSlots++;
+                ui.updateStats();
+                ui.populateInventory();
+            } else ui.showToast("Not enough Bread!");
+        },
+
         upgradeSpeed: function() {
             if (GAME_STATE.bread >= GAME_STATE.upgradeCost) {
                 GAME_STATE.bread -= GAME_STATE.upgradeCost; GAME_STATE.digSpeed += 1;
@@ -1649,18 +1717,6 @@
                     engine.buildMine(GAME_STATE.currentMine); ui.updateStats(); ui.showToast(`Unlocked ${nextMine.name}!`);
                 } else ui.showToast(`Need ${ui.formatNumber(nextMine.unlockCost)} Bread!`);
             } else ui.showToast("Max mine reached!");
-        },
-
-        buySlot: function(slotIndex, cost) {
-            if (GAME_STATE.bread >= cost) {
-                GAME_STATE.bread -= cost;
-                GAME_STATE.maxSlots++;
-                ui.updateStats();
-                ui.populateInventory();
-                ui.showToast(`Equip Slot Unlocked!`);
-            } else {
-                ui.showToast("Not enough Bread!");
-            }
         },
 
         openBoxStore: function() {
@@ -1951,6 +2007,15 @@
             document.getElementById('bread-display').innerText = this.formatNumber(GAME_STATE.bread);
             document.getElementById('diamond-display').innerText = this.formatNumber(GAME_STATE.diamonds);
 
+            if (GAME_STATE.maxSlots < 20) {
+                document.getElementById('btn-squad').innerText = `${this.formatNumber(SLOT_COSTS[GAME_STATE.maxSlots])} 🍞`;
+                document.getElementById('desc-squad').innerText = `${GAME_STATE.maxSlots}/20 Slots`;
+            } else {
+                document.getElementById('btn-squad').innerText = `MAX`;
+                document.getElementById('btn-squad').style.background = '#64748b';
+                document.getElementById('desc-squad').innerText = `20/20 Slots`;
+            }
+
             document.getElementById('btn-dig').innerText = `${this.formatNumber(GAME_STATE.upgradeCost)} 🍞`;
             document.getElementById('desc-dig').innerText = `Lvl ${GAME_STATE.digSpeed} (+${this.formatNumber(GAME_STATE.digSpeed)} 💎/tap)`;
 
@@ -2043,7 +2108,7 @@
         populateInventory: function() {
             const equipContainer = document.getElementById('equip-slots-container');
             equipContainer.innerHTML = '';
-            for(let i=0; i<5; i++) {
+            for(let i=0; i<20; i++) {
                 const slot = document.createElement('div');
                 
                 if (i < GAME_STATE.maxSlots) {
