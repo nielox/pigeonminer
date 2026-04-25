@@ -29,7 +29,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        button, .inv-item, .equip-slot, .nav-btn, .btn-sell-big, .nest-row {
+        button, .inv-item, .equip-slot, .nav-btn, .btn-sell-big, .nest-row, .nest-selectable {
             touch-action: manipulation;
         }
 
@@ -63,13 +63,13 @@
         }
 
         #power-display {
-            position: absolute; top: 100px; right: 15px; background: rgba(0,0,0,0.6);
+            position: absolute; top: 80px; right: 15px; background: rgba(0,0,0,0.6);
             padding: 5px 12px; border-radius: 12px; border: 2px solid var(--secondary);
             color: var(--secondary); font-size: 1rem; font-weight: bold; text-shadow: 0 2px 4px #000;
         }
 
         #combo-display {
-            position: absolute; top: 100px; left: 15px; background: rgba(0,0,0,0.6);
+            position: absolute; top: 80px; left: 15px; background: rgba(0,0,0,0.6);
             padding: 5px 12px; border-radius: 12px; border: 2px solid var(--primary);
             color: var(--primary); font-size: 1.2rem; font-weight: 900;
             text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s;
@@ -138,6 +138,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;
         }
         .upgrade-btn:active { background: #16a34a; transform: scale(0.95); }
+        .upgrade-btn:disabled { background: #64748b; cursor: not-allowed; }
 
         .roulette-container {
             width: 100%; height: 120px; overflow: hidden; position: relative;
@@ -195,7 +196,6 @@
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); display: block;
         }
 
-        /* Squad Equipment UI - Scaled for 50 */
         .equip-slots-container {
             display: flex; justify-content: flex-start; align-items: flex-start; gap: 6px; margin-bottom: 15px; 
             padding: 10px; background: #0f172a; border-radius: 12px; border: 2px solid #334155;
@@ -226,13 +226,19 @@
             border-radius: 8px; padding: 2px 6px; font-weight: 900; font-size: 0.65rem; border: 1px solid #000; white-space: nowrap;
         }
 
-        /* Nesting UI */
-        .nest-row {
-            background: #1e293b; border: 1px solid #475569; border-radius: 10px;
-            padding: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        /* Mix Breeding UI */
+        .nest-columns { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 8px;}
+        .nest-col { flex: 1; background: #1e293b; padding: 8px; border-radius: 10px; border: 1px solid #475569; }
+        .nest-col h3 { margin: 0 0 8px 0; font-size: 0.9rem; text-align: center; }
+        .nest-list { max-height: 25vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .nest-selectable { 
+            background: #334155; border: 1px solid #475569; border-radius: 6px; padding: 4px;
+            display: flex; align-items: center; gap: 6px; font-size: 0.7rem; cursor: pointer;
         }
-        .nest-info { display: flex; align-items: center; gap: 10px; text-align: left; font-size: 0.9rem;}
-        .nest-info img { width: 40px; height: 40px; object-fit: contain; }
+        .nest-selectable img { width: 30px; height: 30px; object-fit: contain; }
+        .nest-selectable.selected-m { border-color: #38bdf8; background: rgba(56, 189, 248, 0.2); }
+        .nest-selectable.selected-f { border-color: #f472b6; background: rgba(244, 114, 182, 0.2); }
+        .breed-action { background: #0f172a; padding: 12px; border-radius: 10px; text-align: center; border: 2px solid #334155;}
 
         .rarity-common { color: #cbd5e1; }
         .rarity-rare { color: #38bdf8; }
@@ -291,7 +297,7 @@
             <button class="nav-btn" onclick="ui.openModal('modal-upgrades')"><span>⬆️</span> Upgrades</button>
             <button class="nav-btn" onclick="game.openBoxStore()"><span>🎁</span> Store</button>
             <button class="nav-btn" onclick="ui.openInventory()"><span>🐦</span> Squad</button>
-            <button class="nav-btn" onclick="ui.openModal('modal-nesting'); ui.populateNesting();"><span>🥚</span> Nest</button>
+            <button class="nav-btn" onclick="ui.openModal('modal-nesting'); ui.populateNesting();"><span>🥚</span> Mix</button>
             <button class="nav-btn" onclick="ui.openSaveModal()"><span>💾</span> Saves</button>
         </div>
     </div>
@@ -303,6 +309,7 @@
 <div id="modal-box-store" class="modal-overlay">
     <div class="modal">
         <h2>Buy Mystery Boxes</h2>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Box Limit: 5 copies per pigeon. Unbox more to get refund!</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
             <button class="btn-sell-big" style="font-size:1rem;" onclick="game.buyBox(1)" id="btn-buy-1">Open 1x<span class="sub" id="store-cost-1">50,000 🍞</span></button>
             <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #ec4899, #be185d); border-color:#f472b6;" onclick="game.buyBox(10)">Open 10x<span class="sub" id="store-cost-10">500k 🍞</span></button>
@@ -347,12 +354,27 @@
     </div>
 </div>
 
-<!-- Nesting Modal -->
+<!-- Nesting Modal (Mixing) -->
 <div id="modal-nesting" class="modal-overlay">
     <div class="modal">
-        <h2>Pigeon Nesting 🥚</h2>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Pair a Male (♂) and Female (♀) to hatch a new pigeon! 5% chance for Twins!</p>
-        <div id="nesting-list" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
+        <h2>Mix & Breed 🥚</h2>
+        <p style="font-size:0.75rem; color:#94a3b8; margin-top:-5px;">Select any Male and Female to breed. Bypasses 5-pigeon limit!</p>
+        
+        <div class="nest-columns">
+            <div class="nest-col">
+                <h3 style="color:#38bdf8;">Males ♂</h3>
+                <div class="nest-list" id="nest-male-list"></div>
+            </div>
+            <div class="nest-col">
+                <h3 style="color:#f472b6;">Females ♀</h3>
+                <div class="nest-list" id="nest-female-list"></div>
+            </div>
+        </div>
+
+        <div class="breed-action" id="breed-action-area">
+            Select parents to breed!
+        </div>
+
         <button class="modal-close" onclick="ui.closeModal('modal-nesting')">Close</button>
     </div>
 </div>
@@ -379,10 +401,7 @@
         <h2>Pigeon Squad</h2>
         <p style="font-size:0.8rem; color:#94a3b8; margin-top:-5px;">Click inventory to equip to available slots.</p>
         
-        <div class="equip-slots-container" id="equip-slots-container">
-            <!-- Generated via JS -->
-        </div>
-
+        <div class="equip-slots-container" id="equip-slots-container"></div>
         <div class="inventory-grid" id="inventory-grid"></div>
         <button class="modal-close" onclick="ui.closeModal('modal-inventory')">Close</button>
     </div>
@@ -438,6 +457,7 @@
     };
 
     const SLOT_COSTS = [0, 1e6, 5e6, 2.5e7, 1e8, 5e8, 2.5e9, 1e10, 5e10, 2.5e11, 1e12, 5e12, 2.5e13, 1e14, 5e14, 2.5e15, 1e16, 5e16, 2.5e17, 1e18];
+    // Fill up to 50 dynamically if needed, but the formula handles the rest.
 
     const NEST_COSTS = {
         'common': 1000, 'rare': 5000, 'epic': 25000, 'legendary': 125000, 'mythic': 625000, 'secret': 3125000, 'silent': 15625000
@@ -518,6 +538,8 @@
 
     let CURRENT_SLOT = 1;
     let isSpinning = false;
+    let nestSelectedMale = null;
+    let nestSelectedFemale = null;
 
     // --- THREE.JS ENGINE ---
     const engine = {
@@ -636,8 +658,7 @@
                         p.rotation.y = Math.PI + Math.PI / 8;
                         
                         if(key === 'dino') { p.scale.set(0.6, 0.6, 0.6); p.position.y = -0.6; }
-                        if(key === 'worca') { p.scale.set(0.8, 0.8, 0.8); p.position.y = -0.5; } 
-
+                        
                         iconScene.add(p);
                         _this.renderer.render(iconScene, iconCamera);
                         PIGEON_TYPES[key].iconUrl = _this.renderer.domElement.toDataURL('image/png');
@@ -645,11 +666,13 @@
                         iconScene.remove(p);
                         _this.disposeHierarchy(p);
                     }
-                } catch(e) {}
-
-                index++;
-                document.getElementById('loading-bar').style.width = ((index / keys.length) * 100) + '%';
-                setTimeout(processNext, 5);
+                } catch(e) {
+                    console.error("Failed to preload:", key, e);
+                } finally {
+                    index++;
+                    document.getElementById('loading-bar').style.width = ((index / keys.length) * 100) + '%';
+                    setTimeout(processNext, 5);
+                }
             }
             processNext();
         },
@@ -758,44 +781,6 @@
             const tex = new THREE.CanvasTexture(canvas);
             this.textureCache['worca'] = tex; return tex;
         },
-        
-        generateSunnyTexture: function() {
-            if(this.textureCache['sunny']) return this.textureCache['sunny'];
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#6e7072'; ctx.fillRect(0,0,256,256);
-            
-            const grad = ctx.createLinearGradient(0, 0, 0, 256);
-            grad.addColorStop(0.3, 'rgba(196, 145, 145, 0)');
-            grad.addColorStop(0.6, 'rgba(196, 145, 145, 0.8)');
-            grad.addColorStop(1, 'rgba(196, 145, 145, 0)');
-            ctx.fillStyle = grad; ctx.fillRect(0,0,256,256);
-            
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(10, 100, 30, 100);
-            ctx.fillRect(216, 100, 30, 100);
-
-            ctx.beginPath(); ctx.arc(64, 40, 15, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(192, 40, 15, 0, Math.PI*2); ctx.fill();
-
-            for(let i=0; i<1500; i++){
-                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-                ctx.fillRect(Math.random()*256, Math.random()*256, 3, 1);
-            }
-            const tex = new THREE.CanvasTexture(canvas);
-            this.textureCache['sunny'] = tex; return tex;
-        },
-        
-        generateSunnyWingTexture: function() {
-            if(this.textureCache['sunnyWing']) return this.textureCache['sunnyWing'];
-            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#6e7072'; ctx.fillRect(0,0,64,64);
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 48, 64, 16); 
-            const tex = new THREE.CanvasTexture(canvas);
-            this.textureCache['sunnyWing'] = tex; return tex;
-        },
 
         generateGlitchTexture: function() {
             if (this.textureCache['glitch']) return this.textureCache['glitch'];
@@ -901,7 +886,7 @@
             const matBrown = new THREE.MeshStandardMaterial({ map: texBrown, roughness: 0.9, metalness: 0.1 });
             const matDarkGrey = new THREE.MeshStandardMaterial({ map: texDarkGrey, roughness: 0.9, metalness: 0.1 });
             const matBeak = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
-            const matOrange = new THREE.MeshStandardMaterial({ color: 0xff8c00, roughness: 0.5 }); // Blackbird beak
+            const matOrange = new THREE.MeshStandardMaterial({ color: 0xff8c00, roughness: 0.5 }); 
             const matEye = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.1, metalness: 0.8 });
             const matPink = new THREE.MeshStandardMaterial({ map: texPink, roughness: 0.6, metalness: 0.1 });
             const matGold = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.2, metalness: 1.0 });
@@ -921,8 +906,6 @@
             const matDemon = new THREE.MeshStandardMaterial({ map: texDemon, roughness: 0.7 });
             const matChrono = new THREE.MeshStandardMaterial({ map: texChrono, metalness: 0.6, roughness: 0.4 });
             const matDino = new THREE.MeshStandardMaterial({ map: texDino, roughness: 0.9, metalness: 0.1 });
-            const matWorca = new THREE.MeshStandardMaterial({ map: this.generateWorcaTexture(), roughness: 0.6 });
-            const matSunny = new THREE.MeshStandardMaterial({ map: this.generateSunnyTexture(), roughness: 0.9 });
             const matLion = new THREE.MeshStandardMaterial({ color: 0xcd853f, roughness: 0.9 });
             const matPhoenix = new THREE.MeshStandardMaterial({ color: 0xff4500, emissive: 0x882200, roughness: 0.2 });
 
@@ -992,8 +975,8 @@
                 if (type === 'time_traveler') customMat = matChrono;
                 if (type === 'dino') customMat = matDino;
                 if (type === 'waffle') customMat = matGrey; 
-                if (type === 'worca') customMat = matDarkGrey;
-                if (type === 'sunny') customMat = matSunny;
+                if (type === 'worca') customMat = matDarkGrey; // Back to dark grey body
+                if (type === 'sunny') customMat = matGrey; // Normal grey pigeon color
 
                 const bodyGeo = (type === 'guinea_pig') ? new THREE.CylinderGeometry(0.5, 0.5, 1.2, 32) : new THREE.SphereGeometry(0.45, 24, 24);
                 const body = new THREE.Mesh(bodyGeo, customMat);
@@ -1018,6 +1001,12 @@
                     pigeonGroup.add(neck);
                 } else if (type === 'guinea_pig') {
                     head.position.set(0, 0.5, 0.6);
+                } else if (type === 'sunny') {
+                    // Simple white spots for Sunny on the neck
+                    const spotGeo = new THREE.SphereGeometry(0.08);
+                    const spotL = new THREE.Mesh(spotGeo, matWhite); spotL.position.set(0.25, -0.1, 0);
+                    const spotR = new THREE.Mesh(spotGeo, matWhite); spotR.position.set(-0.25, -0.1, 0);
+                    head.add(spotL, spotR);
                 }
 
                 pigeonGroup.add(head);
@@ -1034,21 +1023,14 @@
                     const tailMat = (type === 'mecha_dog') ? new THREE.MeshStandardMaterial({color:0x888888, metalness:0.8}) : customMat;
                     
                     if(type === 'worca') {
+                        // Better flat orca tail
                         const tailGroup = new THREE.Group();
-                        
-                        const shape = new THREE.Shape();
-                        shape.moveTo(0, 0);
-                        shape.bezierCurveTo(0.2, 0.2, 0.5, 0.1, 0.6, -0.2); 
-                        shape.bezierCurveTo(0.3, -0.1, 0.1, -0.2, 0, -0.1);  
-                        shape.bezierCurveTo(-0.1, -0.2, -0.3, -0.1, -0.6, -0.2); 
-                        shape.bezierCurveTo(-0.5, 0.1, -0.2, 0.2, 0, 0); 
-                        const flukeGeo = new THREE.ShapeGeometry(shape);
-                        const fluke = new THREE.Mesh(flukeGeo, new THREE.MeshStandardMaterial({color: 0x111111, side: THREE.DoubleSide}));
-                        fluke.rotation.x = Math.PI / 2;
-                        fluke.position.set(0, 0.3, -0.6);
-                        fluke.scale.set(0.6, 0.6, 0.6);
-                        
-                        tailGroup.add(fluke);
+                        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.1, 0.4), matDarkGrey);
+                        base.rotation.x = Math.PI / 2; base.position.set(0, 0, -0.2);
+                        const fluke = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.2), matDarkGrey);
+                        fluke.position.set(0, 0, -0.4);
+                        tailGroup.add(base, fluke);
+                        tailGroup.position.set(0, 0.35, -0.5);
                         pigeonGroup.add(tailGroup);
                         pigeonGroup.userData.tail = tailGroup;
                     } else if (type === 'phoenix') {
@@ -1096,19 +1078,17 @@
                     }
                 }
 
+                // Wolf/Orca specifics
                 if(type === 'worca') {
+                    // Wolf ears
                     const wEarGeo = new THREE.ConeGeometry(0.08, 0.25, 16);
                     const we1 = new THREE.Mesh(wEarGeo, matDarkGrey); we1.position.set(0.15, 0.28, 0); we1.rotation.z = -0.2;
                     const we2 = new THREE.Mesh(wEarGeo, matDarkGrey); we2.position.set(-0.15, 0.28, 0); we2.rotation.z = 0.2;
                     head.add(we1, we2);
 
-                    const wFluffGeo = new THREE.DodecahedronGeometry(0.2, 0);
-                    const wFluff1 = new THREE.Mesh(wFluffGeo, matDarkGrey); wFluff1.position.set(0.25, 0.9, 0.2);
-                    const wFluff2 = new THREE.Mesh(wFluffGeo, matDarkGrey); wFluff2.position.set(-0.25, 0.9, 0.2);
-                    pigeonGroup.add(wFluff1, wFluff2);
-
-                    const bFin = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.8, 16), matDarkGrey);
-                    bFin.position.set(0, 1.2, -0.1); bFin.rotation.x = -0.2; bFin.scale.set(0.3, 1, 1);
+                    // Dorsal fin on back
+                    const bFin = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 16), matDarkGrey);
+                    bFin.position.set(0, 1.2, -0.1); bFin.rotation.x = -0.2;
                     pigeonGroup.add(bFin);
                 }
                 
@@ -1116,7 +1096,7 @@
                 const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel', 'wolf', 'ozzy', 'pepper', 'cat', 'mecha_dog', 'space_dog', 'dino', 'worca', 'super', 'vampire', 'guinea_pig'];
                 if (!noWings.includes(type)) {
                     let wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
-                    const wMat = type === 'griffin' ? matWhite : (type === 'sunny' ? new THREE.MeshStandardMaterial({map: this.generateSunnyWingTexture(), roughness: 0.9}) : customMat);
+                    const wMat = type === 'griffin' ? matWhite : customMat;
 
                     const wingL = new THREE.Mesh(wingGeo, wMat);
                     wingL.scale.set(0.2, 0.8, 1.2); wingL.position.set(0.45, 0.5, -0.1);
@@ -1135,22 +1115,27 @@
 
                 // Custom Bodies & Details
                 if (type === 'friend') {
+                    // Blackbird big flat 2D looking anime eyes
                     const cEyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
-                    const cEye1 = new THREE.Mesh(new THREE.CircleGeometry(0.18, 32), cEyeMat); 
-                    cEye1.position.set(0.12, 0.1, 0.24); cEye1.rotation.y = Math.PI / 6;
-                    const cEye2 = new THREE.Mesh(new THREE.CircleGeometry(0.18, 32), cEyeMat); 
-                    cEye2.position.set(-0.12, 0.1, 0.24); cEye2.rotation.y = -Math.PI / 6;
+                    const eyeGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.02, 32);
+                    
+                    const cEye1 = new THREE.Mesh(eyeGeo, cEyeMat); 
+                    cEye1.rotation.x = Math.PI / 2; cEye1.rotation.y = Math.PI / 6;
+                    cEye1.position.set(0.12, 0.1, 0.24);
+                    
+                    const cEye2 = new THREE.Mesh(eyeGeo, cEyeMat); 
+                    cEye2.rotation.x = Math.PI / 2; cEye2.rotation.y = -Math.PI / 6;
+                    cEye2.position.set(-0.12, 0.1, 0.24); 
                     
                     const matCatch = new THREE.MeshBasicMaterial({color: 0xffffff});
-                    const lc1 = new THREE.Mesh(new THREE.CapsuleGeometry(0.02, 0.05, 4, 8), matCatch); 
-                    lc1.position.set(0.05, 0.06, 0.01); lc1.rotation.z = Math.PI/4; cEye1.add(lc1);
-                    const lc2 = new THREE.Mesh(new THREE.CapsuleGeometry(0.02, 0.05, 4, 8), matCatch); 
-                    lc2.position.set(0.05, 0.06, 0.01); lc2.rotation.z = Math.PI/4; cEye2.add(lc2);
+                    const spot1Geo = new THREE.CylinderGeometry(0.04, 0.04, 0.03, 16);
+                    
+                    const lc1 = new THREE.Mesh(spot1Geo, matCatch); lc1.position.set(0.05, 0.01, -0.05); cEye1.add(lc1);
+                    const lc2 = new THREE.Mesh(spot1Geo, matCatch); lc2.position.set(0.05, 0.01, -0.05); cEye2.add(lc2);
 
-                    const s1_1 = new THREE.Mesh(new THREE.CircleGeometry(0.015, 8), matCatch); 
-                    s1_1.position.set(-0.06, -0.06, 0.01); cEye1.add(s1_1);
-                    const s1_2 = new THREE.Mesh(new THREE.CircleGeometry(0.015, 8), matCatch); 
-                    s1_2.position.set(-0.06, -0.06, 0.01); cEye2.add(s1_2);
+                    const spot2Geo = new THREE.CylinderGeometry(0.015, 0.015, 0.03, 8);
+                    const s1_1 = new THREE.Mesh(spot2Geo, matCatch); s1_1.position.set(-0.06, 0.01, 0.06); cEye1.add(s1_1);
+                    const s1_2 = new THREE.Mesh(spot2Geo, matCatch); s1_2.position.set(-0.06, 0.01, 0.06); cEye2.add(s1_2);
 
                     const cBeak = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 16), matOrange); cBeak.rotation.x = Math.PI / 2; cBeak.position.set(0, -0.05, 0.35);
                     head.add(cEye1, cEye2, cBeak);
@@ -1165,9 +1150,9 @@
                     this.addEyesOnly(head, matEye);
                     const snout = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.1), new THREE.MeshStandardMaterial({color:0xffaaaa}));
                     snout.position.set(0, -0.05, 0.28); head.add(snout);
-                    const gpEarGeo = new THREE.CircleGeometry(0.08, 16);
-                    const eL = new THREE.Mesh(gpEarGeo, matDarkGrey); eL.position.set(0.2, 0.2, 0); eL.rotation.y = Math.PI/2;
-                    const eR = new THREE.Mesh(gpEarGeo, matDarkGrey); eR.position.set(-0.2, 0.2, 0); eR.rotation.y = -Math.PI/2;
+                    const gpEarGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.02, 16);
+                    const eL = new THREE.Mesh(gpEarGeo, matDarkGrey); eL.position.set(0.2, 0.2, 0); eL.rotation.z = Math.PI/2;
+                    const eR = new THREE.Mesh(gpEarGeo, matDarkGrey); eR.position.set(-0.2, 0.2, 0); eR.rotation.z = Math.PI/2;
                     head.add(eL, eR);
                 } else if (type === 'hawk') {
                     this.addEyesOnly(head, matEye);
@@ -1256,7 +1241,7 @@
                     const horn2 = new THREE.Mesh(hornGeo, hornMat); horn2.position.set(-0.15, 0.25, 0); horn2.rotation.z = 0.3;
                     head.add(horn1, horn2);
                 } else { 
-                    if(!['dino', 'worca', 'friend', 'swan', 'guinea_pig'].includes(type)) this.addFace(head, matEye, matBeak); 
+                    if(!['dino', 'friend', 'swan', 'guinea_pig'].includes(type)) this.addFace(head, matEye, matBeak); 
                 }
 
                 if (['super', 'vampire'].includes(type)) {
@@ -1575,18 +1560,13 @@
                     if (typeof GAME_STATE.freeBoxes === 'undefined') GAME_STATE.freeBoxes = 3;
                     if (typeof GAME_STATE.maxSlots === 'undefined') GAME_STATE.maxSlots = 1;
 
-                    // MIGRATION 1: Array -> Object mapping
                     if (GAME_STATE.unlockedPigeons && Array.isArray(GAME_STATE.unlockedPigeons)) {
                         GAME_STATE.inventory = {};
-                        GAME_STATE.unlockedPigeons.forEach(p => { 
-                            if (!GAME_STATE.inventory[p]) GAME_STATE.inventory[p] = {m:0, f:0};
-                            GAME_STATE.inventory[p].m++; 
-                        });
+                        GAME_STATE.unlockedPigeons.forEach(p => { this.addToInventory(p, 1, true); });
                         GAME_STATE.equipped = [GAME_STATE.equippedPigeon || 'base'];
                         delete GAME_STATE.unlockedPigeons; delete GAME_STATE.equippedPigeon;
                     }
                     
-                    // MIGRATION 2: Numeric tracking -> Object mapping
                     if (GAME_STATE.inventory) {
                         for (let k in GAME_STATE.inventory) {
                             if (typeof GAME_STATE.inventory[k] === 'number') {
@@ -1812,46 +1792,54 @@
             return 'hat';
         },
 
-        addToInventory: function(type, amount=1) {
-            if (!GAME_STATE.inventory[type] || typeof GAME_STATE.inventory[type] === 'number') {
-                GAME_STATE.inventory[type] = {m: 0, f: 0};
-            }
-            if(type === 'ozzy') {
-                GAME_STATE.inventory[type].m += amount;
-            } else if (type === 'pepper') {
-                GAME_STATE.inventory[type].f += amount;
-            } else {
-                if (amount > 100) {
-                    let half = Math.floor(amount / 2);
-                    let rem = amount - half;
-                    GAME_STATE.inventory[type].m += half;
-                    GAME_STATE.inventory[type].f += rem;
-                } else {
-                    for(let i=0; i<amount; i++) {
-                        if (Math.random() < 0.5) GAME_STATE.inventory[type].m++;
-                        else GAME_STATE.inventory[type].f++;
-                    }
+        addToInventory: function(type, amount=1, isBreeding=false) {
+            if (!GAME_STATE.inventory[type]) GAME_STATE.inventory[type] = {m: 0, f: 0};
+            
+            let inv = GAME_STATE.inventory[type];
+            let current = inv.m + inv.f;
+            let toAdd = amount;
+            
+            if (!isBreeding && current + amount > 5) {
+                toAdd = Math.max(0, 5 - current);
+                // Refund for lost duplicates from boxes
+                if (amount - toAdd > 0) {
+                    GAME_STATE.bread += (amount - toAdd) * (PIGEON_TYPES[type].cost ? PIGEON_TYPES[type].cost * 0.05 : 100);
                 }
             }
+
+            for(let i=0; i<toAdd; i++) {
+                if(type === 'ozzy') inv.m++;
+                else if (type === 'pepper') inv.f++;
+                else {
+                    if (Math.random() < 0.5) inv.m++;
+                    else inv.f++;
+                }
+            }
+            ui.checkAllPigeonsOwned();
         },
 
-        nest: function(type1, type2, cost) {
+        nest: function() {
+            if(!nestSelectedMale || !nestSelectedFemale) {
+                ui.showToast("Select both a Male and a Female to breed!");
+                return;
+            }
+
+            const r1 = PIGEON_TYPES[nestSelectedMale].rarity;
+            const r2 = PIGEON_TYPES[nestSelectedFemale].rarity;
+            const cost = Math.floor((NEST_COSTS[r1] + NEST_COSTS[r2]) / 2);
+
             if (GAME_STATE.bread < cost) { ui.showToast("Not enough Bread!"); return; }
             GAME_STATE.bread -= cost;
             
             let babies = (Math.random() < 0.05) ? 2 : 1;
-            let resultType = type1;
             
-            if (type1 === 'ozzy' && type2 === 'pepper') {
-                resultType = (Math.random() < 0.5) ? 'ozzy' : 'pepper';
-            }
+            let resultType = (Math.random() < 0.5) ? nestSelectedMale : nestSelectedFemale;
             
-            this.addToInventory(resultType, babies);
-            ui.checkAllPigeonsOwned();
+            this.addToInventory(resultType, babies, true); // isBreeding = true (bypasses 5 limit)
             ui.updateStats();
             ui.populateNesting(); 
             
-            ui.showUnlockModalSingle(resultType, `A ${resultType} hatched!`);
+            ui.showUnlockModalSingle(resultType, `A ${PIGEON_TYPES[resultType].name} hatched!`);
             document.getElementById('unlocked-title').innerText = babies === 2 ? "TWINS HATCHED! 🥚🥚" : "NEW BABY HATCHED! 🥚";
         },
 
@@ -1908,7 +1896,6 @@
                     isSpinning = false;
                     ui.closeModal('modal-roulette');
                     game.addToInventory(wonType, 1);
-                    ui.checkAllPigeonsOwned();
                     ui.showUnlockModalSingle(wonType);
                 }, 5500);
             });
@@ -1992,7 +1979,6 @@
                     setTimeout(function() {
                         isSpinning = false;
                         ui.closeModal('modal-multi-roulette');
-                        ui.checkAllPigeonsOwned();
                         ui.showUnlockModalMulti(wonTypes, amount);
                     }, 1500);
                 }, 500);
@@ -2020,7 +2006,6 @@
                     setTimeout(function() {
                         isSpinning = false;
                         ui.closeModal('modal-multi-roulette');
-                        ui.checkAllPigeonsOwned();
                         ui.showUnlockModalMulti(wonTypes, amount);
                     }, 1500);
                 }
@@ -2058,7 +2043,7 @@
             const data = PIGEON_TYPES[type];
             if (GAME_STATE.bread >= data.cost) {
                 GAME_STATE.bread -= data.cost;
-                this.addToInventory(type, 1);
+                this.addToInventory(type, 1, true); // Buying bypasses 5 limit
                 ui.updateStats();
                 ui.populateInventory();
                 ui.showToast(`Bought ${data.name}!`);
@@ -2268,56 +2253,67 @@
         },
 
         populateNesting: function() {
-            const list = document.getElementById('nesting-list');
-            list.innerHTML = '';
+            const listM = document.getElementById('nest-male-list');
+            const listF = document.getElementById('nest-female-list');
+            listM.innerHTML = ''; listF.innerHTML = '';
             
-            let pairsFound = false;
-
-            // Ozzy + Pepper special combination
-            if (GAME_STATE.inventory['ozzy'] && GAME_STATE.inventory['ozzy'].m > 0 && 
-                GAME_STATE.inventory['pepper'] && GAME_STATE.inventory['pepper'].f > 0) {
-                pairsFound = true;
-                const cost = NEST_COSTS['silent'];
-                const row = document.createElement('div'); row.className = 'nest-row';
-                row.innerHTML = `
-                    <div class="nest-info">
-                        <img src="${PIGEON_TYPES['ozzy'].iconUrl}"> + <img src="${PIGEON_TYPES['pepper'].iconUrl}">
-                        <div>
-                            <span class="rarity-silent">Ozzy ♂ + Pepper ♀</span><br>
-                            <span style="color:#94a3b8; font-size:0.7rem;">50/50 Chance</span>
-                        </div>
-                    </div>
-                    <button class="upgrade-btn" style="background:#8b5cf6;" onclick="game.nest('ozzy', 'pepper', ${cost})">${this.formatNumber(cost)} 🍞</button>
-                `;
-                list.appendChild(row);
-            }
+            let hasM = false; let hasF = false;
 
             for (const key in PIGEON_TYPES) {
                 if (key === 'base') continue;
                 const inv = GAME_STATE.inventory[key];
-                if (inv && inv.m > 0 && inv.f > 0) {
-                    pairsFound = true;
-                    const data = PIGEON_TYPES[key];
-                    const cost = NEST_COSTS[data.rarity] || 1000;
-                    
-                    const row = document.createElement('div'); row.className = 'nest-row';
-                    row.innerHTML = `
-                        <div class="nest-info">
-                            <img src="${data.iconUrl}">
-                            <div>
-                                <span class="${data.color}">${data.name} Pair</span><br>
-                                <span style="color:#94a3b8; font-size:0.7rem;">♂${inv.m} ♀${inv.f}</span>
-                            </div>
-                        </div>
-                        <button class="upgrade-btn" onclick="game.nest('${key}', '${key}', ${cost})">${this.formatNumber(cost)} 🍞</button>
-                    `;
-                    list.appendChild(row);
+                if (!inv) continue;
+
+                const data = PIGEON_TYPES[key];
+
+                if (inv.m > 0) {
+                    hasM = true;
+                    const div = document.createElement('div');
+                    div.className = `nest-selectable ${nestSelectedMale === key ? 'selected-m' : ''}`;
+                    div.innerHTML = `<img src="${data.iconUrl}"> <div><div class="${data.color}">${data.name}</div></div>`;
+                    div.onclick = () => { nestSelectedMale = key; this.populateNesting(); this.updateNestingAction(); };
+                    listM.appendChild(div);
+                }
+                
+                if (inv.f > 0) {
+                    hasF = true;
+                    const div = document.createElement('div');
+                    div.className = `nest-selectable ${nestSelectedFemale === key ? 'selected-f' : ''}`;
+                    div.innerHTML = `<img src="${data.iconUrl}"> <div><div class="${data.color}">${data.name}</div></div>`;
+                    div.onclick = () => { nestSelectedFemale = key; this.populateNesting(); this.updateNestingAction(); };
+                    listF.appendChild(div);
                 }
             }
 
-            if (!pairsFound) {
-                list.innerHTML = `<div style="text-align:center; padding: 20px; color:#94a3b8;">You don't have any Male and Female pairs of the same rarity to nest right now! Keep unboxing!</div>`;
+            if (!hasM) listM.innerHTML = `<div style="color:#94a3b8; font-size:0.8rem; padding:10px;">No Males</div>`;
+            if (!hasF) listF.innerHTML = `<div style="color:#94a3b8; font-size:0.8rem; padding:10px;">No Females</div>`;
+
+            this.updateNestingAction();
+        },
+
+        updateNestingAction: function() {
+            const area = document.getElementById('breed-action-area');
+            if(!nestSelectedMale || !nestSelectedFemale) {
+                area.innerHTML = `Select 1 Male and 1 Female from your inventory above!`;
+                return;
             }
+
+            const mData = PIGEON_TYPES[nestSelectedMale];
+            const fData = PIGEON_TYPES[nestSelectedFemale];
+
+            const cost = Math.floor((NEST_COSTS[mData.rarity] + NEST_COSTS[fData.rarity]) / 2);
+            
+            let hybridText = `<span style="color:#94a3b8; font-size:0.8rem;">50% ${mData.name} / 50% ${fData.name}</span>`;
+
+            area.innerHTML = `
+                <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-bottom:10px;">
+                    <img src="${mData.iconUrl}" style="width:40px; height:40px; object-fit:contain;">
+                    <span style="font-size:1.5rem; color:#facc15;">+</span>
+                    <img src="${fData.iconUrl}" style="width:40px; height:40px; object-fit:contain;">
+                </div>
+                ${hybridText}<br>
+                <button class="upgrade-btn" style="background:#8b5cf6; padding: 12px 24px; font-size: 1.1rem; margin-top:10px;" onclick="game.nest()">Breed (${this.formatNumber(cost)} 🍞)</button>
+            `;
         },
 
         showUnlockModalSingle: function(type, customDesc = null) {
