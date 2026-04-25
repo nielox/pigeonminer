@@ -60,6 +60,15 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1);
         }
 
+        #combo-display {
+            position: absolute; top: 75px; left: 15px; background: rgba(0,0,0,0.5);
+            padding: 5px 12px; border-radius: 12px; border: 2px solid var(--primary);
+            color: var(--primary); font-size: 1.2rem; font-weight: 900;
+            text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s;
+        }
+        
+        .combo-pulse { transform: scale(1.1); color: #fff !important; }
+
         .bottom-action-bar {
             background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0));
             padding: 20px 10px 15px 10px; pointer-events: auto;
@@ -148,7 +157,7 @@
         .floating-text {
             position: absolute; color: var(--secondary); font-weight: bold; font-size: 1.5rem;
             pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            animation: floatUp 1s ease-out forwards; z-index: 5;
+            animation: floatUp 1s ease-out forwards; z-index: 5; white-space: nowrap;
         }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -234,6 +243,8 @@
         <div class="stat-box"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
         <div class="stat-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
     </div>
+    
+    <div id="combo-display">Combo x1.0</div>
 
     <div id="mine-hint">TAP TO MINE</div>
 
@@ -406,6 +417,7 @@
         base: { id: 'base', name: 'Basic Pigeon', rarity: 'common', chance: 0, color: 'rarity-common', cost: 0, iconUrl: '' },
         hat: { id: 'hat', name: 'Hat Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 1000000, iconUrl: '' },
         cool: { id: 'cool', name: 'Cool Pigeon', rarity: 'common', chance: 20, color: 'rarity-common', cost: 1000000, iconUrl: '' },
+        chef: { id: 'chef', name: 'Chef Pigeon', rarity: 'rare', chance: 15, color: 'rarity-rare', cost: 5000000, iconUrl: '' },
         car: { id: 'car', name: 'Car Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
         cat: { id: 'cat', name: 'Cat Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
         pirate: { id: 'pirate', name: 'Pirate Pigeon', rarity: 'rare', chance: 10, color: 'rarity-rare', cost: 10000000, iconUrl: '' },
@@ -416,26 +428,29 @@
         wizard: { id: 'wizard', name: 'Wizard Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
         cyborg: { id: 'cyborg', name: 'Cyborg Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
         zombie: { id: 'zombie', name: 'Zombie Pigeon', rarity: 'epic', chance: 3.0, color: 'rarity-epic', cost: 100000000, iconUrl: '' },
+        demon: { id: 'demon', name: 'Demon Pigeon', rarity: 'epic', chance: 2.0, color: 'rarity-epic', cost: 250000000, iconUrl: '' },
         worm: { id: 'worm', name: 'Realistic Worm', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
         ghost: { id: 'ghost', name: 'Ghost Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
         astronaut: { id: 'astronaut', name: 'Astro Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
         alien: { id: 'alien', name: 'Alien Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
         vampire: { id: 'vampire', name: 'Vamp Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
         diamond: { id: 'diamond', name: 'Diamond Pigeon', rarity: 'legendary', chance: 1.5, color: 'rarity-legendary', cost: 1000000000, iconUrl: '' },
+        mecha_dog: { id: 'mecha_dog', name: 'Mecha Dog', rarity: 'legendary', chance: 1.0, color: 'rarity-legendary', cost: 2000000000, iconUrl: '' },
         golden: { id: 'golden', name: 'Golden Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         king: { id: 'king', name: 'King Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         dragon: { id: 'dragon', name: 'Dragon Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         angel: { id: 'angel', name: 'Angel Pigeon', rarity: 'mythic', chance: 0.6, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         rainbow: { id: 'rainbow', name: 'Rainbow Pigeon', rarity: 'mythic', chance: 0.5, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         neon: { id: 'neon', name: 'Neon Pigeon', rarity: 'mythic', chance: 0.4, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
+        time_traveler: { id: 'time_traveler', name: 'Chrono Pigeon', rarity: 'mythic', chance: 0.3, color: 'rarity-mythic', cost: 80000000000, iconUrl: '' },
         glitch: { id: 'glitch', name: 'Glitch Pigeon', rarity: 'mythic', chance: 0.1, color: 'rarity-mythic', cost: 50000000000, iconUrl: '' },
         dragon_wolf: { id: 'dragon_wolf', name: 'Dragon Wolf', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
         fire: { id: 'fire', name: 'Fire Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
         pixel: { id: 'pixel', name: 'Pixel Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
         void: { id: 'void', name: 'Void Pigeon', rarity: 'secret', chance: 0.05, color: 'rarity-secret', cost: 500000000000, iconUrl: '' },
         godly_fire: { id: 'godly_fire', name: 'Godly Fire', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
-        ozzie: { id: 'ozzie', name: 'Ozzie Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
-        pepper: { id: 'pepper', name: 'Pepper Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
+        ozzie: { id: 'ozzie', name: 'Ozzie Dog', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
+        pepper: { id: 'pepper', name: 'Pepper Dog', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' },
         quantum: { id: 'quantum', name: 'Quantum Pigeon', rarity: 'silent', chance: 0.01, color: 'rarity-silent', cost: 5000000000000, iconUrl: '' }
     };
 
@@ -452,7 +467,7 @@
         bread: 0, diamonds: 0, digSpeed: 1, autoSpeed: 0, factoryLevel: 0,
         upgradeCost: 1000, autoCost: 5000, factoryCost: 50000, boxCost: 5000,
         currentMine: 0, unlockedPigeons: ['base'], equippedPigeon: 'base',
-        sellRate: 2, lastSaveTime: null
+        sellRate: 2, lastSaveTime: null, combo: 0, lastClickTime: 0
     };
 
     let CURRENT_SLOT = 1;
@@ -463,6 +478,7 @@
         scene: null, camera: null, renderer: null, pigeonGroup: null,
         mineBlock: null, particles: [], isAnimatingMine: false, mineAnimationProgress: 0, clock: new THREE.Clock(),
         textureCache: {}, fireCanvas: null, fireCtx: null, fireTex: null,
+        factoryMesh: null, autoDrillMesh: null,
 
         init: function() {
             try {
@@ -470,7 +486,6 @@
                 let w = window.innerWidth || window.screen.width;
                 let h = window.innerHeight || window.screen.height;
 
-                // 1. CREATE ONLY ONE RENDERER EVER
                 this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
                 this.renderer.setSize(w, h);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -478,9 +493,7 @@
                 this.renderer.shadowMap.type = THREE.PCFShadowMap;
                 container.appendChild(this.renderer.domElement);
 
-                // 2. RUN ICON PRELOADER
                 this.preloadIcons(function() {
-                    // 3. ONCE ICONS ARE DONE, BUILD MAIN SCENE
                     engine.scene = new THREE.Scene();
                     engine.scene.background = new THREE.Color(0x87CEEB);
                     engine.scene.fog = new THREE.FogExp2(0x87CEEB, 0.02);
@@ -493,6 +506,7 @@
                     engine.setupEnvironment();
                     engine.buildMine(GAME_STATE.currentMine);
                     engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                    engine.updateVisuals(); // Update factory/drill visibility
 
                     window.addEventListener('resize', engine.onWindowResize.bind(engine));
                     setTimeout(function(){ engine.onWindowResize(); }, 300);
@@ -555,7 +569,6 @@
             let index = 0;
             const _this = this;
 
-            // Temporarily resize renderer for 256x256 snapshot
             const origW = window.innerWidth || window.screen.width;
             const origH = window.innerHeight || window.screen.height;
             _this.renderer.setSize(256, 256);
@@ -627,6 +640,38 @@
                 rock.castShadow = true;
                 this.scene.add(rock);
             }
+
+            // Factory Visual (hidden by default)
+            this.factoryMesh = new THREE.Group();
+            const ovenGeo = new THREE.BoxGeometry(2, 2, 2);
+            const ovenMat = new THREE.MeshStandardMaterial({color: 0x333333, metalness: 0.5});
+            const oven = new THREE.Mesh(ovenGeo, ovenMat); oven.position.y = 1;
+            const windowGeo = new THREE.PlaneGeometry(1, 0.8);
+            const windowMat = new THREE.MeshBasicMaterial({color: 0xff4400});
+            const ovenWin = new THREE.Mesh(windowGeo, windowMat); ovenWin.position.set(0, 1, 1.01);
+            const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), ovenMat);
+            chimney.position.set(0.5, 2.5, 0);
+            this.factoryMesh.add(oven, ovenWin, chimney);
+            this.factoryMesh.position.set(-5, 0, -5);
+            this.factoryMesh.visible = false;
+            this.scene.add(this.factoryMesh);
+
+            // Auto-Drill Visual (hidden by default)
+            this.autoDrillMesh = new THREE.Group();
+            const drillBody = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1), new THREE.MeshStandardMaterial({color:0xffd700, metalness:0.8}));
+            drillBody.position.y = 0.5;
+            const drillBit = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1, 16), new THREE.MeshStandardMaterial({color:0x888888, metalness:0.9}));
+            drillBit.position.y = -0.5; drillBit.rotation.x = Math.PI;
+            this.autoDrillMesh.add(drillBody, drillBit);
+            this.autoDrillMesh.position.set(2, 1, -2);
+            this.autoDrillMesh.rotation.z = Math.PI/6;
+            this.autoDrillMesh.visible = false;
+            this.scene.add(this.autoDrillMesh);
+        },
+
+        updateVisuals: function() {
+            if(this.factoryMesh) this.factoryMesh.visible = GAME_STATE.factoryLevel > 0;
+            if(this.autoDrillMesh) this.autoDrillMesh.visible = GAME_STATE.autoSpeed > 0;
         },
 
         buildMine: function(mineIndex = 0) {
@@ -788,8 +833,13 @@
             const texAlien = this.generateTexture('#22c55e', '#16a34a');
             const texDragon = this.generateTexture('#ef4444', '#b91c1c');
             const texZombie = this.generateTexture('#166534', '#14532d');
-            const texOzzie = this.generateTexture('#eab308', '#ca8a04');
+            
+            // Redesigned Ozzie based on fluffy white/golden dog photo
+            const texOzzie = this.generateTexture('#fafaf9', '#fde68a'); 
+            
             const texPepper = this.generateTexture('#3f271d', '#291913', 'curly');
+            const texDemon = this.generateTexture('#7f1d1d', '#450a0a');
+            const texChrono = this.generateTexture('#b45309', '#d97706');
 
             const matGrey = new THREE.MeshStandardMaterial({ map: texGrey, roughness: 0.9, metalness: 0.1 });
             const matDarkGrey = new THREE.MeshStandardMaterial({ map: texDarkGrey, roughness: 0.9, metalness: 0.1 });
@@ -804,12 +854,14 @@
             const matZombie = new THREE.MeshStandardMaterial({ map: texZombie, roughness: 1.0 });
             const matRainbow = new THREE.MeshStandardMaterial({ map: this.generateRainbowTexture(), roughness: 0.4 });
             const matPixel = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8, flatShading: true });
-            const matOzzie = new THREE.MeshStandardMaterial({ map: texOzzie, roughness: 0.9 });
+            const matOzzie = new THREE.MeshStandardMaterial({ map: texOzzie, roughness: 1.0 });
             const matPepper = new THREE.MeshStandardMaterial({ map: texPepper, roughness: 1.0 });
             const matDiamond = new THREE.MeshStandardMaterial({ color: 0xaaffff, transparent: true, opacity: 0.7, roughness: 0.1, metalness: 0.5 });
             const matVoid = new THREE.MeshBasicMaterial({ color: 0x000000 });
             const matNeon = new THREE.MeshStandardMaterial({ map: this.generateNeonTexture() });
             const matQuantum = new THREE.MeshStandardMaterial({ map: this.generateQuantumTexture() });
+            const matDemon = new THREE.MeshStandardMaterial({ map: texDemon, roughness: 0.7 });
+            const matChrono = new THREE.MeshStandardMaterial({ map: texChrono, metalness: 0.6, roughness: 0.4 });
 
             const matFire = new THREE.MeshStandardMaterial({
                 map: this.updateFireTexture(), transparent: true, opacity: 0.95
@@ -858,7 +910,7 @@
                 if (type === 'dragon') customMat = matDragon;
                 if (type === 'angel') customMat = matWhite;
                 if (type === 'glitch') customMat = matGlitch;
-                if (type === 'cyborg') customMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9, roughness: 0.4 });
+                if (type === 'cyborg' || type === 'mecha_dog') customMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9, roughness: 0.4 });
                 if (type === 'zombie') customMat = matZombie;
                 if (type === 'ice' || type === 'diamond') customMat = matDiamond;
                 if (type === 'rainbow') customMat = matRainbow;
@@ -868,6 +920,8 @@
                 if (type === 'void') customMat = matVoid;
                 if (type === 'neon') customMat = matNeon;
                 if (type === 'quantum') customMat = matQuantum;
+                if (type === 'demon') customMat = matDemon;
+                if (type === 'time_traveler') customMat = matChrono;
 
                 const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), customMat);
                 body.scale.set(0.9, 1.4, 0.9); body.rotation.x = Math.PI / 2; body.position.y = 0.6; body.castShadow = true;
@@ -876,8 +930,29 @@
                 const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 32), customMat);
                 head.position.set(0, 1.0, 0.4); head.castShadow = true; pigeonGroup.add(head);
 
-                // WINGS FOR ALL STANDARD BIRDS
-                const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel'];
+                // Add Tails for Dogs!
+                const hasTail = ['wolf', 'dragon_wolf', 'ozzie', 'pepper', 'cat', 'mecha_dog'];
+                if (hasTail.includes(type)) {
+                    let tailGeo = new THREE.ConeGeometry(0.12, 0.5, 16);
+                    if(type === 'cat') tailGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.6);
+                    if(type === 'ozzie') tailGeo = new THREE.ConeGeometry(0.18, 0.6, 16); // Thicker fluffy tail
+                    
+                    const tailMat = (type === 'mecha_dog') ? new THREE.MeshStandardMaterial({color:0x888888, metalness:0.8}) : customMat;
+                    const tail = new THREE.Mesh(tailGeo, tailMat);
+                    tail.position.set(0, 0.35, -0.6);
+                    
+                    // Center rotation point of tail roughly to the base
+                    tail.geometry.translate(0, 0.25, 0); 
+                    
+                    if(type !== 'cat') tail.rotation.x = -Math.PI / 3;
+                    else { tail.position.y = 0.5; tail.rotation.x = Math.PI / 4; }
+                    
+                    pigeonGroup.add(tail);
+                    pigeonGroup.userData.tail = tail; // Store reference for wagging
+                }
+                
+                // Add Wings for Birds
+                const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel', 'wolf', 'ozzie', 'pepper', 'cat', 'mecha_dog'];
                 if (noWings.indexOf(type) === -1) {
                     const wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
                     const wingL = new THREE.Mesh(wingGeo, customMat);
@@ -887,6 +962,7 @@
                     pigeonGroup.add(wingL, wingR);
                 }
 
+                // Custom Faces and Details
                 if (type === 'wolf' || type === 'dragon_wolf') {
                     const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.3, 16), matDarkGrey); snout.rotation.x = Math.PI / 2; snout.position.set(0, 0, 0.3); head.add(snout);
                     const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 16), matEye); nose.position.set(0, 0, 0.15); snout.add(nose);
@@ -897,14 +973,27 @@
                         const redEye = new THREE.MeshStandardMaterial({color: 0xff0000}); this.addEyesOnly(head, redEye);
                     } else this.addEyesOnly(head, matEye);
                 } else if (type === 'ozzie' || type === 'pepper') {
+                    // Broader dog snout
                     const snout = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.2, 0.3), customMat); snout.position.set(0, -0.05, 0.35);
                     const nose = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), matEye); nose.position.set(0, 0.1, 0.15); snout.add(nose);
                     head.add(snout);
-                    const earGeo = new THREE.SphereGeometry(0.15, 16, 16);
-                    const earL = new THREE.Mesh(earGeo, customMat); earL.scale.set(0.5, 1.5, 1); earL.position.set(0.3, 0, 0);
-                    const earR = new THREE.Mesh(earGeo, customMat); earR.scale.set(0.5, 1.5, 1); earR.position.set(-0.3, 0, 0);
+                    
+                    // Floppy dog ears!
+                    const earGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.35, 16);
+                    const earL = new THREE.Mesh(earGeo, customMat); 
+                    earL.position.set(0.28, 0, 0); earL.rotation.z = Math.PI / 4; earL.rotation.x = Math.PI / 8;
+                    const earR = new THREE.Mesh(earGeo, customMat); 
+                    earR.position.set(-0.28, 0, 0); earR.rotation.z = -Math.PI / 4; earR.rotation.x = Math.PI / 8;
                     head.add(earL, earR);
+                    
                     this.addEyesOnly(head, matEye);
+                } else if (type === 'mecha_dog') {
+                    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.3), new THREE.MeshStandardMaterial({color:0x333333})); snout.position.set(0, -0.05, 0.35);
+                    const roboEye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.1), new THREE.MeshBasicMaterial({color: 0x00ff00})); roboEye.position.set(0, 0.1, 0.26);
+                    head.add(snout, roboEye);
+                    const ear1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 0.1), new THREE.MeshStandardMaterial({color:0x888888})); ear1.position.set(0.2, 0.2, 0);
+                    const ear2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 0.1), new THREE.MeshStandardMaterial({color:0x888888})); ear2.position.set(-0.2, 0.2, 0);
+                    head.add(ear1, ear2);
                 } else if (type === 'robot') {
                     const roboEye = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xff0000})); roboEye.position.set(0, 0.1, 0.26);
                     const beak = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({color: 0x666666, metalness:0.8})); beak.rotation.x = Math.PI / 2; beak.position.set(0, 0, 0.3);
@@ -928,6 +1017,18 @@
                     const redEye = new THREE.MeshStandardMaterial({color: 0xff0000});
                     this.addFace(head, redEye, matBeak);
                     const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 1.2), new THREE.MeshStandardMaterial({color: 0x111111, side: THREE.DoubleSide})); cape.position.set(0, 0.5, -0.5); cape.rotation.x = -Math.PI / 6; pigeonGroup.add(cape);
+                } else if (type === 'demon') {
+                    const redEye = new THREE.MeshStandardMaterial({color: 0xff0000});
+                    this.addFace(head, redEye, matBeak);
+                    const hornGeo = new THREE.ConeGeometry(0.05, 0.2, 16);
+                    const hornMat = new THREE.MeshStandardMaterial({color:0x000000});
+                    const horn1 = new THREE.Mesh(hornGeo, hornMat); horn1.position.set(0.15, 0.25, 0); horn1.rotation.z = -0.3;
+                    const horn2 = new THREE.Mesh(hornGeo, hornMat); horn2.position.set(-0.15, 0.25, 0); horn2.rotation.z = 0.3;
+                    head.add(horn1, horn2);
+                    const batWing = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.4), new THREE.MeshStandardMaterial({color: 0x111111, side: THREE.DoubleSide}));
+                    batWing.position.set(0.4, 0.6, -0.2); batWing.rotation.y = -Math.PI/4;
+                    const batWing2 = batWing.clone(); batWing2.position.set(-0.4, 0.6, -0.2); batWing2.rotation.y = Math.PI/4;
+                    pigeonGroup.add(batWing, batWing2);
                 } else { this.addFace(head, matEye, matBeak); }
 
                 if (type === 'pirate') {
@@ -939,11 +1040,22 @@
                     const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 32), new THREE.MeshStandardMaterial({color: 0x111111})); brim.position.y = 0.25;
                     const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.4, 32), new THREE.MeshStandardMaterial({color: 0x111111})); top.position.y = 0.45; head.add(brim, top);
                 }
+                if (type === 'chef') {
+                    const hatB = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32), new THREE.MeshStandardMaterial({color: 0xffffff})); hatB.position.y = 0.25;
+                    const hatT = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), new THREE.MeshStandardMaterial({color: 0xffffff})); hatT.position.y = 0.4;
+                    head.add(hatB, hatT);
+                }
+                if (type === 'time_traveler') {
+                    const gMat = new THREE.MeshStandardMaterial({color: 0xffd700, metalness:0.8});
+                    const g1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 16), gMat); g1.rotation.x = Math.PI/2; g1.position.set(0.15, 0.05, 0.28);
+                    const g2 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 16), gMat); g2.rotation.x = Math.PI/2; g2.position.set(-0.15, 0.05, 0.28);
+                    const strap = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.05, 32), new THREE.MeshStandardMaterial({color:0x333333})); strap.position.y = 0.05;
+                    head.add(g1, g2, strap);
+                }
                 if (type === 'cool') { const g = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.1), new THREE.MeshStandardMaterial({color: 0x111111})); g.position.set(0, 0.05, 0.26); head.add(g); }
                 if (type === 'cat') {
                     const e1 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 16), matGrey); e1.position.set(0.2, 0.25, 0);
                     const e2 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 16), matGrey); e2.position.set(-0.2, 0.25, 0); head.add(e1, e2);
-                    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 16), matGrey); t.position.set(0, 0.5, -0.7); t.rotation.x = Math.PI / 4; pigeonGroup.add(t);
                 }
                 if (type === 'super') {
                     const c = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.0), new THREE.MeshStandardMaterial({color: 0xef4444, side: THREE.DoubleSide}));
@@ -1044,6 +1156,36 @@
                 }
             }
 
+            // Animate Tails
+            if (this.pigeonGroup && this.pigeonGroup.userData.tail && !this.isAnimatingMine) {
+                this.pigeonGroup.userData.tail.rotation.z = Math.sin(time * 12) * 0.2;
+            }
+
+            // Animate Extras
+            if (this.autoDrillMesh && this.autoDrillMesh.visible) {
+                this.autoDrillMesh.children[1].rotation.y += delta * 15; // Spin drill
+                this.autoDrillMesh.position.y = 1 + Math.sin(time * 5) * 0.1; // bobbing
+            }
+            if (this.factoryMesh && this.factoryMesh.visible) {
+                if(Math.random() < 0.1) {
+                    const pMat = new THREE.MeshBasicMaterial({color: 0x888888, transparent: true, opacity: 0.5});
+                    const p = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), pMat);
+                    p.position.set(-4.5, 3.5, -5);
+                    p.userData.velocity = new THREE.Vector3((Math.random()-0.5), Math.random()*2 + 1, (Math.random()-0.5));
+                    p.userData.life = 1.0; p.userData.isSmoke = true;
+                    this.scene.add(p); this.particles.push(p);
+                }
+            }
+
+            // Combo Decay
+            const now = Date.now();
+            if (GAME_STATE.combo > 0 && now - GAME_STATE.lastClickTime > 1500) {
+                GAME_STATE.combo = 0;
+                const cd = document.getElementById('combo-display');
+                cd.style.opacity = 0;
+                cd.classList.remove('combo-pulse');
+            }
+
             if(!isSpinning && (GAME_STATE.autoSpeed > 0 || GAME_STATE.factoryLevel > 0)) {
                 this.autoTimer = (this.autoTimer || 0) + delta;
                 if (this.autoTimer >= 1.0) {
@@ -1078,7 +1220,7 @@
 
             if (this.pigeonGroup && !this.isAnimatingMine) {
                 this.pigeonGroup.position.y = Math.sin(time * 2) * 0.05;
-                if(['worm', 'car', 'pixel'].indexOf(GAME_STATE.equippedPigeon) === -1) {
+                if(['worm', 'car', 'pixel'].indexOf(GAME_STATE.equippedPigeon) === -1 && this.pigeonGroup.children[1]) {
                      this.pigeonGroup.children[1].rotation.z = Math.sin(time * 1) * 0.1;
                 }
             }
@@ -1099,6 +1241,9 @@
 
                 if(p.userData.isFireP) {
                     p.scale.multiplyScalar(0.92);
+                } else if (p.userData.isSmoke) {
+                    p.scale.multiplyScalar(1.05);
+                    if(p.material) p.material.opacity = p.userData.life * 0.5;
                 } else {
                     p.userData.velocity.y -= 9.8 * delta;
                     p.rotation.x += delta * 10; p.rotation.y += delta * 10;
@@ -1175,12 +1320,13 @@
             GAME_STATE.autoSpeed = 0; GAME_STATE.factoryLevel = 0; GAME_STATE.upgradeCost = 1000;
             GAME_STATE.autoCost = 5000; GAME_STATE.factoryCost = 50000; GAME_STATE.boxCost = 5000;
             GAME_STATE.currentMine = 0; GAME_STATE.unlockedPigeons = ['base']; GAME_STATE.equippedPigeon = 'base';
-            GAME_STATE.sellRate = 2; GAME_STATE.lastSaveTime = null;
+            GAME_STATE.sellRate = 2; GAME_STATE.lastSaveTime = null; GAME_STATE.combo = 0;
         },
 
         switchSave: function(slot) {
             this.saveGame(); CURRENT_SLOT = slot; this.resetGame(); this.loadGame(slot);
             engine.buildMine(GAME_STATE.currentMine); engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+            engine.updateVisuals();
             ui.updateStats(); ui.closeModal('modal-saves'); ui.showToast(`Loaded Slot ${slot}`);
         },
 
@@ -1191,7 +1337,7 @@
                 return;
             }
             localStorage.removeItem(`pigeonMinerSave_${slot}`);
-            if (CURRENT_SLOT === slot) { this.resetGame(); engine.buildMine(GAME_STATE.currentMine); engine.loadPigeonModel(GAME_STATE.equippedPigeon); ui.updateStats(); }
+            if (CURRENT_SLOT === slot) { this.resetGame(); engine.buildMine(GAME_STATE.currentMine); engine.loadPigeonModel(GAME_STATE.equippedPigeon); engine.updateVisuals(); ui.updateStats(); }
             ui.populateSaveModal(); ui.showToast(`Deleted Slot ${slot}`);
         },
 
@@ -1226,6 +1372,7 @@
                         this.saveGame();
                         engine.buildMine(GAME_STATE.currentMine);
                         engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                        engine.updateVisuals();
                         ui.updateStats();
                         ui.populateSaveModal();
                         ui.showToast("Save Imported!");
@@ -1240,9 +1387,27 @@
 
         mine: function(x, y) {
             document.getElementById('mine-hint').style.display = 'none';
+            
+            // Combo System Update
+            const now = Date.now();
+            if (now - GAME_STATE.lastClickTime < 1000) {
+                GAME_STATE.combo = Math.min(GAME_STATE.combo + 1, 50);
+            } else {
+                GAME_STATE.combo = 1;
+            }
+            GAME_STATE.lastClickTime = now;
+            
+            const comboMult = 1 + (GAME_STATE.combo * 0.05);
             const isCrit = Math.random() < 0.1;
-            const gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1);
-            GAME_STATE.diamonds += gained; ui.updateStats(); engine.triggerMineAnimation();
+            
+            let gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1) * comboMult;
+            gained = Math.floor(gained);
+            
+            GAME_STATE.diamonds += gained; 
+            ui.updateStats(); 
+            engine.triggerMineAnimation();
+            
+            ui.updateComboDisplay();
             ui.showFloatingText(x, y, isCrit ? `CRIT! +${ui.formatNumber(gained)} 💎` : `+${ui.formatNumber(gained)} 💎`, isCrit);
         },
 
@@ -1265,13 +1430,17 @@
             if (GAME_STATE.bread >= GAME_STATE.autoCost) {
                 GAME_STATE.bread -= GAME_STATE.autoCost; GAME_STATE.autoSpeed += 1;
                 GAME_STATE.autoCost = Math.floor(GAME_STATE.autoCost * 2.0);
-                document.getElementById('mine-hint').style.display = 'none'; ui.updateStats();
+                document.getElementById('mine-hint').style.display = 'none'; 
+                engine.updateVisuals();
+                ui.updateStats();
             } else ui.showToast("Not enough Bread!");
         },
         upgradeFactory: function() {
             if (GAME_STATE.bread >= GAME_STATE.factoryCost) {
                 GAME_STATE.bread -= GAME_STATE.factoryCost; GAME_STATE.factoryLevel += 1;
-                GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 2.2); ui.updateStats();
+                GAME_STATE.factoryCost = Math.floor(GAME_STATE.factoryCost * 2.2); 
+                engine.updateVisuals();
+                ui.updateStats();
             } else ui.showToast("Not enough Bread!");
         },
         upgradeMine: function() {
@@ -1434,7 +1603,6 @@
             const container = document.getElementById('multi-roulette-grid');
             container.innerHTML = '';
 
-            // SAFE ANDROID ROULETTE: Display max 50 boxes on screen
             const displayLimit = 50;
             const visualAmount = Math.min(wonTypes.length, displayLimit);
             let size = visualAmount > 30 ? '35px' : (visualAmount > 10 ? '45px' : '60px');
@@ -1548,6 +1716,22 @@
             if(!nextMine) document.getElementById('btn-mine').style.background = '#64748b';
 
             document.getElementById('sell-rate-display').innerText = `Multiplier: x${this.formatNumber(MINES[GAME_STATE.currentMine].multiplier)}`;
+        },
+        
+        updateComboDisplay: function() {
+            const cd = document.getElementById('combo-display');
+            if (GAME_STATE.combo > 1) {
+                const mult = 1 + (GAME_STATE.combo * 0.05);
+                cd.innerText = `Combo x${mult.toFixed(2)}`;
+                cd.style.opacity = 1;
+                
+                // Pop animation effect
+                cd.classList.remove('combo-pulse');
+                void cd.offsetWidth; // trigger reflow
+                cd.classList.add('combo-pulse');
+            } else {
+                cd.style.opacity = 0;
+            }
         },
 
         showFloatingText: function(x, y, text, isCrit = false, isBread = false) {
@@ -1674,7 +1858,7 @@
             const previewContainer = document.getElementById('preview-multi-container');
             previewContainer.innerHTML = '';
 
-            const displayCount = Math.min(types.length, 100); // Safely display up to 100 in the UI grid
+            const displayCount = Math.min(types.length, 100); 
             const displayTypes = types.slice(0, displayCount);
 
             displayTypes.forEach(function(type) {
@@ -1706,6 +1890,7 @@
                     }
                     if(engine.buildMine) engine.buildMine(GAME_STATE.currentMine);
                     if(engine.loadPigeonModel) engine.loadPigeonModel(GAME_STATE.equippedPigeon);
+                    if(engine.updateVisuals) engine.updateVisuals();
                     ui.updateStats();
 
                     if (GAME_STATE.lastSaveTime) {
@@ -1730,7 +1915,7 @@
 
     window.onload = function() {
         game.loadGame();
-        setTimeout(function(){ engine.init(); }, 100); // Short delay to ensure WebView sizing
+        setTimeout(function(){ engine.init(); }, 100); 
         ui.updateStats();
 
         setInterval(function() { game.saveGame(); }, 5000);
