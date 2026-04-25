@@ -1116,7 +1116,7 @@
                 const noWings = ['worm', 'car', 'pixel', 'dragon', 'dragon_wolf', 'angel', 'wolf', 'ozzy', 'pepper', 'cat', 'mecha_dog', 'space_dog', 'dino', 'worca', 'super', 'vampire', 'guinea_pig'];
                 if (!noWings.includes(type)) {
                     let wingGeo = new THREE.SphereGeometry(0.2, 16, 16);
-                    const wMat = type === 'griffin' ? matWhite : customMat;
+                    const wMat = type === 'griffin' ? matWhite : (type === 'sunny' ? new THREE.MeshStandardMaterial({map: this.generateSunnyWingTexture(), roughness: 0.9}) : customMat);
 
                     const wingL = new THREE.Mesh(wingGeo, wMat);
                     wingL.scale.set(0.2, 0.8, 1.2); wingL.position.set(0.45, 0.5, -0.1);
@@ -1575,24 +1575,31 @@
                     if (typeof GAME_STATE.freeBoxes === 'undefined') GAME_STATE.freeBoxes = 3;
                     if (typeof GAME_STATE.maxSlots === 'undefined') GAME_STATE.maxSlots = 1;
 
-                    // MIGRATIONS
+                    // MIGRATION 1: Array -> Object mapping
                     if (GAME_STATE.unlockedPigeons && Array.isArray(GAME_STATE.unlockedPigeons)) {
                         GAME_STATE.inventory = {};
-                        GAME_STATE.unlockedPigeons.forEach(p => { this.addToInventory(p, 1); });
+                        GAME_STATE.unlockedPigeons.forEach(p => { 
+                            if (!GAME_STATE.inventory[p]) GAME_STATE.inventory[p] = {m:0, f:0};
+                            GAME_STATE.inventory[p].m++; 
+                        });
                         GAME_STATE.equipped = [GAME_STATE.equippedPigeon || 'base'];
                         delete GAME_STATE.unlockedPigeons; delete GAME_STATE.equippedPigeon;
                     }
                     
-                    // Gender Migration for old saves where inventory was just numbers
-                    if (GAME_STATE.inventory && typeof GAME_STATE.inventory['base'] === 'number') {
-                        const oldInv = {...GAME_STATE.inventory};
-                        GAME_STATE.inventory = {};
-                        for (let k in oldInv) {
-                            const count = oldInv[k];
-                            if(k === 'ozzy') GAME_STATE.inventory[k] = {m: count, f: 0};
-                            else if(k === 'pepper') GAME_STATE.inventory[k] = {m: 0, f: count};
-                            else GAME_STATE.inventory[k] = {m: Math.ceil(count/2), f: Math.floor(count/2)};
+                    // MIGRATION 2: Numeric tracking -> Object mapping
+                    if (GAME_STATE.inventory) {
+                        for (let k in GAME_STATE.inventory) {
+                            if (typeof GAME_STATE.inventory[k] === 'number') {
+                                const count = GAME_STATE.inventory[k];
+                                if(k === 'ozzy') GAME_STATE.inventory[k] = {m: count, f: 0};
+                                else if(k === 'pepper') GAME_STATE.inventory[k] = {m: 0, f: count};
+                                else GAME_STATE.inventory[k] = {m: Math.ceil(count/2), f: Math.floor(count/2)};
+                            }
                         }
+                    }
+                    
+                    if (!GAME_STATE.inventory['base'] || typeof GAME_STATE.inventory['base'].m !== 'number') {
+                        GAME_STATE.inventory['base'] = {m: 1, f: 0};
                     }
 
                     if (GAME_STATE.lastSaveTime) {
@@ -1604,7 +1611,9 @@
                             if(d > 0 || b > 0) setTimeout(function() { ui.showOfflineModal(secs, d, b); }, 1000);
                         }
                     }
-                } catch (e) { this.resetGame(); }
+                } catch (e) {
+                    console.error("Save Load Error", e);
+                }
             } else { this.resetGame(); }
         },
 
@@ -1701,7 +1710,7 @@
         upgradeSquad: function() {
             if (GAME_STATE.maxSlots >= 50) { ui.showToast("Max slots reached!"); return; }
             let cost = SLOT_COSTS[GAME_STATE.maxSlots];
-            if (!cost) cost = 1000000 * (GAME_STATE.maxSlots * GAME_STATE.maxSlots); // Fallback math
+            if (!cost) cost = 1000000 * (GAME_STATE.maxSlots * GAME_STATE.maxSlots);
 
             if (GAME_STATE.bread >= cost) {
                 GAME_STATE.bread -= cost;
@@ -1804,16 +1813,26 @@
         },
 
         addToInventory: function(type, amount=1) {
-            if (!GAME_STATE.inventory[type]) GAME_STATE.inventory[type] = {m: 0, f: 0};
-            for(let i=0; i<amount; i++) {
-                if(type === 'ozzy') GAME_STATE.inventory[type].m++;
-                else if(type === 'pepper') GAME_STATE.inventory[type].f++;
-                else {
-                    if (Math.random() < 0.5) GAME_STATE.inventory[type].m++;
-                    else GAME_STATE.inventory[type].f++;
+            if (!GAME_STATE.inventory[type] || typeof GAME_STATE.inventory[type] === 'number') {
+                GAME_STATE.inventory[type] = {m: 0, f: 0};
+            }
+            if(type === 'ozzy') {
+                GAME_STATE.inventory[type].m += amount;
+            } else if (type === 'pepper') {
+                GAME_STATE.inventory[type].f += amount;
+            } else {
+                if (amount > 100) {
+                    let half = Math.floor(amount / 2);
+                    let rem = amount - half;
+                    GAME_STATE.inventory[type].m += half;
+                    GAME_STATE.inventory[type].f += rem;
+                } else {
+                    for(let i=0; i<amount; i++) {
+                        if (Math.random() < 0.5) GAME_STATE.inventory[type].m++;
+                        else GAME_STATE.inventory[type].f++;
+                    }
                 }
             }
-            ui.checkAllPigeonsOwned();
         },
 
         nest: function(type1, type2, cost) {
@@ -1828,6 +1847,7 @@
             }
             
             this.addToInventory(resultType, babies);
+            ui.checkAllPigeonsOwned();
             ui.updateStats();
             ui.populateNesting(); 
             
@@ -1888,6 +1908,7 @@
                     isSpinning = false;
                     ui.closeModal('modal-roulette');
                     game.addToInventory(wonType, 1);
+                    ui.checkAllPigeonsOwned();
                     ui.showUnlockModalSingle(wonType);
                 }, 5500);
             });
@@ -1971,6 +1992,7 @@
                     setTimeout(function() {
                         isSpinning = false;
                         ui.closeModal('modal-multi-roulette');
+                        ui.checkAllPigeonsOwned();
                         ui.showUnlockModalMulti(wonTypes, amount);
                     }, 1500);
                 }, 500);
@@ -1998,6 +2020,7 @@
                     setTimeout(function() {
                         isSpinning = false;
                         ui.closeModal('modal-multi-roulette');
+                        ui.checkAllPigeonsOwned();
                         ui.showUnlockModalMulti(wonTypes, amount);
                     }, 1500);
                 }
