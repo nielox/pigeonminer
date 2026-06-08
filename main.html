@@ -60,7 +60,10 @@
             padding: 8px 16px; border-radius: 20px; color: var(--text);
             font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s;
         }
+        
+        .stat-pop { transform: scale(1.1); }
 
         #power-display {
             position: absolute; top: 80px; right: 15px; background: rgba(0,0,0,0.6);
@@ -72,10 +75,12 @@
             position: absolute; top: 80px; left: 15px; background: rgba(0,0,0,0.6);
             padding: 5px 12px; border-radius: 12px; border: 2px solid var(--primary);
             color: var(--primary); font-size: 1.2rem; font-weight: 900;
-            text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s;
+            text-shadow: 0 2px 4px #000; opacity: 0; transition: opacity 0.2s, transform 0.1s, color 0.3s;
         }
         
-        .combo-pulse { transform: scale(1.1); color: #fff !important; }
+        .combo-pulse { transform: scale(1.15) rotate(-2deg); color: #fff !important; }
+        .combo-hot { color: #f97316 !important; border-color: #f97316 !important; text-shadow: 0 0 10px #f97316; }
+        .combo-fire { color: #ef4444 !important; border-color: #ef4444 !important; text-shadow: 0 0 15px #ef4444; }
 
         .bottom-action-bar {
             background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0));
@@ -99,10 +104,10 @@
             background: #334155; border: 1px solid #475569; color: white;
             padding: 10px 4px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;
             display: flex; flex-direction: column; align-items: center; gap: 4px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: background 0.2s; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: background 0.2s, transform 0.1s; cursor: pointer;
             text-align: center;
         }
-        .nav-btn:active { background: #1e293b; transform: translateY(2px); }
+        .nav-btn:active { background: #1e293b; transform: translateY(4px); }
         .nav-btn span { font-size: 1.2rem; }
 
         .modal-overlay {
@@ -121,23 +126,25 @@
         .modal-close {
             margin-top: 15px; width: 100%; padding: 12px; background: #ef4444;
             border: none; border-radius: 12px; color: white; font-weight: bold;
-            font-size: 1rem; cursor: pointer;
+            font-size: 1rem; cursor: pointer; transition: transform 0.1s;
         }
+        .modal-close:active { transform: scale(0.95); }
 
         .upgrade-row {
             background: #334155; border: 1px solid #475569; border-radius: 12px;
             padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between;
-            align-items: center; text-align: left;
+            align-items: center; text-align: left; transition: transform 0.1s;
         }
+        .upgrade-row:active { transform: scale(0.98); }
         .upgrade-info { flex: 1; }
         .upgrade-title { font-weight: bold; font-size: 1rem; color: #f8fafc; }
         .upgrade-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
         .upgrade-btn {
             background: #22c55e; border: none; border-radius: 8px; padding: 8px 12px;
             color: white; font-weight: bold; font-size: 0.9rem; margin-left: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s;
         }
-        .upgrade-btn:active { background: #16a34a; transform: scale(0.95); }
+        .upgrade-btn:active { background: #16a34a; transform: scale(0.92); }
         .upgrade-btn:disabled { background: #64748b; cursor: not-allowed; }
 
         .roulette-container {
@@ -162,17 +169,34 @@
             position: absolute; top: 140px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
             border-radius: 20px; font-weight: bold; opacity: 0; transition: opacity 0.3s;
-            z-index: 50; pointer-events: none; text-align: center;
+            z-index: 50; pointer-events: none; text-align: center; border: 1px solid rgba(255,255,255,0.2);
         }
+        
         .floating-text {
             position: absolute; color: var(--secondary); font-weight: bold; font-size: 1.5rem;
-            pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            animation: floatUp 1s ease-out forwards; z-index: 5; white-space: nowrap;
+            pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            animation: floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; z-index: 5; white-space: nowrap;
         }
+        
+        .floating-alert {
+            position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%);
+            color: #facc15; font-weight: 900; font-size: 2rem; pointer-events: none;
+            text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 20px rgba(250,204,21,0.5);
+            animation: zoomFade 2s forwards; z-index: 6; white-space: nowrap;
+        }
+        
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+            50% { transform: translateY(-30px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-60px) scale(0.8); opacity: 0; }
         }
+        @keyframes zoomFade {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -100px) scale(0.8); opacity: 0; }
+        }
+        
         #mine-hint {
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
             color: rgba(255,255,255,0.7); font-size: 1.5rem; pointer-events: none;
@@ -206,45 +230,47 @@
             border-radius: 8px; display: flex; justify-content: center; align-items: center;
             cursor: pointer; position: relative; text-align: center; font-size: 0.55rem; 
             color: #facc15; font-weight: bold; line-height: 1.1; flex-direction: column;
-            flex-shrink: 0;
+            flex-shrink: 0; transition: transform 0.1s;
         }
+        .equip-slot:active { transform: scale(0.9); }
         .equip-slot.filled { border-style: solid; border-color: #4ade80; background: #0f172a; }
         .equip-slot img { width: 85%; height: 85%; object-fit: contain; }
         .equip-slot .unequip-badge {
             position: absolute; top: -5px; right: -5px; background: #ef4444; color: white;
             border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: bold;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 40vh; overflow-y: auto; padding-right: 5px; }
-        .inv-item { background: #334155; border: 2px solid #475569; border-radius: 10px; padding: 8px 4px; cursor: pointer; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; position: relative;}
+        .inv-item { background: #334155; border: 2px solid #475569; border-radius: 10px; padding: 8px 4px; cursor: pointer; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; position: relative; transition: transform 0.1s; }
+        .inv-item:active { transform: scale(0.95); }
         .inv-item.active { border-color: #4ade80; background: #166534; box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.5); }
-        .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: default; }
+        .inv-item.locked { opacity: 0.5; filter: grayscale(1); cursor: default; pointer-events: none; }
 
         .qty-badge {
             position: absolute; top: -5px; left: -5px; background: var(--primary); color: #000;
-            border-radius: 8px; padding: 2px 6px; font-weight: 900; font-size: 0.65rem; border: 1px solid #000; white-space: nowrap;
+            border-radius: 8px; padding: 2px 6px; font-weight: 900; font-size: 0.65rem; border: 1px solid #000; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Mix Breeding UI */
         .nest-columns { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 8px;}
         .nest-col { flex: 1; background: #1e293b; padding: 8px; border-radius: 10px; border: 1px solid #475569; }
         .nest-col h3 { margin: 0 0 8px 0; font-size: 0.9rem; text-align: center; }
         .nest-list { max-height: 25vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
         .nest-selectable { 
             background: #334155; border: 1px solid #475569; border-radius: 6px; padding: 4px;
-            display: flex; align-items: center; gap: 6px; font-size: 0.7rem; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; font-size: 0.7rem; cursor: pointer; transition: transform 0.1s;
         }
+        .nest-selectable:active { transform: scale(0.95); }
         .nest-selectable img { width: 30px; height: 30px; object-fit: contain; }
         .nest-selectable.selected-m { border-color: #38bdf8; background: rgba(56, 189, 248, 0.2); }
         .nest-selectable.selected-f { border-color: #f472b6; background: rgba(244, 114, 182, 0.2); }
         .breed-action { background: #0f172a; padding: 12px; border-radius: 10px; text-align: center; border: 2px solid #334155;}
 
         .rarity-common { color: #cbd5e1; }
-        .rarity-rare { color: #38bdf8; }
-        .rarity-epic { color: #c084fc; }
-        .rarity-legendary { color: #facc15; text-shadow: 0 0 5px rgba(250, 204, 21, 0.5); }
-        .rarity-mythic { color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.8); }
+        .rarity-rare { color: #38bdf8; text-shadow: 0 0 2px rgba(56,189,248,0.5); }
+        .rarity-epic { color: #c084fc; text-shadow: 0 0 4px rgba(192,132,252,0.6); }
+        .rarity-legendary { color: #facc15; text-shadow: 0 0 8px rgba(250, 204, 21, 0.8); }
+        .rarity-mythic { color: #ff00ff; text-shadow: 0 0 10px rgba(255, 0, 255, 0.9); }
         .rarity-secret { color: #ef4444; font-weight: 900; text-shadow: 0 0 10px rgba(239, 68, 68, 1), 0 0 20px rgba(239, 68, 68, 0.8); animation: pulseRed 2s infinite; }
         .rarity-silent { color: #fff; font-weight: 900; background: linear-gradient(90deg, #fff, #fbbf24, #fff); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 15px rgba(255,255,255,0.7); animation: pulseSilent 1.5s infinite; }
 
@@ -252,25 +278,26 @@
         @keyframes pulseSilent { 0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); } 50% { filter: drop-shadow(0 0 20px rgba(255,255,255,1)); } 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); } }
 
         .buy-pigeon-btn {
-            margin-top: 5px; padding: 5px 8px; font-size: 0.7rem; background: #3b82f6;
+            margin-top: 5px; padding: 5px 8px; font-size: 0.7rem; background: #3b82f6; pointer-events: auto;
             border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; width: 90%;
         }
-        .buy-pigeon-btn:active { background: #2563eb; }
+        .buy-pigeon-btn:active { background: #2563eb; transform: scale(0.9); }
 
         .custom-amount-input {
             width: 100%; padding: 12px; background: #0f172a; border: 2px solid #475569;
             border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold;
-            text-align: center; margin-bottom: 10px; outline: none;
+            text-align: center; margin-bottom: 10px; outline: none; transition: border-color 0.2s;
         }
+        .custom-amount-input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
-    <h1 style="color: var(--primary); text-shadow: 0 2px 4px #000; margin-bottom: 10px;">Pigeon Miner 3D</h1>
+    <h1 style="color: var(--primary); text-shadow: 0 2px 4px #000; margin-bottom: 10px; font-size: 2.5rem; animation: pulse 2s infinite;">Pigeon Miner 3D</h1>
     <p style="color: white; margin-bottom: 20px; font-weight: bold;">Loading Realistic Assets...</p>
-    <div style="width: 80%; max-width: 300px; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; border: 2px solid #475569;">
-        <div id="loading-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s;"></div>
+    <div style="width: 80%; max-width: 300px; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; border: 2px solid #475569; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+        <div id="loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #facc15, #f59e0b); transition: width 0.1s;"></div>
     </div>
 </div>
 
@@ -279,8 +306,8 @@
 
 <div id="ui-layer" style="display:none;">
     <div class="top-bar">
-        <div class="stat-box"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
-        <div class="stat-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
+        <div class="stat-box" id="bread-box" onclick="game.handleBreadTap()" style="cursor: pointer;"><span class="icon-bread">🍞</span><span id="bread-display">0</span></div>
+        <div class="stat-box" id="diamond-box"><span class="icon-diamond">💎</span><span id="diamond-display">0</span></div>
     </div>
     
     <div id="combo-display">Combo x1.0</div>
@@ -450,6 +477,17 @@
     </div>
 </div>
 
+<!-- Secret Modal -->
+<div id="modal-secret" class="modal-overlay">
+    <div class="modal">
+        <h2 style="color: #ef4444;">🕵️ DEV MENU 🕵️</h2>
+        <p>Enter encrypted password:</p>
+        <input type="text" id="secret-password" class="custom-amount-input" style="text-align: center; margin-bottom: 15px;">
+        <button class="btn-sell-big" style="font-size:1rem; background: linear-gradient(145deg, #ef4444, #b91c1c); border-color:#fca5a5;" onclick="game.checkSecretPassword()">HACK MAINFRAME</button>
+        <button class="modal-close" onclick="ui.closeModal('modal-secret')">Cancel</button>
+    </div>
+</div>
+
 <script>
     // --- GAME CONFIG & DATA ---
     const RARITY_MULTIPLIERS = {
@@ -457,7 +495,6 @@
     };
 
     const SLOT_COSTS = [0, 1e6, 5e6, 2.5e7, 1e8, 5e8, 2.5e9, 1e10, 5e10, 2.5e11, 1e12, 5e12, 2.5e13, 1e14, 5e14, 2.5e15, 1e16, 5e16, 2.5e17, 1e18];
-    // Fill up to 50 dynamically if needed, but the formula handles the rest.
 
     const NEST_COSTS = {
         'common': 1000, 'rare': 5000, 'epic': 25000, 'legendary': 125000, 'mythic': 625000, 'secret': 3125000, 'silent': 15625000
@@ -517,13 +554,14 @@
         worca: { id: 'worca', name: 'Worca (Wolf-Orca)', rarity: 'silent', chance: 0.00001, color: 'rarity-silent', cost: Number.MAX_SAFE_INTEGER, iconUrl: '' }
     };
 
+    // Upgraded Mine atmospheres for dynamic environments
     const MINES = [
-        { name: "Diamond Mine", rockColor: 0x475569, crystalColor: 0x38bdf8, multiplier: 1, unlockCost: 0 },
-        { name: "Ruby Mine", rockColor: 0x2d3748, crystalColor: 0xf43f5e, multiplier: 5, unlockCost: 500000 },
-        { name: "Emerald Mine", rockColor: 0x1a202c, crystalColor: 0x10b981, multiplier: 25, unlockCost: 25000000 },
-        { name: "Amethyst Mine", rockColor: 0x1e1b4b, crystalColor: 0xa855f7, multiplier: 100, unlockCost: 1000000000 },
-        { name: "Obsidian Mine", rockColor: 0x111111, crystalColor: 0xf97316, multiplier: 500, unlockCost: 100000000000 },
-        { name: "Cosmic Mine", rockColor: 0x0f172a, crystalColor: 0xffffff, multiplier: 2500, unlockCost: 50000000000000 },
+        { name: "Diamond Mine", rockColor: 0x475569, crystalColor: 0x38bdf8, multiplier: 1, unlockCost: 0, skyTop: 0x0f172a, skyBottom: 0x87CEEB, lightOffset: 0xffffff },
+        { name: "Ruby Mine", rockColor: 0x2d3748, crystalColor: 0xf43f5e, multiplier: 5, unlockCost: 500000, skyTop: 0x2a0f17, skyBottom: 0xffb3c1, lightOffset: 0xffdddd },
+        { name: "Emerald Mine", rockColor: 0x1a202c, crystalColor: 0x10b981, multiplier: 25, unlockCost: 25000000, skyTop: 0x0f2a17, skyBottom: 0xa7f3d0, lightOffset: 0xddffdd },
+        { name: "Amethyst Mine", rockColor: 0x1e1b4b, crystalColor: 0xa855f7, multiplier: 100, unlockCost: 1000000000, skyTop: 0x170f2a, skyBottom: 0xd8b4fe, lightOffset: 0xeeccff },
+        { name: "Obsidian Mine", rockColor: 0x111111, crystalColor: 0xf97316, multiplier: 500, unlockCost: 100000000000, skyTop: 0x000000, skyBottom: 0x552200, lightOffset: 0xffa07a },
+        { name: "Cosmic Mine", rockColor: 0x0f172a, crystalColor: 0xffffff, multiplier: 2500, unlockCost: 50000000000000, skyTop: 0x05001a, skyBottom: 0x1e1b4b, lightOffset: 0xddeeff },
     ];
 
     const GAME_STATE = {
@@ -540,12 +578,15 @@
     let isSpinning = false;
     let nestSelectedMale = null;
     let nestSelectedFemale = null;
+    let breadTapCount = 0;
+    let lastBreadTapTime = 0;
 
     // --- THREE.JS ENGINE ---
     const engine = {
-        scene: null, camera: null, renderer: null, pigeonGroups: [],
+        scene: null, camera: null, renderer: null, pigeonGroups: [], dirLight: null, ambientLight: null,
         mineBlock: null, particles: [], isAnimatingMine: false, mineAnimationProgress: 0, clock: new THREE.Clock(),
         textureCache: {}, fireCanvas: null, fireCtx: null, fireTex: null,
+        shakeIntensity: 0, goldenPigeon: null, goldenActive: false, goldenLife: 0,
 
         init: function() {
             try {
@@ -594,8 +635,32 @@
                         mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
                         raycaster.setFromCamera(mouse, engine.camera);
+                        
+                        // Check Golden Pigeon first
+                        if(engine.goldenActive && engine.goldenPigeon) {
+                            const gpIntersects = raycaster.intersectObject(engine.goldenPigeon, true);
+                            if(gpIntersects.length > 0) {
+                                game.catchGoldenPigeon(clientX, clientY);
+                                return;
+                            }
+                        }
+
+                        // Check regular pigeons for fun interaction
+                        let hitPigeon = false;
+                        for(let i=0; i<engine.pigeonGroups.length; i++) {
+                            const p = engine.pigeonGroups[i];
+                            const pIntersects = raycaster.intersectObject(p, true);
+                            if(pIntersects.length > 0) {
+                                p.userData.jumpVelocity = 4; // Make pigeon jump!
+                                p.userData.rotationSpeed = Math.PI * 2; // Do a flip
+                                hitPigeon = true;
+                                break;
+                            }
+                        }
+                        
+                        // Default mining logic if nothing else was hit or hit the rock
                         const intersects = raycaster.intersectObject(engine.mineBlock, true);
-                        if (intersects.length > 0 || (mouse.y > -0.3 && mouse.y < 0.6)) {
+                        if (intersects.length > 0 || (mouse.y > -0.3 && mouse.y < 0.6) || !hitPigeon) {
                             game.mine(clientX, clientY);
                         }
                     };
@@ -678,18 +743,18 @@
         },
 
         setupLighting: function() {
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
-            this.scene.add(ambientLight);
+            this.ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            this.scene.add(this.ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            dirLight.position.set(8, 15, 8);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 1024;
-            dirLight.shadow.mapSize.height = 1024;
-            dirLight.shadow.camera.top = 15; dirLight.shadow.camera.bottom = -15;
-            dirLight.shadow.camera.left = -15; dirLight.shadow.camera.right = 15;
-            dirLight.shadow.bias = -0.0005;
-            this.scene.add(dirLight);
+            this.dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            this.dirLight.position.set(8, 15, 8);
+            this.dirLight.castShadow = true;
+            this.dirLight.shadow.mapSize.width = 1024;
+            this.dirLight.shadow.mapSize.height = 1024;
+            this.dirLight.shadow.camera.top = 15; this.dirLight.shadow.camera.bottom = -15;
+            this.dirLight.shadow.camera.left = -15; this.dirLight.shadow.camera.right = 15;
+            this.dirLight.shadow.bias = -0.0005;
+            this.scene.add(this.dirLight);
         },
 
         setupEnvironment: function() {
@@ -715,6 +780,10 @@
         buildMine: function(mineIndex = 0) {
             if (this.mineBlock) this.scene.remove(this.mineBlock);
             const mineData = MINES[mineIndex];
+            
+            // Dynamic environment coloring
+            if(this.dirLight) this.dirLight.color.setHex(mineData.lightOffset);
+            
             this.mineBlock = new THREE.Group();
 
             const geo = new THREE.DodecahedronGeometry(1.5, 1);
@@ -737,6 +806,38 @@
             }
             this.mineBlock.position.set(0, 0, -2.5);
             this.scene.add(this.mineBlock);
+        },
+
+        spawnGoldenPigeon: function() {
+            if(this.goldenActive) return;
+            this.goldenActive = true;
+            this.goldenLife = 0;
+            if(!this.goldenPigeon) {
+                this.goldenPigeon = this.createPigeon('golden');
+                this.goldenPigeon.scale.setScalar(1.5);
+                
+                // Add shiny aura
+                const auraMat = new THREE.MeshBasicMaterial({color: 0xffdd00, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending});
+                const aura = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), auraMat);
+                this.goldenPigeon.add(aura);
+                this.goldenPigeon.userData.aura = aura;
+                
+                this.scene.add(this.goldenPigeon);
+            }
+            this.goldenPigeon.visible = true;
+            this.goldenPigeon.position.set(-15, 6, -5);
+            
+            // Alert user
+            const el = document.createElement('div');
+            el.className = 'floating-alert'; el.innerText = '✨ GOLDEN PIGEON APPEARED! ✨';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2500);
+        },
+
+        despawnGoldenPigeon: function() {
+            if(!this.goldenActive) return;
+            this.goldenActive = false;
+            if(this.goldenPigeon) this.goldenPigeon.visible = false;
         },
 
         generateTexture: function(baseColor, accentColor, format = 'normal') {
@@ -765,21 +866,6 @@
             texture.repeat.set(format === 'worm' ? 1 : 2, format === 'worm' ? 1 : 2);
             this.textureCache[key] = texture;
             return texture;
-        },
-
-        generateWorcaTexture: function() {
-            if(this.textureCache['worca']) return this.textureCache['worca'];
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#111'; ctx.fillRect(0,0,256,140);
-            ctx.fillStyle = '#eee'; ctx.fillRect(0,140,256,116);
-            for(let i=0; i<1000; i++){
-                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-                ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2);
-            }
-            const tex = new THREE.CanvasTexture(canvas);
-            this.textureCache['worca'] = tex; return tex;
         },
 
         generateGlitchTexture: function() {
@@ -869,6 +955,8 @@
         createPigeon: function(type) {
             const pigeonGroup = new THREE.Group();
             
+            pigeonGroup.userData = { jumpVelocity: 0, rotationSpeed: 0, initialY: 0 }; // Added physics states
+
             const texGrey = this.generateTexture('#9ca3af', '#4b5563');
             const texBrown = this.generateTexture('#8b5a2b', '#5c3a21');
             const texDarkGrey = this.generateTexture('#222222', '#000000');
@@ -908,7 +996,6 @@
             const matDino = new THREE.MeshStandardMaterial({ map: texDino, roughness: 0.9, metalness: 0.1 });
             const matLion = new THREE.MeshStandardMaterial({ color: 0xcd853f, roughness: 0.9 });
             const matPhoenix = new THREE.MeshStandardMaterial({ color: 0xff4500, emissive: 0x882200, roughness: 0.2 });
-
             const matFire = new THREE.MeshStandardMaterial({ map: this.updateFireTexture(), transparent: true, opacity: 0.95 });
 
             if (type === 'worm') {
@@ -931,10 +1018,6 @@
                     const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.15, 24), matWheel);
                     wheel.rotation.z = Math.PI / 2; wheel.position.set(pos[0], pos[1], pos[2]); wheel.castShadow = true; pigeonGroup.add(wheel);
                 });
-                const hlMat = new THREE.MeshStandardMaterial({color: 0xffffff});
-                const hl1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 16), hlMat); hl1.rotation.x = Math.PI/2; hl1.position.set(0.3, 1.0, 0.8);
-                const hl2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 16), hlMat); hl2.rotation.x = Math.PI/2; hl2.position.set(-0.3, 1.0, 0.8);
-                pigeonGroup.add(hl1, hl2);
             } else if (type === 'pixel') {
                 const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), matPixel); body.position.y = 0.6; body.castShadow = true; pigeonGroup.add(body);
                 const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), matPixel); head.position.set(0, 1.1, 0.4); head.castShadow = true; pigeonGroup.add(head);
@@ -975,8 +1058,8 @@
                 if (type === 'time_traveler') customMat = matChrono;
                 if (type === 'dino') customMat = matDino;
                 if (type === 'waffle') customMat = matGrey; 
-                if (type === 'worca') customMat = matDarkGrey; // Back to dark grey body
-                if (type === 'sunny') customMat = matGrey; // Normal grey pigeon color
+                if (type === 'worca') customMat = matDarkGrey;
+                if (type === 'sunny') customMat = matGrey;
 
                 const bodyGeo = (type === 'guinea_pig') ? new THREE.CylinderGeometry(0.5, 0.5, 1.2, 32) : new THREE.SphereGeometry(0.45, 24, 24);
                 const body = new THREE.Mesh(bodyGeo, customMat);
@@ -990,7 +1073,7 @@
 
                 if (type === 'swan') body.scale.set(1.1, 1.6, 1.1);
 
-                const headMat = type === 'griffin' ? matWhite : customMat; // Griffin has white eagle head
+                const headMat = type === 'griffin' ? matWhite : customMat; 
                 const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), headMat);
                 head.position.set(0, 1.0, 0.4); head.castShadow = true; 
                 
@@ -1002,7 +1085,6 @@
                 } else if (type === 'guinea_pig') {
                     head.position.set(0, 0.5, 0.6);
                 } else if (type === 'sunny') {
-                    // Simple white spots for Sunny on the neck
                     const spotGeo = new THREE.SphereGeometry(0.08);
                     const spotL = new THREE.Mesh(spotGeo, matWhite); spotL.position.set(0.25, -0.1, 0);
                     const spotR = new THREE.Mesh(spotGeo, matWhite); spotR.position.set(-0.25, -0.1, 0);
@@ -1023,7 +1105,6 @@
                     const tailMat = (type === 'mecha_dog') ? new THREE.MeshStandardMaterial({color:0x888888, metalness:0.8}) : customMat;
                     
                     if(type === 'worca') {
-                        // Better flat orca tail
                         const tailGroup = new THREE.Group();
                         const base = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.1, 0.4), matDarkGrey);
                         base.rotation.x = Math.PI / 2; base.position.set(0, 0, -0.2);
@@ -1078,15 +1159,11 @@
                     }
                 }
 
-                // Wolf/Orca specifics
                 if(type === 'worca') {
-                    // Wolf ears
                     const wEarGeo = new THREE.ConeGeometry(0.08, 0.25, 16);
                     const we1 = new THREE.Mesh(wEarGeo, matDarkGrey); we1.position.set(0.15, 0.28, 0); we1.rotation.z = -0.2;
                     const we2 = new THREE.Mesh(wEarGeo, matDarkGrey); we2.position.set(-0.15, 0.28, 0); we2.rotation.z = 0.2;
                     head.add(we1, we2);
-
-                    // Dorsal fin on back
                     const bFin = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 16), matDarkGrey);
                     bFin.position.set(0, 1.2, -0.1); bFin.rotation.x = -0.2;
                     pigeonGroup.add(bFin);
@@ -1113,9 +1190,7 @@
                     pigeonGroup.userData.wingL = wingL; pigeonGroup.userData.wingR = wingR;
                 }
 
-                // Custom Bodies & Details
                 if (type === 'friend') {
-                    // Blackbird big flat 2D looking anime eyes
                     const cEyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
                     const eyeGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.02, 32);
                     
@@ -1359,6 +1434,7 @@
 
                 pg.position.set(posX, 0, posZ);
                 pg.rotation.y = Math.PI - (posX * 0.15);
+                pg.userData.initialY = 0;
                 
                 this.scene.add(pg);
                 this.pigeonGroups.push(pg);
@@ -1368,16 +1444,21 @@
         triggerMineAnimation: function() {
             this.isAnimatingMine = true; this.mineAnimationProgress = 0;
             const particleColor = MINES[GAME_STATE.currentMine].crystalColor;
-            const mat = new THREE.MeshBasicMaterial({color: particleColor});
+            const mat = new THREE.MeshStandardMaterial({color: particleColor, roughness: 0.1, metalness: 0.8});
+            
             for(let i=0; i<8; i++) {
-                const size = Math.random() * 0.1 + 0.05;
-                const p = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
+                const size = Math.random() * 0.2 + 0.05;
+                const p = new THREE.Mesh(new THREE.DodecahedronGeometry(size), mat);
                 p.position.copy(this.mineBlock.position); p.position.y += 1;
-                p.userData.velocity = new THREE.Vector3((Math.random() - 0.5) * 6, Math.random() * 6 + 2, Math.random() * 6);
-                p.userData.life = 1.0; this.scene.add(p); this.particles.push(p);
+                // Add bounce physics variables
+                p.userData.velocity = new THREE.Vector3((Math.random() - 0.5) * 8, Math.random() * 6 + 4, (Math.random() - 0.5) * 8);
+                p.userData.rotSpeed = new THREE.Vector3(Math.random()*10, Math.random()*10, Math.random()*10);
+                p.userData.life = 1.5; 
+                this.scene.add(p); 
+                this.particles.push(p);
             }
-            this.mineBlock.scale.set(0.9, 0.9, 0.9);
-            setTimeout(function() { engine.mineBlock.scale.set(1,1,1); }, 50);
+            this.mineBlock.scale.set(0.8, 0.8, 0.8);
+            setTimeout(function() { engine.mineBlock.scale.set(1,1,1); }, 70);
         },
 
         update: function() {
@@ -1385,6 +1466,36 @@
             const time = this.clock.getElapsedTime();
 
             if (this.textureCache['glitch']) { this.textureCache['glitch'] = this.generateGlitchTexture(); }
+
+            // Handle Camera Shake
+            if (this.shakeIntensity > 0) {
+                this.camera.position.x = Math.sin(time * 0.4) * 8 + (Math.random() - 0.5) * this.shakeIntensity;
+                this.camera.position.y = 4 + (Math.random() - 0.5) * this.shakeIntensity;
+                this.camera.position.z = Math.cos(time * 0.4) * 8 + (Math.random() - 0.5) * this.shakeIntensity;
+                this.shakeIntensity *= 0.85; // Decay
+                if(this.shakeIntensity < 0.01) this.shakeIntensity = 0;
+            } else {
+                this.camera.position.x = Math.sin(time * 0.4) * 8;
+                this.camera.position.y = 4;
+                this.camera.position.z = Math.cos(time * 0.4) * 8;
+            }
+            this.camera.lookAt(0, 1, 0);
+
+            // Update Golden Pigeon
+            if(this.goldenActive && this.goldenPigeon) {
+                this.goldenLife += delta;
+                this.goldenPigeon.position.x += delta * 6; // Move right
+                this.goldenPigeon.position.y = 5 + Math.sin(time * 5) * 0.5;
+                if(this.goldenPigeon.userData.aura) {
+                    this.goldenPigeon.userData.aura.rotation.y += delta;
+                    this.goldenPigeon.userData.aura.rotation.x += delta * 0.5;
+                }
+                
+                // Despawn if it goes off screen
+                if(this.goldenPigeon.position.x > 15) {
+                    this.despawnGoldenPigeon();
+                }
+            }
 
             this.pigeonGroups.forEach(pg => {
                 if (pg.children[0] && pg.children[0].material.map === this.textureCache['glitch']) {
@@ -1408,8 +1519,21 @@
                     }
                 }
 
-                if (!this.isAnimatingMine) {
-                    pg.position.y = Math.sin(time * 2 + pg.position.x) * 0.05;
+                // Pigeon Physics / Interaction Jump
+                if(pg.userData.jumpVelocity > 0 || pg.position.y > pg.userData.initialY) {
+                    pg.position.y += pg.userData.jumpVelocity * delta;
+                    pg.userData.jumpVelocity -= 15 * delta; // Gravity
+                    if(pg.position.y < pg.userData.initialY) {
+                        pg.position.y = pg.userData.initialY;
+                        pg.userData.jumpVelocity = 0;
+                        pg.rotation.z = 0;
+                    } else if(pg.userData.rotationSpeed > 0) {
+                        pg.rotation.z += pg.userData.rotationSpeed * delta;
+                    }
+                }
+
+                if (!this.isAnimatingMine && pg.userData.jumpVelocity <= 0) {
+                    pg.position.y = pg.userData.initialY + Math.sin(time * 2 + pg.position.x) * 0.05;
                     if(pg.children[1]) {
                         pg.children[1].rotation.z = Math.sin(time * 1.5 + pg.position.x) * 0.05;
                     }
@@ -1428,8 +1552,10 @@
                         pg.userData.wingL.rotation.y = -Math.PI/6 + Math.sin(time * 8 + pg.position.x) * 0.2;
                         pg.userData.wingR.rotation.y = Math.PI/6 - Math.sin(time * 8 + pg.position.x) * 0.2;
                     } else {
-                        pg.userData.wingL.rotation.z = Math.sin(time * 10 + pg.position.x) * 0.15;
-                        pg.userData.wingR.rotation.z = -Math.sin(time * 10 + pg.position.x) * 0.15;
+                        // Flap faster if jumping
+                        const flapMult = pg.position.y > pg.userData.initialY ? 3 : 1;
+                        pg.userData.wingL.rotation.z = Math.sin(time * 10 * flapMult + pg.position.x) * 0.15 * flapMult;
+                        pg.userData.wingR.rotation.z = -Math.sin(time * 10 * flapMult + pg.position.x) * 0.15 * flapMult;
                     }
                 }
 
@@ -1457,9 +1583,10 @@
                 GAME_STATE.combo = 0;
                 const cd = document.getElementById('combo-display');
                 cd.style.opacity = 0;
-                cd.classList.remove('combo-pulse');
+                cd.className = ''; // Remove all pulse/hot classes
             }
 
+            // Auto-miner logic
             if(!isSpinning && (GAME_STATE.autoSpeed > 0 || GAME_STATE.factoryLevel > 0)) {
                 this.autoTimer = (this.autoTimer || 0) + delta;
                 if (this.autoTimer >= 1.0) {
@@ -1478,21 +1605,20 @@
                         ui.showFloatingText(window.innerWidth/2 - 100, 100, `+${ui.formatNumber(breadGen)} 🍞`, false, true);
                     }
                     ui.updateStats();
+                    game.checkGoldenSpawn();
                 }
             }
 
-            if (this.camera) {
-                this.camera.position.x = Math.sin(time * 0.4) * 8;
-                this.camera.position.z = Math.cos(time * 0.4) * 8;
-                this.camera.lookAt(0, 1, 0);
-            }
-
+            // Dynamic environment blending
             if (this.scene && this.scene.background) {
+                const targetMine = MINES[GAME_STATE.currentMine];
                 const cycle = (Math.sin(time * 0.05) + 1) / 2;
-                this.scene.background.lerpColors(new THREE.Color(0x0f172a), new THREE.Color(0x87CEEB), cycle);
+                // Interpolate between the skyTop and skyBottom of the current mine
+                this.scene.background.lerpColors(new THREE.Color(targetMine.skyTop), new THREE.Color(targetMine.skyBottom), cycle);
                 this.scene.fog.color.copy(this.scene.background);
             }
 
+            // Enhanced Particle Physics
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
                 p.position.addScaledVector(p.userData.velocity, delta);
@@ -1500,12 +1626,27 @@
                 if(p.userData.isFireP) {
                     p.scale.multiplyScalar(0.92);
                 } else {
-                    p.userData.velocity.y -= 9.8 * delta;
-                    p.rotation.x += delta * 10; p.rotation.y += delta * 10;
+                    // Gravity and bouncing
+                    p.userData.velocity.y -= 15 * delta; // Gravity
+                    
+                    if (p.position.y <= 0 && p.userData.velocity.y < 0) {
+                        p.position.y = 0;
+                        p.userData.velocity.y *= -0.5; // Bounce dampening
+                        p.userData.velocity.x *= 0.8;  // Friction
+                        p.userData.velocity.z *= 0.8;
+                    }
+
+                    p.rotation.x += p.userData.rotSpeed.x * delta;
+                    p.rotation.y += p.userData.rotSpeed.y * delta;
+                    p.rotation.z += p.userData.rotSpeed.z * delta;
+                    
+                    // Shrink over time
+                    const scaleFactor = p.userData.life / 1.5;
+                    p.scale.set(scaleFactor, scaleFactor, scaleFactor);
                 }
 
                 p.userData.life -= delta;
-                if (p.userData.life <= 0 || p.position.y < -1) {
+                if (p.userData.life <= 0 || (p.userData.isFireP && p.position.y < -1)) {
                     if(p.material) p.material.dispose();
                     if(p.geometry) p.geometry.dispose();
                     this.scene.remove(p);
@@ -1534,6 +1675,70 @@
 
     // --- GAME LOGIC ---
     const game = {
+        handleBreadTap: function() {
+            const now = Date.now();
+            // Reset count if more than 2 seconds have passed between taps (more forgiving)
+            if (now - lastBreadTapTime > 2000) {
+                breadTapCount = 0; 
+            }
+            breadTapCount++;
+            lastBreadTapTime = now;
+
+            // Make the bread box pop a little bit so you know you're tapping it
+            const breadBox = document.getElementById('bread-box');
+            breadBox.classList.add('stat-pop');
+            setTimeout(() => breadBox.classList.remove('stat-pop'), 100);
+
+            if (breadTapCount >= 5) {
+                breadTapCount = 0; // reset
+                // Small timeout prevents mobile browsers from freezing when opening a prompt mid-touch
+                setTimeout(() => { this.triggerSecretCheat(); }, 50);
+            }
+        },
+
+        triggerSecretCheat: function() {
+            document.getElementById('secret-password').value = '';
+            ui.openModal('modal-secret');
+        },
+
+        checkSecretPassword: function() {
+            const pwd = document.getElementById('secret-password').value;
+            // Password 'sigeon' is base64 encrypted as 'c2lnZW9u' so hackers can't find it!
+            if (btoa(pwd.toLowerCase().trim()) === "c2lnZW9u") {
+                ui.closeModal('modal-secret');
+                // Activate Hacker Mode!
+                GAME_STATE.bread = 1e20; // 100 Quintillion Bread
+                GAME_STATE.diamonds = 1e20; // 100 Quintillion Diamonds
+                GAME_STATE.maxSlots = 50;
+                GAME_STATE.digSpeed = 5000;
+                GAME_STATE.autoSpeed = 5000;
+                GAME_STATE.factoryLevel = 5000;
+                GAME_STATE.currentMine = MINES.length - 1;
+                
+                // Unlock 5 Males and 5 Females of EVERY pigeon
+                for (const key in PIGEON_TYPES) {
+                    if (key !== 'base') {
+                        GAME_STATE.inventory[key] = {m: 5, f: 5};
+                    }
+                }
+                
+                engine.buildMine(GAME_STATE.currentMine);
+                ui.updateStats();
+                ui.populateInventory();
+                ui.checkAllPigeonsOwned();
+                
+                // Epic visual alert and mega shake
+                engine.shakeIntensity = 2.0; 
+                const el = document.createElement('div');
+                el.className = 'floating-alert'; el.innerText = '🔥 HACKER MODE ACTIVATED! 🔥';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+                ui.showToast("Infinite wealth and all pigeons unlocked!");
+            } else {
+                ui.showToast("Access Denied. Wrong password!");
+            }
+        },
+
         saveGame: function() {
             GAME_STATE.lastSaveTime = Date.now();
             const saveString = JSON.stringify(GAME_STATE);
@@ -1660,10 +1865,33 @@
             return mult === 0 ? 1 : mult;
         },
 
+        checkGoldenSpawn: function() {
+            // Very low chance each auto-tick to spawn the golden pigeon
+            if(Math.random() < 0.005) {
+                engine.spawnGoldenPigeon();
+            }
+        },
+
+        catchGoldenPigeon: function(x, y) {
+            engine.despawnGoldenPigeon();
+            // Massive reward based on current progress
+            const breadReward = Math.max(10000, GAME_STATE.factoryLevel * 50000);
+            const diamondReward = Math.max(1000, GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * this.getPigeonMultiplier() * 100);
+            
+            GAME_STATE.bread += breadReward;
+            GAME_STATE.diamonds += diamondReward;
+            
+            ui.updateStats();
+            engine.shakeIntensity = 0.8; // Huge screen shake!
+            
+            ui.showFloatingText(x, y - 40, `+${ui.formatNumber(diamondReward)} 💎`, true);
+            ui.showFloatingText(x, y + 40, `+${ui.formatNumber(breadReward)} 🍞`, true, true);
+        },
+
         mine: function(x, y) {
             document.getElementById('mine-hint').style.display = 'none';
             const now = Date.now();
-            if (now - GAME_STATE.lastClickTime < 1000) GAME_STATE.combo = Math.min(GAME_STATE.combo + 1, 50);
+            if (now - GAME_STATE.lastClickTime < 1000) GAME_STATE.combo = Math.min(GAME_STATE.combo + 1, 100);
             else GAME_STATE.combo = 1;
             GAME_STATE.lastClickTime = now;
             
@@ -1671,19 +1899,27 @@
             const pMult = this.getPigeonMultiplier();
             const isCrit = Math.random() < 0.1;
             
+            // Add screen shake
+            engine.shakeIntensity = isCrit ? 0.3 : 0.05;
+
             let gained = GAME_STATE.digSpeed * MINES[GAME_STATE.currentMine].multiplier * (isCrit ? 3 : 1) * comboMult * pMult;
             gained = Math.floor(gained);
             
             GAME_STATE.diamonds += gained; 
             ui.updateStats(); engine.triggerMineAnimation(); ui.updateComboDisplay();
-            ui.showFloatingText(x, y, isCrit ? `CRIT! +${ui.formatNumber(gained)} 💎` : `+${ui.formatNumber(gained)} 💎`, isCrit);
+            ui.showFloatingText(x, y, isCrit ? `CRIT! +${ui.formatNumber(gained)}` : `+${ui.formatNumber(gained)}`, isCrit);
         },
 
         sellDiamonds: function() {
             if (GAME_STATE.diamonds > 0) {
                 const gained = GAME_STATE.diamonds * GAME_STATE.sellRate;
                 GAME_STATE.bread += gained; GAME_STATE.diamonds = 0;
-                ui.updateStats(); ui.showToast(`Sold for ${ui.formatNumber(gained)} 🍞`);
+                ui.updateStats(); 
+                ui.showToast(`Sold for ${ui.formatNumber(gained)} 🍞`);
+                // Pop the bread stat box
+                const breadBox = document.getElementById('bread-box');
+                breadBox.classList.add('stat-pop');
+                setTimeout(() => breadBox.classList.remove('stat-pop'), 200);
             } else ui.showToast("No diamonds to sell!");
         },
 
@@ -1697,6 +1933,7 @@
                 GAME_STATE.maxSlots++;
                 ui.updateStats();
                 ui.populateInventory();
+                engine.shakeIntensity = 0.2;
             } else ui.showToast("Not enough Bread!");
         },
 
@@ -1705,6 +1942,7 @@
                 GAME_STATE.bread -= GAME_STATE.upgradeCost; GAME_STATE.digSpeed += 1;
                 GAME_STATE.upgradeCost = Math.floor(GAME_STATE.upgradeCost * 2.0);
                 ui.updateStats();
+                engine.shakeIntensity = 0.1;
             } else ui.showToast("Not enough Bread!");
         },
         upgradeAuto: function() {
@@ -1727,7 +1965,10 @@
             if (nextMine) {
                 if (GAME_STATE.bread >= nextMine.unlockCost) {
                     GAME_STATE.bread -= nextMine.unlockCost; GAME_STATE.currentMine++;
-                    engine.buildMine(GAME_STATE.currentMine); ui.updateStats(); ui.showToast(`Unlocked ${nextMine.name}!`);
+                    engine.buildMine(GAME_STATE.currentMine); 
+                    ui.updateStats(); 
+                    engine.shakeIntensity = 0.5; // Big shake for new mine
+                    ui.showToast(`Unlocked ${nextMine.name}!`);
                 } else ui.showToast(`Need ${ui.formatNumber(nextMine.unlockCost)} Bread!`);
             } else ui.showToast("Max mine reached!");
         },
@@ -1801,7 +2042,6 @@
             
             if (!isBreeding && current + amount > 5) {
                 toAdd = Math.max(0, 5 - current);
-                // Refund for lost duplicates from boxes
                 if (amount - toAdd > 0) {
                     GAME_STATE.bread += (amount - toAdd) * (PIGEON_TYPES[type].cost ? PIGEON_TYPES[type].cost * 0.05 : 100);
                 }
@@ -1835,7 +2075,7 @@
             
             let resultType = (Math.random() < 0.5) ? nestSelectedMale : nestSelectedFemale;
             
-            this.addToInventory(resultType, babies, true); // isBreeding = true (bypasses 5 limit)
+            this.addToInventory(resultType, babies, true);
             ui.updateStats();
             ui.populateNesting(); 
             
@@ -2026,6 +2266,7 @@
                 engine.loadSquad(GAME_STATE.equipped); 
                 ui.populateInventory();
                 ui.updateStats();
+                engine.shakeIntensity = 0.1;
             } else {
                 ui.showToast("Squad full! Buy more slots.");
             }
@@ -2119,9 +2360,14 @@
                 cd.innerText = `Combo x${mult.toFixed(2)}`;
                 cd.style.opacity = 1;
                 
-                cd.classList.remove('combo-pulse');
-                void cd.offsetWidth;
+                cd.classList.remove('combo-pulse', 'combo-hot', 'combo-fire');
+                void cd.offsetWidth; // trigger reflow
                 cd.classList.add('combo-pulse');
+                
+                // Add spicy colors for higher combos
+                if(GAME_STATE.combo >= 50) cd.classList.add('combo-fire');
+                else if(GAME_STATE.combo >= 20) cd.classList.add('combo-hot');
+                
             } else {
                 cd.style.opacity = 0;
             }
@@ -2131,7 +2377,7 @@
             const el = document.createElement('div');
             el.className = 'floating-text'; el.innerText = text;
             if (isCrit) { el.style.color = '#facc15'; el.style.fontSize = '2.5rem'; el.style.textShadow = '0 0 15px rgba(250, 204, 21, 1)'; el.style.zIndex = '10'; }
-            if (isBread) { el.style.color = '#facc15'; }
+            if (isBread) { el.style.color = '#f59e0b'; }
             el.style.left = x + 'px'; el.style.top = y + 'px';
             document.body.appendChild(el);
             setTimeout(function() { el.remove(); }, 1000);
